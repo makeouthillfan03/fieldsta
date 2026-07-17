@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -75,17 +76,22 @@ export function runAssistant(message, customers, jobs) {
 
 const googleProvider = new GoogleAuthProvider();
 
-// Redirect-based sign-in instead of a popup — popups get silently blocked
-// by browsers/extensions often enough (Safari especially) that this is the
-// more reliable choice in production. The tradeoff is the user briefly
-// leaves the page and comes back; onAuthStateChanged in AuthContext picks
-// up the result automatically once they're back, no extra wiring needed
-// on most pages. Login.jsx calls getRedirectRoundtripError() once on
-// mount to surface any error that happened during the redirect itself
-// (e.g. popup/redirect misconfiguration), since those don't throw the
-// normal way a popup's promise would.
-export function loginWithGoogle() {
-  return signInWithRedirect(auth, googleProvider);
+// Try a popup first — it's the more reliable flow when it isn't blocked,
+// since it doesn't depend on third-party storage access surviving a full
+// page navigation away and back (redirect-based sign-in silently fails to
+// complete on Safari/browsers with strict cross-site storage partitioning,
+// dumping the user back on the login page with no error at all — exactly
+// the bug redirect was supposed to dodge from popup-blocker issues).
+// If the popup itself gets blocked, fall back to redirect as a last resort.
+export async function loginWithGoogle() {
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (err) {
+    if (err.code === "auth/popup-blocked" || err.code === "auth/cancelled-popup-request") {
+      return signInWithRedirect(auth, googleProvider);
+    }
+    throw err;
+  }
 }
 
 export function getRedirectRoundtripError() {
