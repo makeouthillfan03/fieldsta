@@ -54,6 +54,21 @@ service cloud.firestore {
         request.resource.data.stripeSubscriptionId == resource.data.stripeSubscriptionId;
     }
 
+    // Lets an existing company (one that skipped the access-code field at
+    // signup) redeem one later from /billing. Only allowed from "trial" —
+    // an already-comped/active/past_due company can't use this path — and
+    // only to a live, unused code, same validation as at creation time.
+    // trialEndsAt/Stripe fields still can't move through this path.
+    function redeemingAccessCode() {
+      return resource.data.plan == "trial" &&
+        request.resource.data.plan == "comped" &&
+        request.resource.data.accessCodeUsed is string &&
+        get(/databases/$(database)/documents/accessCodes/$(request.resource.data.accessCodeUsed)).data.active == true &&
+        request.resource.data.trialEndsAt == resource.data.trialEndsAt &&
+        request.resource.data.stripeCustomerId == resource.data.stripeCustomerId &&
+        request.resource.data.stripeSubscriptionId == resource.data.stripeSubscriptionId;
+    }
+
     // ---------------------------------------------------------------
     // Companies + invites
     // ---------------------------------------------------------------
@@ -74,7 +89,7 @@ service cloud.firestore {
           )
         );
       allow read: if isCompanyMember(companyId);
-      allow update: if isCompanyAdmin(companyId) && planFieldsUnchanged();
+      allow update: if isCompanyAdmin(companyId) && (planFieldsUnchanged() || redeemingAccessCode());
       allow delete: if isCompanyAdmin(companyId);
 
       match /invites/{email} {
