@@ -204,16 +204,24 @@ Fieldsta is $49/mo per company (owner + 1 teammate included), plus $15/mo for ea
 
 `AuthContext.planActive` computes whether the signed-in company currently has access; `App.jsx`'s `RequirePlan` wrapper redirects anywhere else in the app to `/billing` if it's false. `/billing` itself is always reachable so a blocked company can still pay.
 
-### Comping an account for free (the first few contractors trying it out)
+### Comping an account for free
 
-There's no self-serve promo code — it's a manual step, on purpose, so you control exactly who gets free access:
+Two ways to give someone free access, both landing on the same `plan: "comped"` state:
 
+**Manual (any time, no code needed)** — for a company that already exists:
 1. Open the Firebase Console → Firestore → `companies` → the contractor's company doc.
 2. Set `plan` to `"comped"`.
 
-That's it. Everyone on that company's team automatically gets free access too, since access is gated per-company, not per-user. To revoke, change `plan` back to `"trial"` or `"past_due"`.
+That's it. Everyone on that company's team automatically gets free access too, since access is gated per-company, not per-user. To revoke, change `plan` back to `"trial"` or `"past_due"` — this is also how you end someone's comped access whenever you want, since a code being spent doesn't create any ongoing entitlement beyond what's stored on the company doc.
 
-(Firestore rules block company admins from setting `plan`/`trialEndsAt`/Stripe fields themselves via a client update — only the Firebase Console, which uses your own account's Admin access, or the Stripe webhook via the Admin SDK, can write those fields. This stops a company from just granting itself free access.)
+**Access codes (hand out ahead of time)** — for someone who hasn't signed up yet:
+1. Firebase Console → Firestore → create a doc in an `accessCodes` collection, with the code itself as the document ID (e.g. `FIELDSTA-PA01`), and one field: `active` (boolean) set to `true`.
+2. Give that code to the contractor. On the "Create company" screen, there's an optional "Access code" field — entering a valid, unused code makes their company start out `comped` instead of on the trial.
+3. The code is automatically spent (flipped to `active: false`) the moment it's used, so it can't be reused elsewhere. It's single-use per company, not per-person — everyone on that company's team inherits the free access.
+
+Note that deactivating a code (or it being spent) only affects *future* signups — it does not revoke access for a company that already redeemed it. To end an already-comped company's access, use the manual method above.
+
+(Firestore rules block company admins from setting `plan`/`trialEndsAt`/Stripe fields themselves via a client update, and block setting `plan: "comped"` at company-creation time unless a live, unused access code is referenced — only the Firebase Console (your own Admin access), the Stripe webhook via the Admin SDK, or a valid access code redemption can grant comped/active status. This stops a company from just granting itself free access.)
 
 ### One-time setup for real subscription payments
 

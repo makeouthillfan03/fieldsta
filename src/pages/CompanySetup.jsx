@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { Wrench, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export default function CompanySetup() {
   const { user, companyLoading, needsCompany } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [companyName, setCompanyName] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [inviteCode, setInviteCode] = useState("");
@@ -39,22 +41,40 @@ export default function CompanySetup() {
       // the security rule that lets a user create their own `users/{uid}`
       // doc with role "owner" needs to look up the company doc's ownerUid,
       // which only works if the company doc is already committed first.
+      const code = accessCode.trim().toUpperCase();
+      let accessCodeSnap = null;
+      if (code) {
+        accessCodeSnap = await getDoc(doc(db, "accessCodes", code));
+        if (!accessCodeSnap.exists() || accessCodeSnap.data().active !== true) {
+          setError(t("companySetup.invalidAccessCode") || "That access code isn't valid or has already been used.");
+          setSaving(false);
+          return;
+        }
+      }
+
       const companyRef = doc(collection(db, "companies"));
-      const trialEndsAt = Timestamp.fromMillis(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      await setDoc(companyRef, {
+      const trialEndsAt = Timestamp.fromMillis(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      const companyDoc = {
         name: companyName.trim(),
         ownerUid: user.uid,
         createdAt: serverTimestamp(),
-        // New companies start on a 7-day free trial. `plan` is flipped to
-        // "comped" manually in the Firestore console for hand-picked free
-        // accounts (e.g. the first few contractors trying it out), or to
-        // "active" automatically by the Stripe webhook once someone pays.
-        // See AuthContext.planActive for how this gates app access.
-        plan: "trial",
+        // New companies start on a 3-day free trial, UNLESS a valid access
+        // code was redeemed, in which case they start "comped" (free)
+        // instead. `plan` otherwise only ever changes via the Stripe
+        // webhook (payment) or a manual edit in the Firestore console —
+        // see AuthContext.planActive for how this gates app access, and
+        // firestore.rules for how both paths are locked down server-side.
+        plan: code ? "comped" : "trial",
         trialEndsAt,
         stripeCustomerId: null,
         stripeSubscriptionId: null,
-      });
+        ...(code ? { accessCodeUsed: code } : {}),
+      };
+      // These writes are sequential (not a batch) on purpose — see the
+      // note above about rules needing the company doc already committed
+      // before dependent checks (the users/{uid} create rule, and here
+      // also the accessCodes/{code} spend-check) can see it.
+      await setDoc(companyRef, companyDoc);
       await setDoc(doc(db, "users", user.uid), {
         companyId: companyRef.id,
         role: "owner",
@@ -62,6 +82,15 @@ export default function CompanySetup() {
         email: (user.email || "").toLowerCase(),
         createdAt: serverTimestamp(),
       });
+      if (code) {
+        // Spend the code so it can't be reused elsewhere. Not fatal if
+        // this fails for some reason — the company is already comped.
+        try {
+          await updateDoc(doc(db, "accessCodes", code), { active: false, usedByCompanyId: companyRef.id });
+        } catch {
+          // ignore — company setup already succeeded
+        }
+      }
     } catch (err) {
       setError(err.message || "Couldn't create your company. Try again.");
       setSaving(false);
@@ -158,6 +187,17 @@ export default function CompanySetup() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="accessCode">
+                    {t("companySetup.accessCode") || "Access code (optional)"}
+                  </Label>
+                  <Input
+                    id="accessCode"
+                    placeholder={t("companySetup.accessCodePlaceholder") || "Have a free-access code?"}
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value)}
                   />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}

@@ -58,7 +58,21 @@ service cloud.firestore {
     // Companies + invites
     // ---------------------------------------------------------------
     match /companies/{companyId} {
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      // A new company can only ever set itself up on the standard trial —
+      // UNLESS it's redeeming a live, unused access code, in which case it
+      // can start out "comped" instead. Either way, a client can never just
+      // write plan: "active" directly (that's Stripe-webhook-only), and
+      // after creation planFieldsUnchanged() below locks these fields down
+      // entirely except via the webhook or a manual console edit.
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid &&
+        (
+          request.resource.data.plan == "trial" ||
+          (
+            request.resource.data.plan == "comped" &&
+            request.resource.data.accessCodeUsed is string &&
+            get(/databases/$(database)/documents/accessCodes/$(request.resource.data.accessCodeUsed)).data.active == true
+          )
+        );
       allow read: if isCompanyMember(companyId);
       allow update: if isCompanyAdmin(companyId) && planFieldsUnchanged();
       allow delete: if isCompanyAdmin(companyId);
@@ -73,6 +87,24 @@ service cloud.firestore {
         // Deleting your own invite happens as part of joining.
         allow delete: if isSignedIn() && request.auth.token.email.lower() == email;
       }
+    }
+
+    // ---------------------------------------------------------------
+    // Access codes — one-time-use codes that grant a new company free
+    // ("comped") access instead of the standard trial. Codes are created
+    // and deleted only by hand in the Firebase console (never by a
+    // client) — see README "Access codes" for how. A client can read a
+    // code to validate it during company setup, and can flip it from
+    // active to inactive to "spend" it, but can't create, delete, or
+    // reactivate one, and can't touch anything but the active flag.
+    // ---------------------------------------------------------------
+    match /accessCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow update: if isSignedIn() &&
+        resource.data.active == true &&
+        request.resource.data.active == false;
+      allow create, delete: if false;
     }
 
     // ---------------------------------------------------------------
