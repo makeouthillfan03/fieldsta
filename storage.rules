@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Firebase Storage rules for job photo attachments.
+//
+// Photos live at jobPhotos/{jobId}/{fileName}. Access is scoped to the
+// company that owns the job: we look up the job's companyId in Firestore
+// and compare it to the requesting user's own companyId (also looked up
+// in Firestore, off their users/{uid} profile doc).
+//
+// Deploy with: firebase deploy --only storage
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /jobPhotos/{jobId}/{fileName} {
+      function myCompanyId() {
+        return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.companyId;
+      }
+
+      function jobCompanyId() {
+        return firestore.get(/databases/(default)/documents/jobs/$(jobId)).data.companyId;
+      }
+
+      function sameCompany() {
+        return request.auth != null && myCompanyId() == jobCompanyId();
+      }
+
+      allow read: if sameCompany();
+      allow write: if sameCompany()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

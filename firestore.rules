@@ -1,0 +1,201 @@
+rules_version = '2';
+
+// Multi-tenant security rules for Fieldsta.
+//
+// Every top-level business document (customers, jobs, technicians, etc.)
+// carries a `companyId` field. A signed-in user's own `users/{uid}` doc
+// says which company they belong to and what role they have there
+// ("owner" | "admin" | "technician"). All reads/writes to company data
+// are gated on the requester's `users/{uid}.companyId` matching the
+// document's `companyId`.
+//
+// Deploy with: firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function myCompanyId() {
+      return myProfile().companyId;
+    }
+
+    function myRole() {
+      return myProfile().role;
+    }
+
+    function isCompanyMember(companyId) {
+      return isSignedIn() && myCompanyId() == companyId;
+    }
+
+    function isCompanyAdmin(companyId) {
+      return isCompanyMember(companyId) && myRole() in ["owner", "admin"];
+    }
+
+    // A resource's companyId can never be changed by an update.
+    function companyIdUnchanged() {
+      return request.resource.data.companyId == resource.data.companyId;
+    }
+
+    // Billing/plan fields on a company doc are only ever written by the
+    // Stripe webhook (Admin SDK, bypasses these rules entirely) or by hand
+    // in the Firestore console for comped accounts — never by a client
+    // update, so an admin can't just grant themselves a free/active plan.
+    function planFieldsUnchanged() {
+      return request.resource.data.plan == resource.data.plan &&
+        request.resource.data.trialEndsAt == resource.data.trialEndsAt &&
+        request.resource.data.stripeCustomerId == resource.data.stripeCustomerId &&
+        request.resource.data.stripeSubscriptionId == resource.data.stripeSubscriptionId;
+    }
+
+    // ---------------------------------------------------------------
+    // Companies + invites
+    // ---------------------------------------------------------------
+    match /companies/{companyId} {
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow read: if isCompanyMember(companyId);
+      allow update: if isCompanyAdmin(companyId) && planFieldsUnchanged();
+      allow delete: if isCompanyAdmin(companyId);
+
+      match /invites/{email} {
+        // A prospective teammate needs to read their own invite to join;
+        // admins can read/manage all invites for their company.
+        allow get: if isCompanyAdmin(companyId) ||
+          (isSignedIn() && request.auth.token.email.lower() == email);
+        allow list: if isCompanyAdmin(companyId);
+        allow create, delete: if isCompanyAdmin(companyId);
+        // Deleting your own invite happens as part of joining.
+        allow delete: if isSignedIn() && request.auth.token.email.lower() == email;
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Users (auth uid -> company + role mapping)
+    // ---------------------------------------------------------------
+    match /users/{uid} {
+      allow read: if isSignedIn() &&
+        (request.auth.uid == uid || isCompanyMember(resource.data.companyId));
+
+      // Creating your own profile is only allowed either when:
+      //  (a) you're becoming the "owner" of a company you just created, or
+      //  (b) you have a pending invite at that company for your email.
+      // The `email` field on the new doc must match the caller's own auth
+      // token email — otherwise someone could claim a role by writing
+      // *someone else's* invited email into their own payload and riding
+      // that invite's existence check.
+      allow create: if isSignedIn() && request.auth.uid == uid &&
+        !exists(/databases/$(database)/documents/users/$(uid)) &&
+        request.resource.data.email == request.auth.token.email.lower() &&
+        (
+          (
+            request.resource.data.role == "owner" &&
+            get(/databases/$(database)/documents/companies/$(request.resource.data.companyId)).data.ownerUid == request.auth.uid
+          ) ||
+          (
+            request.resource.data.role in ["admin", "technician"] &&
+            exists(/databases/$(database)/documents/companies/$(request.resource.data.companyId)/invites/$(request.resource.data.email))
+          )
+        );
+
+      // Admins can update anything about a member (including role) except
+      // moving them to a different company. A user updating their own doc
+      // can change non-privilege fields (name, etc.) but can NOT change
+      // their own role or companyId — that would be self-promotion.
+      allow update: if isCompanyAdmin(resource.data.companyId) && companyIdUnchanged();
+      allow update: if isSignedIn() && request.auth.uid == uid &&
+        companyIdUnchanged() &&
+        request.resource.data.role == resource.data.role;
+
+      allow delete: if isCompanyAdmin(resource.data.companyId);
+    }
+
+    // ---------------------------------------------------------------
+    // Company-scoped business collections
+    // ---------------------------------------------------------------
+    match /customers/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /equipment/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    // Technicians and Price Book are admin-managed in the UI (behind
+    // AdminRoute) — enforce that at the rules layer too, not just in the
+    // client, since a direct Firestore call would otherwise bypass it.
+    match /technicians/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isCompanyAdmin(myCompanyId()) && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyAdmin(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /jobs/{jobId} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+
+      match /activity/{activityId} {
+        allow read: if isCompanyMember(get(/databases/$(database)/documents/jobs/$(jobId)).data.companyId);
+        allow create: if isSignedIn() &&
+          request.resource.data.companyId == myCompanyId() &&
+          get(/databases/$(database)/documents/jobs/$(jobId)).data.companyId == myCompanyId();
+      }
+    }
+
+    match /storeOrders/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /priceBook/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isCompanyAdmin(myCompanyId()) && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyAdmin(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /estimates/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /routes/{routeId} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    match /maintenanceAgreements/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    // ---------------------------------------------------------------
+    // Customer self-service portal — intentionally public.
+    // Access is via an unguessable random token used as the doc ID,
+    // not by companyId. Anyone with the link can view; only signed-in
+    // users (the company generating it) can create/update snapshots.
+    // ---------------------------------------------------------------
+    match /portal/{token} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
