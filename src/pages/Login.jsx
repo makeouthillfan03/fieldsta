@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Wrench, Calendar, MapPin, FileText, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { loginWithGoogle } from "@/lib/firebase";
+import { loginWithGoogle, getRedirectRoundtripError } from "@/lib/firebase";
 
 export default function Login() {
   const { user, loading } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [error, setError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+
+  // Sign-in uses a full-page redirect (not a popup, which browsers block
+  // often enough to be unreliable). That means the actual result of the
+  // Google sign-in comes back on the *next* page load, not from a promise
+  // right after clicking the button — so we check for it once here.
+  useEffect(() => {
+    getRedirectRoundtripError().then((result) => {
+      if (result instanceof Error && result.code !== "auth/no-auth-event") {
+        setError(result.message || "Sign-in failed. Try again.");
+      }
+    });
+  }, []);
 
   if (!loading && user) return <Navigate to="/" replace />;
 
@@ -25,10 +37,12 @@ export default function Login() {
     setError("");
     setSigningIn(true);
     try {
+      // This navigates the browser away to Google's sign-in page — it
+      // doesn't resolve here. AuthContext's onAuthStateChanged picks up
+      // the signed-in user automatically once Google redirects back.
       await loginWithGoogle();
     } catch (err) {
       setError(err.message || "Sign-in failed. Try again.");
-    } finally {
       setSigningIn(false);
     }
   }
