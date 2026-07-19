@@ -58,6 +58,11 @@ export default function Welcome() {
           className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-white/10"
         />
         <div className="relative mx-auto max-w-2xl text-center">
+          <img
+            src="/mascot.png"
+            alt="Fieldsta mascot"
+            className="mx-auto mb-2 h-32 w-32 sm:h-40 sm:w-40"
+          />
           <h1 className="text-3xl font-semibold sm:text-4xl">
             {t("welcome.heroTitle") || "Run your HVAC business from your phone"}
           </h1>
