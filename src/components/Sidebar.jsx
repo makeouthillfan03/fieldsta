@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import { Wrench } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { baseLinks, adminLinks } from "@/lib/navLinks";
@@ -17,7 +16,7 @@ export default function Sidebar() {
   return (
     <aside className="no-print sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-background sm:flex">
       <NavLink to="/" className="flex items-center gap-2 px-4 py-4">
-        <Wrench className="h-5 w-5 text-primary" />
+        <img src="/mascot.png" alt="" className="h-6 w-6" />
         <span className="font-semibold">Fieldsta</span>
       </NavLink>
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-4">

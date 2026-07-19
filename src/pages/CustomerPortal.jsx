@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { Wrench } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
@@ -51,7 +50,7 @@ export default function CustomerPortal() {
     <div className="min-h-screen bg-muted/30 px-4 py-6">
       <div className="mx-auto max-w-lg space-y-4">
         <div className="flex items-center gap-2">
-          <Wrench className="h-5 w-5 text-primary" />
+          <img src="/mascot.png" alt="" className="h-6 w-6" />
           <span className="font-semibold">Fieldsta</span>
         </div>
 

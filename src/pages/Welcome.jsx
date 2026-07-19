@@ -1,5 +1,5 @@
 import { Link, Navigate } from "react-router-dom";
-import { Wrench, Calendar, MapPin, FileText, ShieldCheck, Globe, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, FileText, ShieldCheck, Globe, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -26,9 +26,7 @@ export default function Welcome() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Wrench className="h-4 w-4" />
-          </div>
+          <img src="/mascot.png" alt="" className="h-8 w-8" />
           <span className="font-semibold">Fieldsta</span>
         </div>
         <div className="flex items-center gap-2">

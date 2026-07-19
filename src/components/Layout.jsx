@@ -1,5 +1,5 @@
 import { Outlet, Link } from "react-router-dom";
-import { LogOut, Wrench } from "lucide-react";
+import { LogOut } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Sidebar from "@/components/Sidebar";
 import AppStatusBanner from "@/components/AppStatusBanner";
@@ -20,7 +20,7 @@ export default function Layout() {
         <header className="no-print sticky top-0 z-30 border-b border-border bg-background">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <Link to="/" className="flex items-center gap-2 sm:hidden">
-              <Wrench className="h-5 w-5 text-primary" />
+              <img src="/mascot.png" alt="" className="h-6 w-6" />
               <span className="font-semibold">Fieldsta</span>
             </Link>
             <div className="ml-auto flex items-center gap-3">

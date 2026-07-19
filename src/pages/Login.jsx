@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Wrench, Calendar, MapPin, FileText, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, FileText, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -67,9 +67,7 @@ export default function Login() {
           className="pointer-events-none absolute -bottom-14 -left-10 h-32 w-32 rounded-full bg-white/10"
         />
         <div className="relative mx-auto flex max-w-sm flex-col items-center text-center">
-          <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
-            <Wrench className="h-5 w-5" />
-          </div>
+          <img src="/mascot.png" alt="" className="mb-2 h-16 w-16" />
           <h1 className="text-xl font-semibold sm:text-2xl">{t("login.title")}</h1>
           <p className="mt-1 text-xs text-primary-foreground/80 sm:text-sm">{t("login.tagline")}</p>
         </div>

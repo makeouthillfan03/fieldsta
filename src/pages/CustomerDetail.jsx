@@ -15,7 +15,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { ArrowLeft, Link2, Mail, MapPin, Phone, Plus, Trash2, Wrench } from "lucide-react";
+import { ArrowLeft, Link2, Mail, MapPin, Phone, Plus, Settings2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -251,7 +251,7 @@ export default function CustomerDetail() {
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Wrench className="h-4 w-4" /> {t("customerDetail.equipment")}
+            <Settings2 className="h-4 w-4" /> {t("customerDetail.equipment")}
           </CardTitle>
           <Button size="sm" variant="outline" onClick={() => setShowAddEquip(true)}>
             <Plus className="mr-1 h-4 w-4" /> {t("common.add")}

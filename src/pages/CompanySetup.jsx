@@ -10,7 +10,7 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
-import { Wrench, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -145,8 +145,8 @@ export default function CompanySetup() {
       </button>
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
-            <Wrench className="h-7 w-7" />
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+            <img src="/mascot.png" alt="" className="h-11 w-11" />
           </div>
           <h1 className="text-xl font-semibold">{t("companySetup.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
