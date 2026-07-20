@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
   const needsCompany = !!user && !companyLoading && !companyId;
 
   // A company has access to the app if: comped (free forever), an active
-  // paid subscription, or still inside its 14-day trial window. Anything
+  // paid subscription, or still inside its 3-day trial window. Anything
   // else (trial expired, canceled, past_due) blocks access and routes to
   // /billing. Companies created before this feature shipped have no `plan`
   // field at all — treat that as "trial" so nobody already using the app

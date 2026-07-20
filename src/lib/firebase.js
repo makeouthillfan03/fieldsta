@@ -6,6 +6,8 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut,
+  RecaptchaVerifier,
+  linkWithPhoneNumber,
 } from "firebase/auth";
 import {
   initializeFirestore,
@@ -69,9 +71,9 @@ export function parseQuickNote(text, jobId) {
 // lightweight index of the company's customers/jobs so the AI can propose
 // actions referencing real records. Returns proposed actions only — it
 // never writes to Firestore itself.
-export function runAssistant(message, customers, jobs) {
+export function runAssistant(message, customers, jobs, history) {
   const call = httpsCallable(functions, "runAssistant");
-  return call({ message, customers, jobs });
+  return call({ message, customers, jobs, history });
 }
 
 const googleProvider = new GoogleAuthProvider();
@@ -100,4 +102,40 @@ export function getRedirectRoundtripError() {
 
 export function logout() {
   return signOut(auth);
+}
+
+// --- Phone verification (company setup gate) -------------------------
+//
+// Requires the "Phone" sign-in provider to be turned on in Firebase
+// Console → Authentication → Sign-in method (and the project on the Blaze
+// plan, since Phone Auth sends real SMS). See README "Phone verification".
+//
+// We link a phone credential onto the *already Google-signed-in* user
+// (rather than signing in fresh with phone) so this is a verification step
+// on top of an existing account, not a second login method — one real
+// human, one Google account, one verified phone, all tied together. That's
+// both the anti-fake-signup barrier and the "who is who" record the owner
+// asked for: every company doc ends up with a real, SMS-verified phone
+// number on it.
+let recaptchaVerifier = null;
+
+function getRecaptcha(containerId) {
+  if (!recaptchaVerifier) {
+    recaptchaVerifier = new RecaptchaVerifier(auth, containerId, { size: "invisible" });
+  }
+  return recaptchaVerifier;
+}
+
+// Sends a 6-digit SMS code to `phoneNumber` (E.164 format, e.g. +15551234567)
+// and returns a confirmationResult to pass into confirmPhoneCode().
+export async function sendPhoneVerificationCode(phoneNumber, containerId = "recaptcha-container") {
+  const verifier = getRecaptcha(containerId);
+  return linkWithPhoneNumber(auth.currentUser, phoneNumber, verifier);
+}
+
+// Confirms the code the person typed in against the confirmationResult from
+// sendPhoneVerificationCode(). Throws (e.g. "auth/invalid-verification-code")
+// if it doesn't match. On success, auth.currentUser.phoneNumber is set.
+export async function confirmPhoneVerificationCode(confirmationResult, code) {
+  return confirmationResult.confirm(code);
 }

@@ -97,7 +97,14 @@ export default function Assistant() {
         .slice(0, 60)
         .map((j) => ({ id: j.id, customerName: j.customerName, description: j.description, status: j.status }));
 
-      const result = await runAssistant(text, customerContext, jobContext);
+      // Give the model the actual back-and-forth so far, not just this one
+      // message — otherwise "add another one for him too" means nothing to it.
+      const history = turns.flatMap((t) => [
+        { role: "user", content: t.request },
+        { role: "assistant", content: t.assistantRaw },
+      ]);
+
+      const result = await runAssistant(text, customerContext, jobContext, history);
       const data = result.data || {};
       const actions = (data.actions || []).map((a) => ({
         id: nextId(),
@@ -106,7 +113,16 @@ export default function Assistant() {
         included: true,
         status: "pending",
       }));
-      setTurns((t) => [...t, { id: nextId(), request: text, reply: data.reply || "", actions }]);
+      setTurns((t) => [
+        ...t,
+        {
+          id: nextId(),
+          request: text,
+          reply: data.reply || "",
+          actions,
+          assistantRaw: JSON.stringify({ reply: data.reply || "", actions: data.actions || [] }),
+        },
+      ]);
     } catch (err) {
       setError(
         err.code === "functions/failed-precondition" || err.code === "failed-precondition"
@@ -317,9 +333,16 @@ export default function Assistant() {
     }
   }
 
+  const starters = [
+    t("assistant.starter1") || "Schedule an AC repair for tomorrow at 2pm",
+    t("assistant.starter2") || "Log a $150 cash payment on the Smith job",
+    t("assistant.starter3") || "Add a new customer, Maria Lopez, 555-0142",
+  ];
+
   return (
     <div className="mx-auto flex max-w-lg flex-col space-y-4">
       <div className="flex items-center gap-2">
+        <img src="/mascot.png" alt="" className="h-6 w-6" />
         <Sparkles className="h-5 w-5 text-primary" />
         <h1 className="text-lg font-semibold">{t("assistant.title")}</h1>
       </div>
@@ -328,13 +351,46 @@ export default function Assistant() {
       </p>
 
       <div className="space-y-4">
+        {turns.length === 0 && !sending && (
+          <div className="space-y-3 rounded-lg border border-dashed border-border p-4 text-center">
+            <img src="/mascot.png" alt="" className="mx-auto h-10 w-10" />
+            <p className="text-sm text-muted-foreground">
+              {t("assistant.emptyState") || "Tell me what happened and I'll turn it into jobs, notes, and payments — try one of these:"}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {starters.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setMessageText(s)}
+                  className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-accent"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {turns.map((turn) => (
           <div key={turn.id} className="space-y-2">
-            <div className="rounded-lg bg-secondary px-3 py-2 text-sm">{turn.request}</div>
-            {turn.reply && <p className="text-sm text-muted-foreground">{turn.reply}</p>}
+            <div className="flex justify-end">
+              <div className="max-w-[85%] rounded-lg rounded-br-sm bg-primary px-3 py-2 text-sm text-primary-foreground">
+                {turn.request}
+              </div>
+            </div>
+
+            {turn.reply && (
+              <div className="flex items-start gap-2">
+                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
+                <div className="max-w-[85%] rounded-lg rounded-tl-sm bg-secondary px-3 py-2 text-sm">
+                  {turn.reply}
+                </div>
+              </div>
+            )}
 
             {turn.actions.length > 0 && (
-              <Card>
+              <Card className="ml-8">
                 <CardContent className="space-y-3 p-3">
                   {turn.actions.map((action) => (
                     <ActionEditor
@@ -360,6 +416,17 @@ export default function Assistant() {
             )}
           </div>
         ))}
+
+        {sending && (
+          <div className="flex items-start gap-2">
+            <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
+            <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -371,6 +438,7 @@ export default function Assistant() {
           value={messageText}
           onChange={(e) => setMessageText(e.target.value)}
           disabled={sending}
+          autoFocus
         />
         <Button type="submit" size="icon" disabled={sending || !messageText.trim()}>
           <Send className="h-4 w-4" />

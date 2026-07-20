@@ -10,14 +10,14 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { db, logout } from "@/lib/firebase";
+import { auth, db, logout, sendPhoneVerificationCode, confirmPhoneVerificationCode } from "@/lib/firebase";
 
 export default function CompanySetup() {
   const { user, companyLoading, needsCompany } = useAuth();
@@ -29,7 +29,73 @@ export default function CompanySetup() {
   const [inviteCode, setInviteCode] = useState("");
   const [mode, setMode] = useState("create"); // "create" | "join"
 
+  // Real barrier to entry: a company can't be created (or joined) until the
+  // signed-in Google account also has a verified phone number linked to it.
+  // Costs a few seconds and a real SMS, which a throwaway/fake signup won't
+  // bother with — and it doubles as the "who is who" phone record the owner
+  // wanted on every account. See lib/firebase.js "Phone verification".
+  const [phoneVerified, setPhoneVerified] = useState(!!auth.currentUser?.phoneNumber);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [confirmation, setConfirmation] = useState(null);
+  const [phoneBusy, setPhoneBusy] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
+
   if (!companyLoading && !needsCompany) return <Navigate to="/" replace />;
+
+  function toE164(raw) {
+    const digits = raw.replace(/[^\d+]/g, "");
+    if (digits.startsWith("+")) return digits;
+    // Assume US/Canada if no country code was given — matches the primary
+    // launch market; contractors outside it can type their own "+" prefix.
+    return `+1${digits.replace(/\D/g, "")}`;
+  }
+
+  async function handleSendCode(e) {
+    e.preventDefault();
+    const formatted = toE164(phone);
+    if (formatted.replace(/\D/g, "").length < 11) {
+      setPhoneError(t("companySetup.phoneInvalid") || "Enter a valid phone number.");
+      return;
+    }
+    setPhoneBusy(true);
+    setPhoneError("");
+    try {
+      const result = await sendPhoneVerificationCode(formatted);
+      setConfirmation(result);
+    } catch (err) {
+      setPhoneError(
+        err.code === "auth/too-many-requests"
+          ? "Too many attempts — wait a bit and try again."
+          : err.code === "auth/invalid-phone-number"
+          ? "That phone number doesn't look right."
+          : err.message || "Couldn't send a code. Try again."
+      );
+    } finally {
+      setPhoneBusy(false);
+    }
+  }
+
+  async function handleVerifyCode(e) {
+    e.preventDefault();
+    if (!confirmation || !otp.trim()) return;
+    setPhoneBusy(true);
+    setPhoneError("");
+    try {
+      await confirmPhoneVerificationCode(confirmation, otp.trim());
+      setPhoneVerified(true);
+    } catch (err) {
+      setPhoneError(
+        err.code === "auth/invalid-verification-code"
+          ? "That code isn't right — check it and try again."
+          : err.code === "auth/code-expired"
+          ? "That code expired — request a new one."
+          : err.message || "Couldn't verify that code."
+      );
+    } finally {
+      setPhoneBusy(false);
+    }
+  }
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -57,6 +123,7 @@ export default function CompanySetup() {
       const companyDoc = {
         name: companyName.trim(),
         ownerUid: user.uid,
+        ownerPhone: auth.currentUser?.phoneNumber || null,
         createdAt: serverTimestamp(),
         // New companies start on a 3-day free trial, UNLESS a valid access
         // code was redeemed, in which case they start "comped" (free)
@@ -80,6 +147,7 @@ export default function CompanySetup() {
         role: "owner",
         name: user.displayName || "",
         email: (user.email || "").toLowerCase(),
+        phone: auth.currentUser?.phoneNumber || null,
         createdAt: serverTimestamp(),
       });
       if (code) {
@@ -120,6 +188,7 @@ export default function CompanySetup() {
         role: invite.role || "technician",
         name: user.displayName || "",
         email,
+        phone: auth.currentUser?.phoneNumber || null,
         createdAt: serverTimestamp(),
       });
       await deleteDoc(inviteRef);
@@ -154,8 +223,75 @@ export default function CompanySetup() {
           </p>
         </div>
 
+        <div id="recaptcha-container" />
+
         <Card className="shadow-sm">
           <CardContent className="space-y-4 p-5">
+            {!phoneVerified ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  {t("companySetup.phoneVerifyTitle") || "Verify your phone to continue"}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("companySetup.phoneVerifySubtitle") ||
+                    "One quick step before you can create or join a company — we'll text you a 6-digit code."}
+                </p>
+
+                {!confirmation ? (
+                  <form onSubmit={handleSendCode} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="phone">{t("common.phone") || "Phone number"}</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="(555) 123-4567"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                      />
+                    </div>
+                    {phoneError && <p className="text-sm text-destructive">{phoneError}</p>}
+                    <Button type="submit" className="w-full" disabled={phoneBusy}>
+                      {phoneBusy
+                        ? t("companySetup.sendingCode") || "Sending code…"
+                        : t("companySetup.sendCode") || "Text me a code"}
+                    </Button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleVerifyCode} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="otp">{t("companySetup.enterCode") || "Enter the 6-digit code"}</Label>
+                      <Input
+                        id="otp"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="123456"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                      />
+                    </div>
+                    {phoneError && <p className="text-sm text-destructive">{phoneError}</p>}
+                    <Button type="submit" className="w-full" disabled={phoneBusy}>
+                      {phoneBusy ? t("companySetup.verifying") || "Verifying…" : t("companySetup.verify") || "Verify"}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConfirmation(null);
+                        setOtp("");
+                        setPhoneError("");
+                      }}
+                      className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      {t("companySetup.useDifferentNumber") || "Use a different number"}
+                    </button>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <>
             <div className="flex rounded-md border border-border p-1 text-sm">
               <button
                 type="button"
@@ -225,6 +361,8 @@ export default function CompanySetup() {
                   {saving ? t("companySetup.joining") : t("companySetup.joinButton")}
                 </Button>
               </form>
+            )}
+              </>
             )}
           </CardContent>
         </Card>

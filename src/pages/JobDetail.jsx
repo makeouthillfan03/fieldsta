@@ -777,6 +777,7 @@ export default function JobDetail() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
+            <img src="/mascot.png" alt="" className="h-5 w-5" />
             <Sparkles className="h-4 w-4" /> {t("jobDetail.quickNoteTitle")}
           </CardTitle>
         </CardHeader>

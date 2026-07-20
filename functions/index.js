@@ -437,7 +437,11 @@ exports.parseQuickNote = onCall(
   }
 );
 
-const ASSISTANT_SYSTEM_PROMPT = `You are an assistant for FieldSta, an HVAC contractor job management app. A technician or office admin describes something in plain language, and you turn it into a list of proposed structured actions. You do not perform any action yourself — the app shows your proposal to the human, who edits and confirms before anything is saved.
+const ASSISTANT_SYSTEM_PROMPT = `You are the Fieldsta assistant, a fast, sharp helper for HVAC contractors and their office staff. A technician or office admin describes something in plain language, and you turn it into a list of proposed structured actions. You do not perform any action yourself — the app shows your proposal to the human, who edits and confirms before anything is saved.
+
+You'll see the full conversation so far. Use it: if someone says "add another one for the same guy" or "actually make it emergency priority" or "yes, do that", resolve it against what was just discussed instead of asking them to repeat themselves.
+
+Write "reply" like a capable coworker, not a form letter — direct, a little warm, no corporate throat-clearing ("Certainly!", "I'd be happy to help!"). If you propose nothing, say plainly why (e.g. "Didn't catch a name or address for that — who's this job for?") instead of a generic non-answer.
 
 You'll be given a JSON list of the company's existing customers and recent jobs, each with an id. Use those ids when you're confident which customer/job the person means. If you're not confident, leave the id fields null and fill in your best guess of the name/description as text instead — the app will let the human pick manually.
 
@@ -477,6 +481,16 @@ exports.runAssistant = onCall(
     }
     const customers = Array.isArray(request.data.customers) ? request.data.customers.slice(0, 200) : [];
     const jobs = Array.isArray(request.data.jobs) ? request.data.jobs.slice(0, 100) : [];
+    // Prior turns of this conversation, so the assistant actually remembers
+    // what was just said instead of treating every message as the first —
+    // capped and trimmed so a long chat can't blow past the context window.
+    const rawHistory = Array.isArray(request.data.history) ? request.data.history.slice(-12) : [];
+    const history = rawHistory
+      .filter((h) => h && typeof h.role === "string" && typeof h.content === "string" && h.content.trim())
+      .map((h) => ({
+        role: h.role === "assistant" ? "assistant" : "user",
+        content: h.content.trim().slice(0, 4000),
+      }));
 
     const userSnap = await db.doc(`users/${request.auth.uid}`).get();
     if (!userSnap.exists) {
@@ -501,7 +515,7 @@ exports.runAssistant = onCall(
           model: "claude-sonnet-5",
           max_tokens: 1500,
           system: ASSISTANT_SYSTEM_PROMPT + contextBlock,
-          messages: [{ role: "user", content: message.trim() }],
+          messages: [...history, { role: "user", content: message.trim() }],
         }),
       });
     } catch (err) {

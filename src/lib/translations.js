@@ -63,6 +63,15 @@ export const translations = {
     "companySetup.inviteHelp": "Ask your company's admin to invite {email} from the Team page, then share the company code with you.",
     "companySetup.joinButton": "Join company",
     "companySetup.joining": "Joining...",
+    "companySetup.phoneVerifyTitle": "Verify your phone to continue",
+    "companySetup.phoneVerifySubtitle": "One quick step before you can create or join a company — we'll text you a 6-digit code.",
+    "companySetup.phoneInvalid": "Enter a valid phone number.",
+    "companySetup.sendCode": "Text me a code",
+    "companySetup.sendingCode": "Sending code…",
+    "companySetup.enterCode": "Enter the 6-digit code",
+    "companySetup.verify": "Verify",
+    "companySetup.verifying": "Verifying…",
+    "companySetup.useDifferentNumber": "Use a different number",
 
     // Dashboard
     "dashboard.title": "Jobs",
@@ -421,6 +430,10 @@ export const translations = {
     "assistant.title": "Assistant",
     "assistant.subtitle": "Describe what you want in plain language — new customers, jobs, payments, refrigerant logs, maintenance agreements, notes. Review and confirm before anything saves.",
     "assistant.placeholder": "e.g. Add a new customer Jane Doe, 555-2345...",
+    "assistant.emptyState": "Tell me what happened and I'll turn it into jobs, notes, and payments — try one of these:",
+    "assistant.starter1": "Schedule an AC repair for tomorrow at 2pm",
+    "assistant.starter2": "Log a $150 cash payment on the Smith job",
+    "assistant.starter3": "Add a new customer, Maria Lopez, 555-0142",
     "assistant.actionCreateCustomer": "New customer",
     "assistant.actionCreateJob": "New job",
     "assistant.actionLogPayment": "Log payment",
@@ -473,7 +486,7 @@ export const translations = {
     "welcome.aboutPoint1": "EPA 608 refrigerant logs, kept for you automatically",
     "welcome.aboutPoint2": "Full English & Spanish support, not just menus",
     "welcome.pricingTitle": "Simple pricing",
-    "welcome.trialNote": "Every account starts with a 14-day free trial.",
+    "welcome.trialNote": "Every account starts with a 3-day free trial.",
 
     // Language toggle
     "lang.toggle": "ES",
@@ -538,6 +551,15 @@ export const translations = {
     "companySetup.inviteHelp": "Pídele a tu administrador que invite a {email} desde la página de Equipo, y que te comparta el código de la empresa.",
     "companySetup.joinButton": "Unirse a la empresa",
     "companySetup.joining": "Uniéndose...",
+    "companySetup.phoneVerifyTitle": "Verifica tu teléfono para continuar",
+    "companySetup.phoneVerifySubtitle": "Un paso rápido antes de crear o unirte a una empresa — te enviaremos un código de 6 dígitos por mensaje de texto.",
+    "companySetup.phoneInvalid": "Ingresa un número de teléfono válido.",
+    "companySetup.sendCode": "Enviarme un código",
+    "companySetup.sendingCode": "Enviando código…",
+    "companySetup.enterCode": "Ingresa el código de 6 dígitos",
+    "companySetup.verify": "Verificar",
+    "companySetup.verifying": "Verificando…",
+    "companySetup.useDifferentNumber": "Usar otro número",
 
     // Dashboard
     "dashboard.title": "Trabajos",
@@ -896,6 +918,10 @@ export const translations = {
     "assistant.title": "Asistente",
     "assistant.subtitle": "Describe lo que necesitas en lenguaje sencillo — nuevos clientes, trabajos, pagos, registros de refrigerante, contratos de mantenimiento, notas. Revisa y confirma antes de guardar cualquier cosa.",
     "assistant.placeholder": "ej. Agregar nueva clienta Jane Doe, 555-2345...",
+    "assistant.emptyState": "Cuéntame qué pasó y lo convierto en trabajos, notas y pagos — prueba uno de estos:",
+    "assistant.starter1": "Agendar una reparación de A/C para mañana a las 2pm",
+    "assistant.starter2": "Registrar un pago de $150 en efectivo del trabajo de Smith",
+    "assistant.starter3": "Agregar nueva clienta, Maria Lopez, 555-0142",
     "assistant.actionCreateCustomer": "Nuevo cliente",
     "assistant.actionCreateJob": "Nuevo trabajo",
     "assistant.actionLogPayment": "Registrar pago",
@@ -948,7 +974,7 @@ export const translations = {
     "welcome.aboutPoint1": "Registros de refrigerante EPA 608, guardados automáticamente",
     "welcome.aboutPoint2": "Soporte completo en inglés y español, no solo los menús",
     "welcome.pricingTitle": "Precios simples",
-    "welcome.trialNote": "Cada cuenta comienza con una prueba gratuita de 14 días.",
+    "welcome.trialNote": "Cada cuenta comienza con una prueba gratuita de 3 días.",
 
     // Language toggle
     "lang.toggle": "EN",

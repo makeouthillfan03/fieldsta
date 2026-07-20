@@ -68,9 +68,10 @@ npm install
 
 1. Go to the [Firebase console](https://console.firebase.google.com) and create a project.
 2. Enable **Authentication → Sign-in method → Google**.
-3. Enable **Firestore Database** (start in production mode).
-4. Enable **Storage** (used for job photo attachments).
-5. Add a **Web app** and copy the config values.
+3. Also enable **Authentication → Sign-in method → Phone**. This gates company creation/joining — see "Phone verification" below — and requires the project to be on the **Blaze (pay-as-you-go) plan** since it sends real SMS (a handful of verification texts a day costs pennies; Cloud Functions already require Blaze anyway).
+4. Enable **Firestore Database** (start in production mode).
+5. Enable **Storage** (used for job photo attachments).
+6. Add a **Web app** and copy the config values.
 
 ### 3. Configure environment variables
 
@@ -134,9 +135,19 @@ companyId, role ("owner"|"admin"|"technician"), name, email, createdAt
 
 Every document below also carries a `companyId` field pointing at the `companies/{companyId}` it belongs to, and every list query in the app filters on it.
 
-**New sign-in flow:** after signing in with Google, a user with no `users/{uid}` doc is routed to `/setup-company`, where they either create a brand-new company (becoming its "owner") or join an existing one by entering the company's ID plus having a pending invite waiting for their email (sent from the admin-only `/team` page). "Owner" and "admin" roles get access to Dispatch, Technicians, Price Book, Store Orders, Reports, and Team; "technician" is a normal crew member.
+**New sign-in flow:** after signing in with Google, a user with no `users/{uid}` doc is routed to `/setup-company`, where they first verify a phone number (see "Phone verification" below), then either create a brand-new company (becoming its "owner") or join an existing one by entering the company's ID plus having a pending invite waiting for their email (sent from the admin-only `/team` page). "Owner" and "admin" roles get access to Dispatch, Technicians, Price Book, Store Orders, Reports, and Team; "technician" is a normal crew member.
 
 **Migration note:** any test data created before multi-tenancy (a handful of customers, most likely) has no `companyId` and will become invisible under the new rules — it isn't deleted, just orphaned. Easiest fix is to just re-enter that handful of records once you've created your real company; there's no bulk migration script for this since it wasn't worth building for such a small amount of test data.
+
+## Phone verification
+
+Before a signed-in Google account can create or join a company, `/setup-company` requires it to link a real, SMS-verified phone number (`src/lib/firebase.js` → `sendPhoneVerificationCode` / `confirmPhoneVerificationCode`, using Firebase's `linkWithPhoneNumber` on the already-signed-in user, plus an invisible reCAPTCHA in a `#recaptcha-container` div on the page).
+
+This exists for two reasons: it's a real cost (a few seconds and a live SMS) that a throwaway or fake signup won't bother paying, and it gives you an actual "who is who" record — every company doc gets an `ownerPhone` field and every `users/{uid}` doc gets a `phone` field, both pulled straight from Firebase's verified `auth.currentUser.phoneNumber`, never typed freeform into a form.
+
+**Requires:** the Phone sign-in provider enabled in Firebase Console (see Setup step 2 above) and the project on the Blaze plan. Without it, `sendPhoneVerificationCode` will fail — the person gets stuck on the verification screen with an error instead of silently getting through, which is the correct failure mode for a gate like this (fail closed, not open).
+
+Numbers without a `+` country code are assumed US/Canada (`+1`); anyone outside that can type their own `+` prefix.
 
 ## Stripe payments
 
