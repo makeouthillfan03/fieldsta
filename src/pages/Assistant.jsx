@@ -441,10 +441,12 @@ export default function Assistant() {
           25% { transform: rotate(-8deg) scale(1.05); }
           75% { transform: rotate(8deg) scale(1.05); }
         }
-        .fs-cloud { position: absolute; z-index: 0; fill: hsl(221.2 83.2% 53.3%); pointer-events: none; }
-        .fs-cloud-1 { top: -18px; left: -30px; width: 130px; opacity: 0.16; animation: fs-drift-a 9s ease-in-out infinite; }
-        .fs-cloud-2 { top: 60px; right: -36px; width: 160px; opacity: 0.13; animation: fs-drift-b 11s ease-in-out infinite; }
-        .fs-cloud-3 { bottom: 40px; left: -40px; width: 110px; opacity: 0.12; animation: fs-drift-c 8s ease-in-out infinite; }
+        .fs-cloud { position: fixed; z-index: 0; fill: hsl(221.2 83.2% 53.3%); pointer-events: none; }
+        .fs-cloud-1 { top: -8vh; left: -12vw; width: 55vw; max-width: 620px; opacity: 0.16; animation: fs-drift-a 14s ease-in-out infinite; }
+        .fs-cloud-2 { top: 18vh; right: -18vw; width: 60vw; max-width: 680px; opacity: 0.13; animation: fs-drift-b 16s ease-in-out infinite; }
+        .fs-cloud-3 { bottom: -6vh; left: -16vw; width: 50vw; max-width: 560px; opacity: 0.14; animation: fs-drift-c 12s ease-in-out infinite; }
+        .fs-cloud-4 { bottom: 10vh; right: -14vw; width: 45vw; max-width: 520px; opacity: 0.11; animation: fs-drift-a 18s ease-in-out infinite; }
+        .fs-cloud-5 { top: 42vh; left: 32vw; width: 38vw; max-width: 460px; opacity: 0.09; animation: fs-drift-b 20s ease-in-out infinite; }
         .fs-pop { animation: fs-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
         .fs-mascot-idle { animation: fs-wiggle 2.4s ease-in-out infinite; }
         .fs-content { position: relative; z-index: 1; }
@@ -453,10 +455,12 @@ export default function Assistant() {
       <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-1"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
       <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-2"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
       <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-3"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
+      <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-4"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
+      <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-5"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
 
-      <div className="fs-content flex items-center gap-2">
-        <img src="/mascot.png" alt="" className="fs-mascot-idle h-6 w-6" />
-        <Sparkles className="h-5 w-5 text-primary" />
+      <div className="fs-content flex items-center gap-3">
+        <img src="/mascot.png" alt="" className="fs-mascot-idle h-12 w-12" />
+        <Sparkles className="h-6 w-6 text-primary" />
         <h1 className="text-lg font-semibold">{t("assistant.title")}</h1>
       </div>
       <p className="fs-content text-sm text-muted-foreground">
@@ -466,7 +470,7 @@ export default function Assistant() {
       <div className="fs-content space-y-4">
         {turns.length === 0 && !sending && (
           <div className="fs-pop space-y-3 rounded-3xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 text-center shadow-sm">
-            <img src="/mascot.png" alt="" className="fs-mascot-idle mx-auto h-12 w-12" />
+            <img src="/mascot.png" alt="" className="fs-mascot-idle mx-auto h-24 w-24" />
             <p className="text-sm text-muted-foreground">
               {t("assistant.emptyState") || "Tell me what happened and I'll turn it into jobs, notes, and payments — try one of these:"}
             </p>
@@ -495,7 +499,7 @@ export default function Assistant() {
 
             {turn.pending && (
               <div className="fs-pop flex items-start gap-2">
-                <img src="/mascot.png" alt="" className="fs-mascot-idle mt-0.5 h-6 w-6 shrink-0" />
+                <img src="/mascot.png" alt="" className="fs-mascot-idle mt-0.5 h-10 w-10 shrink-0" />
                 <div className="flex items-center gap-1 rounded-3xl rounded-tl-md bg-secondary px-3.5 py-3 shadow-sm">
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
@@ -506,7 +510,7 @@ export default function Assistant() {
 
             {turn.reply && (
               <div className="fs-pop flex items-start gap-2">
-                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
+                <img src="/mascot.png" alt="" className="mt-0.5 h-10 w-10 shrink-0" />
                 <div className="max-w-[85%] rounded-3xl rounded-tl-md bg-secondary px-4 py-2.5 text-sm shadow-sm">
                   {turn.reply}
                 </div>
@@ -515,7 +519,7 @@ export default function Assistant() {
 
             {turn.error && (
               <div className="fs-pop flex items-start gap-2">
-                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
+                <img src="/mascot.png" alt="" className="mt-0.5 h-10 w-10 shrink-0" />
                 <div className="max-w-[85%] rounded-3xl rounded-tl-md border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive shadow-sm">
                   {turn.error}
                 </div>
@@ -552,7 +556,7 @@ export default function Assistant() {
 
         {fileBusy && (
           <div className="flex items-start gap-2">
-            <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
+            <img src="/mascot.png" alt="" className="mt-0.5 h-10 w-10 shrink-0 animate-pulse" />
             <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
