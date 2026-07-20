@@ -625,7 +625,28 @@ exports.runAssistant = onCall(
     }
 
     const data = await anthropicRes.json();
-    const raw = (data.content && data.content[0] && data.content[0].text) || "{}";
+    const textBlock = data.content && data.content.find((b) => b.type === "text");
+
+    // Previously, a missing/empty content block silently fell through to
+    // `raw = "{}"`, which parsed "successfully" into an empty {reply:"",
+    // actions:[]} — a 200 response with nothing in it, which the UI then
+    // had nothing to show for. Treat "no text content at all" as the real
+    // failure it is instead of pretending it was a normal empty answer, and
+    // log the full response so the actual cause (stop_reason, etc.) shows
+    // up in `firebase functions:log` / Cloud Console the next time this
+    // happens.
+    if (!textBlock || !textBlock.text) {
+      logger.error("Anthropic returned no text content", {
+        stopReason: data.stop_reason,
+        contentTypes: (data.content || []).map((b) => b.type),
+        raw: data,
+      });
+      throw new HttpsError(
+        "internal",
+        `AI didn't return an answer (stop reason: ${data.stop_reason || "unknown"}). Try again — if it keeps happening, check the Cloud Functions logs.`
+      );
+    }
+    const raw = textBlock.text;
 
     let parsed;
     try {
