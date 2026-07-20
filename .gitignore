@@ -1,5 +1,6 @@
 node_modules
 dist
+dist[0-9]*
 .env
 .env.local
 .DS_Store

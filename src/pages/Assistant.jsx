@@ -92,6 +92,15 @@ export default function Assistant() {
     setError("");
     const text = messageText.trim();
     setMessageText("");
+
+    // Show the person's own message the instant they hit send — don't wait
+    // on the AI round trip to render it. Without this, the input clears and
+    // *nothing* appears until the whole request finishes, which reads as
+    // "it did nothing" even when it's just thinking, and reads even worse
+    // if the request is ever slow or fails outright.
+    const turnId = nextId();
+    setTurns((t) => [...t, { id: turnId, request: text, reply: "", actions: [], pending: true }]);
+
     try {
       const customerContext = customers.map((c) => ({ id: c.id, name: c.name }));
       const jobContext = jobs
@@ -102,6 +111,7 @@ export default function Assistant() {
 
       // Give the model the actual back-and-forth so far, not just this one
       // message — otherwise "add another one for him too" means nothing to it.
+      // Excludes the optimistic turn just pushed (it has no assistantRaw yet).
       const history = turns.flatMap((t) => [
         { role: "user", content: t.request },
         { role: "assistant", content: t.assistantRaw },
@@ -116,24 +126,32 @@ export default function Assistant() {
         included: true,
         status: "pending",
       }));
-      setTurns((t) => [
-        ...t,
-        {
-          id: nextId(),
-          request: text,
-          reply: data.reply || "",
-          actions,
-          assistantRaw: JSON.stringify({ reply: data.reply || "", actions: data.actions || [] }),
-        },
-      ]);
+      setTurns((ts) =>
+        ts.map((t) =>
+          t.id !== turnId
+            ? t
+            : {
+                ...t,
+                reply: data.reply || "",
+                actions,
+                pending: false,
+                assistantRaw: JSON.stringify({ reply: data.reply || "", actions: data.actions || [] }),
+              }
+        )
+      );
     } catch (err) {
-      setError(
+      const message =
         err.code === "functions/failed-precondition" || err.code === "failed-precondition"
           ? "AI service rejected the request — the ANTHROPIC_API_KEY secret may be missing or invalid."
           : err.code === "functions/unavailable" || err.message?.includes("fetch")
           ? "Couldn't reach the AI assistant. Cloud Functions may not be deployed yet — see README.md."
-          : err.message || "Something went wrong. Try again."
+          : err.message || "Something went wrong. Try again.";
+      // Show the failure right on the message that caused it, not just as a
+      // generic banner someone might not connect to what they just sent.
+      setTurns((ts) =>
+        ts.map((t) => (t.id !== turnId ? t : { ...t, pending: false, reply: "", error: message }))
       );
+      setError(message);
     } finally {
       setSending(false);
     }
@@ -448,11 +466,31 @@ export default function Assistant() {
               </div>
             </div>
 
+            {turn.pending && (
+              <div className="flex items-start gap-2">
+                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
+                <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                </div>
+              </div>
+            )}
+
             {turn.reply && (
               <div className="flex items-start gap-2">
                 <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
                 <div className="max-w-[85%] rounded-lg rounded-tl-sm bg-secondary px-3 py-2 text-sm">
                   {turn.reply}
+                </div>
+              </div>
+            )}
+
+            {turn.error && (
+              <div className="flex items-start gap-2">
+                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
+                <div className="max-w-[85%] rounded-lg rounded-tl-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {turn.error}
                 </div>
               </div>
             )}
@@ -485,7 +523,7 @@ export default function Assistant() {
           </div>
         ))}
 
-        {(sending || fileBusy) && (
+        {fileBusy && (
           <div className="flex items-start gap-2">
             <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
             <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
