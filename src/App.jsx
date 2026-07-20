@@ -17,6 +17,9 @@ import EstimateDetail from "@/pages/EstimateDetail";
 import MyRoute from "@/pages/MyRoute";
 import Reports from "@/pages/Reports";
 import CustomerPortal from "@/pages/CustomerPortal";
+import EstimatePortal from "@/pages/EstimatePortal";
+import BookingRequest from "@/pages/BookingRequest";
+import BookingRequests from "@/pages/BookingRequests";
 import CompanySetup from "@/pages/CompanySetup";
 import Team from "@/pages/Team";
 import MaintenanceAgreements from "@/pages/MaintenanceAgreements";
@@ -69,6 +72,8 @@ export default function App() {
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/login" element={<Login />} />
       <Route path="/portal/:token" element={<CustomerPortal />} />
+      <Route path="/estimate/:estimateId" element={<EstimatePortal />} />
+      <Route path="/book/:companyId" element={<BookingRequest />} />
       <Route
         path="/setup-company"
         element={
@@ -144,6 +149,14 @@ export default function App() {
             element={
               <AdminRoute>
                 <Team />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/booking-requests"
+            element={
+              <AdminRoute>
+                <BookingRequests />
               </AdminRoute>
             }
           />

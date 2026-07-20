@@ -139,6 +139,14 @@ Every document below also carries a `companyId` field pointing at the `companies
 
 **Migration note:** any test data created before multi-tenancy (a handful of customers, most likely) has no `companyId` and will become invisible under the new rules — it isn't deleted, just orphaned. Easiest fix is to just re-enter that handful of records once you've created your real company; there's no bulk migration script for this since it wasn't worth building for such a small amount of test data.
 
+## Estimate e-signatures
+
+Every estimate's "Customer link" button (EstimateDetail) copies a public `/estimate/{estimateId}` link — no login required, same unguessable-Firestore-ID tradeoff as the customer portal. The customer opens it, picks a Good/Better/Best tier, draws a signature (`src/components/SignaturePad.jsx`, plain canvas, no library), and that's written straight to the estimate doc. `firestore.rules` has a narrow `customerSigning()` clause that lets an anonymous visitor set exactly the sign-off fields (status, selectedTier, customerSignature, signedByName, signedAt) and nothing else — they can't touch line items or price. Once signed, the link becomes read-only ("Approved — signed by ___"). No setup needed; this doesn't touch any secrets.
+
+## Online booking requests
+
+Team page → "Online booking link" gives each company a public `/book/{companyId}` link to put on their website/Google Business profile. It's a plain request form (no login) that lands in `bookingRequests`, visible only to that company at `/booking-requests` (admin only). Nothing gets auto-scheduled — an admin reviews each request and either "Create job"s it (pulls straight into the jobs pipeline as status "new") or dismisses it. No setup needed.
+
 ## Phone verification
 
 Before a signed-in Google account can create or join a company, `/setup-company` requires it to link a real, SMS-verified phone number (`src/lib/firebase.js` → `sendPhoneVerificationCode` / `confirmPhoneVerificationCode`, using Firebase's `linkWithPhoneNumber` on the already-signed-in user, plus an invisible reCAPTCHA in a `#recaptcha-container` div on the page).

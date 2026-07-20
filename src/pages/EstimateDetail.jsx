@@ -14,7 +14,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { ArrowLeft, Plus, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Printer, Trash2, Link as LinkIcon, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { currency } from "@/lib/utils";
+import { currency, formatDate } from "@/lib/utils";
 
 const TIER_KEYS = ["good", "better", "best"];
 const TIER_LABEL_KEYS = { good: "estimates.good", better: "estimates.better", best: "estimates.best" };
@@ -60,6 +60,17 @@ export default function EstimateDetail() {
   const [saving, setSaving] = useState(false);
   const [converting, setConverting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [customerSignature, setCustomerSignature] = useState(null);
+  const [signedByName, setSignedByName] = useState("");
+  const [signedAt, setSignedAt] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  function copyCustomerLink() {
+    const url = `${window.location.origin}/estimate/${estimateId}`;
+    navigator.clipboard?.writeText(url);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
 
   useEffect(() => {
     if (!companyId) return;
@@ -98,6 +109,9 @@ export default function EstimateDetail() {
         setSelectedTier(data.selectedTier || "");
         setTiers(data.tiers || emptyTiers());
         setNotes(data.notes || "");
+        setCustomerSignature(data.customerSignature || null);
+        setSignedByName(data.signedByName || "");
+        setSignedAt(data.signedAt || null);
       }
       setLoading(false);
     }
@@ -232,6 +246,12 @@ export default function EstimateDetail() {
           <ArrowLeft className="mr-1 h-4 w-4" /> {t("common.back")}
         </Button>
         <div className="flex gap-2">
+          {!isNew && (
+            <Button variant="outline" size="sm" onClick={copyCustomerLink}>
+              {linkCopied ? <Check className="mr-1 h-4 w-4" /> : <LinkIcon className="mr-1 h-4 w-4" />}
+              {linkCopied ? t("estimateDetail.linkCopied") || "Copied!" : t("estimateDetail.copyLink") || "Customer link"}
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1 h-4 w-4" /> {t("estimateDetail.print")}
           </Button>
@@ -329,6 +349,17 @@ export default function EstimateDetail() {
             <Label htmlFor="notes">{t("common.notes")}</Label>
             <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
+
+          {!isNew && customerSignature && (
+            <div className="space-y-2 rounded-md border border-green-300 bg-green-50 p-3">
+              <p className="text-sm font-medium text-green-700">
+                {t("estimateDetail.customerSigned", { name: signedByName }) ||
+                  `Signed by ${signedByName}`}
+                {signedAt?.toDate ? ` — ${formatDate(signedAt)}` : ""}
+              </p>
+              <img src={customerSignature} alt="Customer signature" className="h-14 rounded border border-border bg-white" />
+            </div>
+          )}
 
           {!isNew && (
             <div className="no-print space-y-2 rounded-md border border-border p-3">

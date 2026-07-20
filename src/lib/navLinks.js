@@ -13,6 +13,7 @@ import {
   CalendarCheck,
   Sparkles,
   CreditCard,
+  CalendarPlus,
 } from "lucide-react";
 
 // Shared between the mobile bottom NavBar and the desktop Sidebar so both
@@ -33,6 +34,7 @@ export const adminLinks = [
   { to: "/technicians", labelKey: "nav.techs", icon: HardHat },
   { to: "/price-book", labelKey: "nav.priceBook", icon: BookOpen },
   { to: "/store-orders", labelKey: "nav.orders", icon: Package },
+  { to: "/booking-requests", labelKey: "nav.bookingRequests", icon: CalendarPlus },
   { to: "/reports", labelKey: "nav.reports", icon: BarChart3 },
   { to: "/team", labelKey: "nav.team", icon: UsersRound },
 ];

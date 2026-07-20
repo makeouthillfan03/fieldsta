@@ -32,6 +32,7 @@ export default function Team() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [bookingLinkCopied, setBookingLinkCopied] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
@@ -82,6 +83,12 @@ export default function Team() {
     setTimeout(() => setCopied(false), 1500);
   }
 
+  function copyBookingLink() {
+    navigator.clipboard.writeText(`${window.location.origin}/book/${companyId}`);
+    setBookingLinkCopied(true);
+    setTimeout(() => setBookingLinkCopied(false), 1500);
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
@@ -103,6 +110,24 @@ export default function Team() {
             </code>
             <Button variant="secondary" size="icon" onClick={copyCode}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-2 p-4">
+          <p className="text-sm font-medium">{t("team.bookingLink") || "Online booking link"}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("team.bookingLinkHelp") ||
+              "Share this on your website, Google Business profile, or social media — customers can request an appointment without calling. Requests show up under Booking Requests for you to review."}
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded-md border border-border bg-muted px-3 py-2 text-xs">
+              {`${window.location.origin}/book/${companyId}`}
+            </code>
+            <Button variant="secondary" size="icon" onClick={copyBookingLink}>
+              {bookingLinkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
         </CardContent>

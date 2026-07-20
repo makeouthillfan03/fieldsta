@@ -212,9 +212,27 @@ service cloud.firestore {
     }
 
     match /estimates/{id} {
-      allow read: if isCompanyMember(resource.data.companyId);
+      // Public read (not just company members) so a customer can open their
+      // own estimate link (/estimate/{id}) without an account — same
+      // unguessable-Firestore-ID tradeoff already accepted for /portal.
+      allow read: if true;
       allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
-      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+      allow update: if (isCompanyMember(resource.data.companyId) && companyIdUnchanged()) || customerSigning();
+      allow delete: if isCompanyMember(resource.data.companyId);
+    }
+
+    // Lets an anonymous customer (link only, no account) sign an estimate
+    // exactly once: the doc must not already have a signature, and the
+    // write can only touch the specific fields a signature needs to set —
+    // nothing else about the estimate (line items, prices, companyId) can
+    // move through this path.
+    function customerSigning() {
+      return resource.data.customerSignature == null &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["status", "selectedTier", "customerSignature", "signedByName", "signedAt"]) &&
+        request.resource.data.customerSignature is string &&
+        request.resource.data.customerSignature.size() > 0 &&
+        request.resource.data.status == "accepted";
     }
 
     match /routes/{routeId} {
@@ -226,6 +244,18 @@ service cloud.firestore {
     match /maintenanceAgreements/{id} {
       allow read: if isCompanyMember(resource.data.companyId);
       allow create: if isSignedIn() && request.resource.data.companyId == myCompanyId();
+      allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
+    }
+
+    // Public online booking requests — anyone with a company's /book/{id}
+    // link (shared on their website, no login) can submit a request. Only
+    // the company itself can ever read/manage the list; a stranger can
+    // create a request but can't see anyone else's.
+    match /bookingRequests/{id} {
+      allow read: if isCompanyMember(resource.data.companyId);
+      allow create: if request.resource.data.companyId is string &&
+        exists(/databases/$(database)/documents/companies/$(request.resource.data.companyId)) &&
+        request.resource.data.status == "new";
       allow update, delete: if isCompanyMember(resource.data.companyId) && companyIdUnchanged();
     }
 
