@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addDoc,
   collection,
@@ -11,15 +11,16 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X, Upload, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog } from "@/components/ui/dialog";
-import { db } from "@/lib/firebase";
+import { db, uploadAndParsePriceBookFile } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -33,6 +34,65 @@ export default function PriceBook() {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  // Import-from-file (PDF price sheet / CSV export) flow. `imported` holds
+  // the AI's proposed items with an `included` flag each, so the admin can
+  // deselect anything wrong before it's written to Firestore.
+  const [importBusy, setImportBusy] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [imported, setImported] = useState(null);
+  const [importSaving, setImportSaving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  async function handleFileSelected(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const isPdf = file.name.toLowerCase().endsWith(".pdf");
+    const isCsv = file.name.toLowerCase().endsWith(".csv");
+    if (!isPdf && !isCsv) {
+      setImportError(t("priceBook.importBadType") || "Only PDF or CSV files are supported — export Excel sheets to CSV first.");
+      return;
+    }
+    setImportBusy(true);
+    setImportError("");
+    try {
+      const items = await uploadAndParsePriceBookFile(file, companyId);
+      if (items.length === 0) {
+        setImportError(t("priceBook.importNoneFound") || "Couldn't find any priced line items in that file.");
+      } else {
+        setImported(items.map((it, i) => ({ ...it, id: `imp${i}`, included: true })));
+      }
+    } catch (err) {
+      setImportError(err.message || "Couldn't read that file. Try again.");
+    } finally {
+      setImportBusy(false);
+    }
+  }
+
+  async function confirmImport() {
+    const toAdd = (imported || []).filter((it) => it.included);
+    if (toAdd.length === 0) return;
+    setImportSaving(true);
+    try {
+      for (const it of toAdd) {
+        await addDoc(collection(db, "priceBook"), {
+          companyId,
+          name: it.name,
+          category: it.category,
+          unitPrice: Number(it.unitPrice) || 0,
+          unit: it.unit,
+          notes: it.notes || "",
+          createdAt: serverTimestamp(),
+        });
+      }
+      setImported(null);
+    } catch (err) {
+      setImportError(err.message || "Couldn't save those items. Try again.");
+    } finally {
+      setImportSaving(false);
+    }
+  }
 
   useEffect(() => {
     if (!companyId) {
@@ -83,15 +143,39 @@ export default function PriceBook() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-lg font-semibold">{t("priceBook.title")}</h1>
-        <Button size="sm" onClick={() => setShowAdd(true)}>
-          <Plus className="mr-1 h-4 w-4" /> {t("priceBook.addItem")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={importBusy}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload className="mr-1 h-4 w-4" />
+            {importBusy ? t("priceBook.importing") || "Reading file…" : t("priceBook.import") || "Import"}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.csv,application/pdf,text/csv"
+            className="hidden"
+            onChange={handleFileSelected}
+            disabled={importBusy}
+          />
+          <Button size="sm" onClick={() => setShowAdd(true)}>
+            <Plus className="mr-1 h-4 w-4" /> {t("priceBook.addItem")}
+          </Button>
+        </div>
       </div>
       <p className="text-sm text-muted-foreground">
         {t("priceBook.subtitle")}
       </p>
+      <p className="text-xs text-muted-foreground">
+        {t("priceBook.importHelp") || "Upload a supplier price sheet (PDF) or spreadsheet export (CSV) and the AI will pull out priced line items for you to review before adding."}
+      </p>
+      {importError && <p className="text-sm text-destructive">{importError}</p>}
 
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("priceBook.loading")}</p>
@@ -171,6 +255,76 @@ export default function PriceBook() {
             {saving ? t("common.saving") : t("priceBook.addItem")}
           </Button>
         </form>
+      </Dialog>
+
+      <Dialog open={!!imported} onClose={() => setImported(null)}>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-semibold">{t("priceBook.reviewImport") || "Review imported items"}</h2>
+          <Button variant="ghost" size="icon" onClick={() => setImported(null)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="mb-3 text-sm text-muted-foreground">
+          {t("priceBook.reviewImportHelp") ||
+            "Uncheck anything that isn't right, then add the rest to your price book."}
+        </p>
+        <div className="max-h-[50vh] space-y-2 overflow-y-auto">
+          {(imported || []).map((it) => (
+            <div key={it.id} className="flex items-start gap-2 rounded-md border border-border p-2.5 text-sm">
+              <Checkbox
+                checked={it.included}
+                onCheckedChange={() =>
+                  setImported((rows) => rows.map((r) => (r.id === it.id ? { ...r, included: !r.included } : r)))
+                }
+              />
+              <div className="grid flex-1 grid-cols-2 gap-1.5">
+                <Input
+                  value={it.name}
+                  onChange={(e) =>
+                    setImported((rows) => rows.map((r) => (r.id === it.id ? { ...r, name: e.target.value } : r)))
+                  }
+                  className="col-span-2"
+                />
+                <Select
+                  value={it.category}
+                  onChange={(e) =>
+                    setImported((rows) => rows.map((r) => (r.id === it.id ? { ...r, category: e.target.value } : r)))
+                  }
+                >
+                  <option value="labor">{t("priceBook.categoryLabor")}</option>
+                  <option value="part">{t("priceBook.categoryPart")}</option>
+                  <option value="material">{t("priceBook.categoryMaterial")}</option>
+                  <option value="fee">{t("priceBook.categoryFee")}</option>
+                </Select>
+                <div className="flex gap-1.5">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={it.unitPrice}
+                    onChange={(e) =>
+                      setImported((rows) =>
+                        rows.map((r) => (r.id === it.id ? { ...r, unitPrice: e.target.value } : r))
+                      )
+                    }
+                  />
+                  <Input
+                    value={it.unit}
+                    onChange={(e) =>
+                      setImported((rows) => rows.map((r) => (r.id === it.id ? { ...r, unit: e.target.value } : r)))
+                    }
+                    className="w-20"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button className="mt-3 w-full" onClick={confirmImport} disabled={importSaving || !(imported || []).some((it) => it.included)}>
+          <Check className="mr-1 h-4 w-4" />
+          {importSaving
+            ? t("common.saving") || "Saving…"
+            : t("priceBook.addSelected") || `Add ${(imported || []).filter((it) => it.included).length} selected`}
+        </Button>
       </Dialog>
     </div>
   );

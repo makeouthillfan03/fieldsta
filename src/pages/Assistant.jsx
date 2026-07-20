@@ -11,7 +11,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { Sparkles, Send, Check, X } from "lucide-react";
+import { Sparkles, Send, Check, X, Paperclip } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { db } from "@/lib/firebase";
-import { runAssistant } from "@/lib/firebase";
+import { runAssistant, uploadAndParsePriceBookFile } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { currency } from "@/lib/utils";
@@ -31,6 +31,7 @@ const ACTION_LABEL_KEYS = {
   log_refrigerant: "assistant.actionLogRefrigerant",
   create_maintenance_agreement: "assistant.actionCreateAgreement",
   add_note: "assistant.actionAddNote",
+  import_price_book_items: "assistant.actionImportPriceBook",
 };
 
 const FREQUENCY_MONTHS = { quarterly: 3, biannual: 6, annual: 12 };
@@ -50,7 +51,9 @@ export default function Assistant() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [turns, setTurns] = useState([]);
+  const [fileBusy, setFileBusy] = useState(false);
   const bottomRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!companyId) return;
@@ -133,6 +136,56 @@ export default function Assistant() {
       );
     } finally {
       setSending(false);
+    }
+  }
+
+  // Lets someone attach a supplier price sheet (PDF) or spreadsheet export
+  // (CSV) right in the chat instead of going to Price Book separately — it
+  // shows up as an ordinary proposed action they review and apply, same as
+  // anything else the assistant suggests.
+  async function handleFileAttached(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || fileBusy) return;
+    const isPdf = file.name.toLowerCase().endsWith(".pdf");
+    const isCsv = file.name.toLowerCase().endsWith(".csv");
+    if (!isPdf && !isCsv) {
+      setError(t("assistant.fileBadType") || "Only PDF or CSV files are supported — export Excel sheets to CSV first.");
+      return;
+    }
+    setFileBusy(true);
+    setError("");
+    try {
+      const items = await uploadAndParsePriceBookFile(file, companyId);
+      const action = {
+        id: nextId(),
+        type: "import_price_book_items",
+        fields: { items },
+        included: true,
+        status: "pending",
+      };
+      const replyText =
+        items.length === 0
+          ? t("assistant.fileNoneFound") || "Couldn't find any priced line items in that file."
+          : t("assistant.fileFoundItems", { count: items.length }) ||
+            `Found ${items.length} priced item${items.length === 1 ? "" : "s"} — review below and add what looks right.`;
+      setTurns((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          request: `📎 ${file.name}`,
+          reply: replyText,
+          actions: items.length ? [action] : [],
+          // Keeps user/assistant turns alternating in the history sent to
+          // runAssistant — see handleSend — even though this "turn" never
+          // actually went through the assistant's own JSON action format.
+          assistantRaw: JSON.stringify({ reply: replyText, actions: [] }),
+        },
+      ]);
+    } catch (err) {
+      setError(err.message || "Couldn't read that file. Try again.");
+    } finally {
+      setFileBusy(false);
     }
   }
 
@@ -290,6 +343,21 @@ export default function Assistant() {
         });
         return;
       }
+      case "import_price_book_items": {
+        const items = (f.items || []).filter((it) => it.included !== false);
+        for (const it of items) {
+          await addDoc(collection(db, "priceBook"), {
+            companyId,
+            name: it.name,
+            category: it.category,
+            unitPrice: Number(it.unitPrice) || 0,
+            unit: it.unit,
+            notes: it.notes || "",
+            createdAt: serverTimestamp(),
+          });
+        }
+        return;
+      }
       default:
         throw new Error(`Unknown action type: ${action.type}`);
     }
@@ -417,7 +485,7 @@ export default function Assistant() {
           </div>
         ))}
 
-        {sending && (
+        {(sending || fileBusy) && (
           <div className="flex items-start gap-2">
             <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
             <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
@@ -433,6 +501,24 @@ export default function Assistant() {
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <form onSubmit={handleSend} className="sticky bottom-16 flex gap-2 bg-background pt-2 sm:bottom-0">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.csv,application/pdf,text/csv"
+          className="hidden"
+          onChange={handleFileAttached}
+          disabled={fileBusy || sending}
+        />
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          title={t("assistant.attachFile") || "Attach a price sheet (PDF/CSV)"}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={fileBusy || sending}
+        >
+          <Paperclip className="h-4 w-4" />
+        </Button>
         <Input
           placeholder={t("assistant.placeholder")}
           value={messageText}
@@ -593,6 +679,26 @@ function ActionEditor({ action, customers, jobs, jobLabel, onToggle, onFieldChan
               />
             </div>
           </>
+        )}
+
+        {action.type === "import_price_book_items" && (
+          <div className="max-h-56 space-y-1.5 overflow-y-auto">
+            {(f.items || []).map((it, i) => (
+              <label key={i} className="flex items-start gap-2 rounded border border-border p-1.5 text-xs">
+                <Checkbox
+                  checked={it.included !== false}
+                  onCheckedChange={() =>
+                    onFieldChange(
+                      "items",
+                      f.items.map((row, ri) => (ri === i ? { ...row, included: row.included === false } : row))
+                    )
+                  }
+                />
+                <span className="flex-1 truncate">{it.name}</span>
+                <span className="shrink-0 text-muted-foreground">{currency(it.unitPrice)}/{it.unit}</span>
+              </label>
+            ))}
+          </div>
         )}
       </fieldset>
     </div>

@@ -14,7 +14,7 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager,
 } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 const firebaseConfig = {
@@ -74,6 +74,28 @@ export function parseQuickNote(text, jobId) {
 export function runAssistant(message, customers, jobs, history) {
   const call = httpsCallable(functions, "runAssistant");
   return call({ message, customers, jobs, history });
+}
+
+// Uploads a price sheet/catalog (PDF or CSV) to Storage, then asks
+// parsePriceBookFile to turn it into structured {name, category, unitPrice,
+// unit, notes} line items for the caller to review before anything is
+// written to Firestore. Shared by the manual Price Book "Import" button and
+// the Assistant page's file-attach flow, so both go through one code path.
+export async function uploadAndParsePriceBookFile(file, companyId) {
+  // Browsers/OSes are inconsistent about the .type they report for CSVs
+  // (sometimes empty, sometimes application/vnd.ms-excel) — the Storage
+  // rule and Cloud Function both key off contentType, so normalize by
+  // extension rather than trusting file.type blindly.
+  const isPdf = file.name.toLowerCase().endsWith(".pdf");
+  const mimeType = isPdf ? "application/pdf" : "text/csv";
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `priceBookImports/${companyId}/${Date.now()}_${safeName}`;
+  const storageRef = ref(storage, storagePath);
+  await uploadBytes(storageRef, file, { contentType: mimeType });
+  const call = httpsCallable(functions, "parsePriceBookFile");
+  const result = await call({ storagePath, mimeType });
+  return result.data?.items || [];
 }
 
 const googleProvider = new GoogleAuthProvider();

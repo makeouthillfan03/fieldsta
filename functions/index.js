@@ -550,3 +550,137 @@ exports.runAssistant = onCall(
     };
   }
 );
+
+const PRICE_BOOK_SYSTEM_PROMPT = `You extract line items from an HVAC contractor's uploaded price sheet, parts catalog, or supplier list so they can be imported into a price book. Read the whole document and pull out every distinct sellable/billable item that has a clear price attached.
+
+Respond with ONLY a JSON object (no markdown fencing, no commentary) matching exactly this shape:
+{ "items": [ { "name": string, "category": "labor" | "part" | "material" | "fee", "unitPrice": number, "unit": string, "notes": string } ] }
+
+Rules:
+- "unit" is what the price is per — "each", "hour", "lb", "job", "sq ft", etc. Guess "each" if unclear.
+- "category": "labor" for billed time/services, "part" for a specific component (e.g. a capacitor, a compressor), "material" for bulk/consumable supplies (e.g. refrigerant, duct tape, wire), "fee" for flat charges (e.g. dispatch fee, diagnostic fee).
+- Skip section headers, page numbers, taglines, and anything without a real numeric price.
+- Keep "name" short and specific — as it would appear on an estimate line, not the full catalog description.
+- Cap at 300 items. If the document clearly has more, take the first 300 and note it in "notes" of the last item.
+- If you can't find any priced line items at all, return { "items": [] }.
+- Output nothing but the JSON object.`;
+
+// Turns an uploaded PDF price sheet or CSV export into structured price book
+// line items for the admin to review and import — never writes to Firestore
+// itself. Storage rules already scope reads to the caller's own company
+// bucket path, but we double-check the path prefix here too since Admin SDK
+// storage access bypasses those rules entirely.
+exports.parsePriceBookFile = onCall(
+  { secrets: [anthropicApiKey] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    const storagePath = request.data && request.data.storagePath;
+    const mimeType = request.data && request.data.mimeType;
+    if (!storagePath || typeof storagePath !== "string") {
+      throw new HttpsError("invalid-argument", "storagePath is required.");
+    }
+
+    const userSnap = await db.doc(`users/${request.auth.uid}`).get();
+    if (!userSnap.exists) {
+      throw new HttpsError("permission-denied", "No company profile found for this account.");
+    }
+    const companyId = userSnap.data().companyId;
+    if (!storagePath.startsWith(`priceBookImports/${companyId}/`)) {
+      throw new HttpsError("permission-denied", "That file doesn't belong to your company.");
+    }
+
+    const isPdf = mimeType === "application/pdf" || storagePath.toLowerCase().endsWith(".pdf");
+    const isCsv = mimeType === "text/csv" || storagePath.toLowerCase().endsWith(".csv");
+    if (!isPdf && !isCsv) {
+      throw new HttpsError(
+        "invalid-argument",
+        "Only PDF or CSV files are supported right now — export spreadsheets/Excel files to CSV first."
+      );
+    }
+
+    let fileBuffer;
+    try {
+      const [contents] = await admin.storage().bucket().file(storagePath).download();
+      fileBuffer = contents;
+    } catch (err) {
+      logger.error("Couldn't download price book import file", err);
+      throw new HttpsError("internal", "Couldn't read that file. Try uploading it again.");
+    }
+
+    // Cap raw file size fed to the model — a 15MB catalog PDF is plenty for
+    // a price sheet; bigger than that is almost certainly not a price list.
+    if (fileBuffer.length > 15 * 1024 * 1024) {
+      throw new HttpsError("invalid-argument", "That file is too large — try a smaller export (under 15MB).");
+    }
+
+    const userContent = isPdf
+      ? [
+          {
+            type: "document",
+            source: { type: "base64", media_type: "application/pdf", data: fileBuffer.toString("base64") },
+          },
+          { type: "text", text: "Extract the price book items from this document." },
+        ]
+      : [
+          {
+            type: "text",
+            text: `Extract the price book items from this CSV file:\n\n${fileBuffer.toString("utf8").slice(0, 200000)}`,
+          },
+        ];
+
+    let anthropicRes;
+    try {
+      anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": anthropicApiKey.value(),
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-5",
+          max_tokens: 4000,
+          system: PRICE_BOOK_SYSTEM_PROMPT,
+          messages: [{ role: "user", content: userContent }],
+        }),
+      });
+    } catch (err) {
+      logger.error("Anthropic request failed to send", err);
+      throw new HttpsError("unavailable", "Couldn't reach the AI service. Try again.");
+    }
+
+    if (!anthropicRes.ok) {
+      const errBody = await anthropicRes.text();
+      logger.error("Anthropic API error", anthropicRes.status, errBody);
+      if (anthropicRes.status === 401) {
+        throw new HttpsError("failed-precondition", "AI service rejected the API key — check ANTHROPIC_API_KEY.");
+      }
+      throw new HttpsError("internal", "AI request failed.");
+    }
+
+    const data = await anthropicRes.json();
+    const raw = (data.content && data.content[0] && data.content[0].text) || "{}";
+
+    let parsed;
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+    } catch (err) {
+      logger.warn("Couldn't parse price book response as JSON", raw);
+      parsed = { items: [] };
+    }
+
+    const items = Array.isArray(parsed.items) ? parsed.items : [];
+    return {
+      items: items.slice(0, 300).map((it) => ({
+        name: typeof it.name === "string" ? it.name : "Untitled item",
+        category: ["labor", "part", "material", "fee"].includes(it.category) ? it.category : "part",
+        unitPrice: Number(it.unitPrice) || 0,
+        unit: typeof it.unit === "string" && it.unit ? it.unit : "each",
+        notes: typeof it.notes === "string" ? it.notes : "",
+      })),
+    };
+  }
+);

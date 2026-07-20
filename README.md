@@ -273,6 +273,12 @@ That's it — no webhook to register this time, since the AI call happens synchr
 - If the secret isn't set yet, "Parse with AI" fails with a message pointing back here instead of hanging.
 - The function double-checks server-side that the job you're taking notes on actually belongs to your company before calling the AI at all — same pattern as the Stripe functions.
 
+### Price book import (PDF/CSV → price book)
+
+Both the Price Book page ("Import" button) and the Assistant page (paperclip icon) can take an uploaded supplier price sheet (PDF) or spreadsheet export (CSV), upload it to Storage under `priceBookImports/{companyId}/`, and hand it to `parsePriceBookFile` — another endpoint in the same `functions/index.js`, using the same `ANTHROPIC_API_KEY` secret, so there's nothing extra to configure beyond what's above. It returns proposed `{name, category, unitPrice, unit}` line items for the admin to check off and edit before anything is written to Firestore — same "propose, never auto-write" pattern as the rest of the assistant. Excel files (.xlsx) aren't parsed directly yet — export to CSV first.
+
+Since this ships in the same `functions/index.js` as everything else, redeploying functions (`npx firebase-tools deploy --only functions`) picks it up automatically — no separate setup step.
+
 ## HVAC-specific features
 
 Two things generalist field-service tools (ServiceTitan, Housecall Pro, Jobber) don't do well for HVAC specifically:
