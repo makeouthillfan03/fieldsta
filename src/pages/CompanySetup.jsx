@@ -118,12 +118,26 @@ export default function CompanySetup() {
         }
       }
 
+      // Referral link (?ref=<companyId>), stashed in localStorage back on
+      // Welcome/Login since it wouldn't otherwise survive the Google OAuth
+      // redirect round-trip. Not validated here — a new user has no
+      // company yet, so security rules won't even let them read an
+      // arbitrary company doc to check it exists. Trusting the format is
+      // fine: the referral only ever pays out via the Stripe webhook (Admin
+      // SDK, see functions/index.js), which checks the referrer is real
+      // before crediting anything, so a stale/bogus code just quietly does
+      // nothing instead of blocking signup.
+      const refCompanyId = localStorage.getItem("fieldsta_ref");
+      localStorage.removeItem("fieldsta_ref");
+      const referredBy = refCompanyId && refCompanyId !== "undefined" ? refCompanyId : null;
+
       const companyRef = doc(collection(db, "companies"));
       const trialEndsAt = Timestamp.fromMillis(Date.now() + 3 * 24 * 60 * 60 * 1000);
       const companyDoc = {
         name: companyName.trim(),
         ownerUid: user.uid,
         ownerPhone: auth.currentUser?.phoneNumber || null,
+        ...(referredBy ? { referredBy } : {}),
         createdAt: serverTimestamp(),
         // New companies start on a 3-day free trial, UNLESS a valid access
         // code was redeemed, in which case they start "comped" (free)

@@ -9,7 +9,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { Copy, Plus, Trash2, X, Check } from "lucide-react";
+import { Copy, Plus, Trash2, X, Check, Gift } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +18,15 @@ import { Select } from "@/components/ui/select";
 import { Dialog } from "@/components/ui/dialog";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { db } from "@/lib/firebase";
+import { db, redeemReferralCredit } from "@/lib/firebase";
+import { currency } from "@/lib/utils";
 
 export default function Team() {
-  const { companyId } = useAuth();
+  const { companyId, company } = useAuth();
   const { t } = useLanguage();
   const [members, setMembers] = useState([]);
   const [invites, setInvites] = useState([]);
+  const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -33,6 +35,9 @@ export default function Team() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [bookingLinkCopied, setBookingLinkCopied] = useState(false);
+  const [referralLinkCopied, setReferralLinkCopied] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
+  const [redeemError, setRedeemError] = useState("");
 
   useEffect(() => {
     if (!companyId) return;
@@ -45,11 +50,28 @@ export default function Team() {
       collection(db, "companies", companyId, "invites"),
       (snap) => setInvites(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
     );
+    const unsubReferrals = onSnapshot(
+      collection(db, "companies", companyId, "referrals"),
+      (snap) => setReferrals(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    );
     return () => {
       unsubMembers();
       unsubInvites();
+      unsubReferrals();
     };
   }, [companyId]);
+
+  async function handleRedeemCredit() {
+    setRedeeming(true);
+    setRedeemError("");
+    try {
+      await redeemReferralCredit();
+    } catch (err) {
+      setRedeemError(err.message || "Couldn't redeem your credit. Try again.");
+    } finally {
+      setRedeeming(false);
+    }
+  }
 
   async function handleInvite(e) {
     e.preventDefault();
@@ -87,6 +109,12 @@ export default function Team() {
     navigator.clipboard.writeText(`${window.location.origin}/book/${companyId}`);
     setBookingLinkCopied(true);
     setTimeout(() => setBookingLinkCopied(false), 1500);
+  }
+
+  function copyReferralLink() {
+    navigator.clipboard.writeText(`${window.location.origin}/welcome?ref=${companyId}`);
+    setReferralLinkCopied(true);
+    setTimeout(() => setReferralLinkCopied(false), 1500);
   }
 
   return (
@@ -130,6 +158,56 @@ export default function Team() {
               {bookingLinkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-2 p-4">
+          <p className="flex items-center gap-1.5 text-sm font-medium">
+            <Gift className="h-4 w-4 text-primary" />
+            {t("team.referralTitle") || "Refer another contractor"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t("team.referralHelp") ||
+              "Share your link — when a contractor you refer subscribes to Fieldsta, you get a free month credited automatically."}
+          </p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded-md border border-border bg-muted px-3 py-2 text-xs">
+              {`${window.location.origin}/welcome?ref=${companyId}`}
+            </code>
+            <Button variant="secondary" size="icon" onClick={copyReferralLink}>
+              {referralLinkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          {company?.referralCreditsOwed > 0 && (
+            <div className="flex items-center justify-between gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
+              <p className="text-xs">
+                {t("team.creditsOwed", { count: company.referralCreditsOwed }) ||
+                  `${company.referralCreditsOwed} free month${company.referralCreditsOwed === 1 ? "" : "s"} ready to redeem`}
+              </p>
+              <Button size="sm" onClick={handleRedeemCredit} disabled={redeeming}>
+                {redeeming ? t("common.saving") || "Redeeming…" : t("team.redeem") || "Redeem"}
+              </Button>
+            </div>
+          )}
+          {redeemError && <p className="text-xs text-destructive">{redeemError}</p>}
+
+          {referrals.length > 0 && (
+            <div className="space-y-1 pt-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t("team.referredCompanies") || "Companies you've referred"}
+              </p>
+              {referrals.map((r) => (
+                <div key={r.id} className="flex items-center justify-between text-xs">
+                  <span>{r.companyName}</span>
+                  <span className="text-muted-foreground">
+                    {r.creditCents ? currency(r.creditCents / 100) : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

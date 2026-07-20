@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { Calendar, MapPin, FileText, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +12,14 @@ export default function Login() {
   const { lang, setLang, t } = useLanguage();
   const [error, setError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Same referral-link stash as Welcome.jsx, in case someone lands here
+  // directly with ?ref= instead of going through /welcome first.
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) localStorage.setItem("fieldsta_ref", ref);
+  }, [searchParams]);
 
   // Sign-in uses a full-page redirect (not a popup, which browsers block
   // often enough to be unreliable). That means the actual result of the

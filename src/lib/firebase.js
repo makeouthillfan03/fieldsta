@@ -59,6 +59,13 @@ export function requestSubscriptionCheckout() {
   return call({});
 }
 
+// Applies any queued referral credits (see functions/index.js stripeWebhook)
+// to the caller's Stripe subscription. See README.md "Referral program".
+export function redeemReferralCredit() {
+  const call = httpsCallable(functions, "redeemReferralCredit");
+  return call({});
+}
+
 // Sends a technician's freeform note to the parseQuickNote Cloud Function,
 // which returns structured suggestions (never writes anything itself) —
 // the caller decides what to actually apply. See README.md "AI Quick Note".

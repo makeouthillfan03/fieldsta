@@ -1,4 +1,5 @@
-import { Link, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Calendar, MapPin, FileText, ShieldCheck, Globe, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +14,17 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function Welcome() {
   const { user, loading } = useAuth();
   const { lang, setLang, t } = useLanguage();
+  const [searchParams] = useSearchParams();
+
+  // Referral link (?ref=<companyId>) — stashed in localStorage so it
+  // survives the click through to /login and the Google OAuth redirect
+  // round-trip, both of which would otherwise drop the query param before
+  // CompanySetup ever gets a chance to read it. See "Referral program" in
+  // the README.
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) localStorage.setItem("fieldsta_ref", ref);
+  }, [searchParams]);
 
   if (!loading && user) return <Navigate to="/" replace />;
 

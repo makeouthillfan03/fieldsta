@@ -47,6 +47,14 @@ const appUrl = defineString("APP_URL", { default: "http://localhost:5173" });
 const stripeBasePriceId = defineString("STRIPE_BASE_PRICE_ID", { default: "" });
 const stripeSeatPriceId = defineString("STRIPE_SEAT_PRICE_ID", { default: "" });
 
+// Referral reward: how much credit (in cents) a referrer earns each time
+// someone they referred converts from trial to a paying subscription.
+// Applied as a Stripe customer balance credit (see redeemReferralCredit),
+// not an automatic discount — the referrer has to already be a Stripe
+// customer (i.e. have paid at least once) for a balance credit to attach
+// to anything, so credits queue up as `referralCreditsOwed` until then.
+const referralCreditCents = defineString("REFERRAL_CREDIT_CENTS", { default: "4900" });
+
 function computeBalanceDue(job) {
   const totalPaid = (job.paymentsLog || []).reduce(
     (sum, p) => sum + (Number(p.amount) || 0),
@@ -202,6 +210,61 @@ exports.createSubscriptionCheckout = onCall(
   }
 );
 
+// Applies any queued-up referral credits (see stripeWebhook) to the
+// caller's actual Stripe subscription, as a customer balance credit that
+// auto-applies to their next invoice. Only possible once they have a real
+// Stripe customer (i.e. have subscribed at least once) — a credit can't
+// attach to nothing, so this fails with a clear message until then rather
+// than silently losing the credit; referralCreditsOwed stays put either way.
+exports.redeemReferralCredit = onCall(
+  { secrets: [stripeSecretKey] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    const userSnap = await db.doc(`users/${request.auth.uid}`).get();
+    if (!userSnap.exists) {
+      throw new HttpsError("permission-denied", "No company profile found for this account.");
+    }
+    const { companyId, role } = userSnap.data();
+    if (role !== "owner" && role !== "admin") {
+      throw new HttpsError("permission-denied", "Only an owner or admin can redeem referral credit.");
+    }
+
+    const companyRef = db.doc(`companies/${companyId}`);
+    const companySnap = await companyRef.get();
+    if (!companySnap.exists) {
+      throw new HttpsError("not-found", "Company not found.");
+    }
+    const company = companySnap.data();
+    const owed = Number(company.referralCreditsOwed) || 0;
+    if (owed <= 0) {
+      throw new HttpsError("failed-precondition", "No referral credit to redeem right now.");
+    }
+    if (!company.stripeCustomerId) {
+      throw new HttpsError(
+        "failed-precondition",
+        "You need an active subscription before a credit can be applied — subscribe first, then come back to redeem."
+      );
+    }
+
+    const stripe = new Stripe(stripeSecretKey.value(), { apiVersion: "2024-04-10" });
+    const creditCents = owed * (Number(referralCreditCents.value()) || 0);
+    try {
+      await stripe.customers.createBalanceTransaction(company.stripeCustomerId, {
+        amount: -creditCents, // negative = credit toward future invoices
+        currency: "usd",
+        description: `Referral credit — ${owed} referred compan${owed === 1 ? "y" : "ies"} converted to a paid plan`,
+      });
+      await companyRef.set({ referralCreditsOwed: 0 }, { merge: true });
+      return { creditedCents: creditCents };
+    } catch (err) {
+      logger.error("Failed to apply referral credit", err);
+      throw new HttpsError("internal", `Stripe error: ${err.message || "unknown error"}`);
+    }
+  }
+);
+
 exports.stripeWebhook = onRequest(
   { secrets: [stripeSecretKey, stripeWebhookSecret] },
   async (req, res) => {
@@ -267,7 +330,11 @@ exports.stripeWebhook = onRequest(
         return;
       }
       try {
-        await db.doc(`companies/${companyId}`).set(
+        const companyRef = db.doc(`companies/${companyId}`);
+        const companySnap = await companyRef.get();
+        const company = companySnap.data() || {};
+
+        await companyRef.set(
           {
             plan: "active",
             stripeCustomerId: session.customer,
@@ -275,6 +342,31 @@ exports.stripeWebhook = onRequest(
           },
           { merge: true }
         );
+
+        // First real conversion — if this company was referred by another
+        // one and hasn't already triggered a credit (Stripe can redeliver
+        // this event), queue a credit on the referrer and leave a visible
+        // record they can see on their own Team page.
+        if (company.referredBy && !company.referralCredited) {
+          const referrerRef = db.doc(`companies/${company.referredBy}`);
+          const creditCents = Number(referralCreditCents.value()) || 0;
+          await db.runTransaction(async (tx) => {
+            const referrerSnap = await tx.get(referrerRef);
+            if (!referrerSnap.exists) return;
+            tx.set(
+              referrerRef,
+              { referralCreditsOwed: admin.firestore.FieldValue.increment(1) },
+              { merge: true }
+            );
+            tx.set(referrerRef.collection("referrals").doc(companyId), {
+              companyName: company.name || "A referred company",
+              creditCents,
+              convertedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          });
+          await companyRef.set({ referralCredited: true }, { merge: true });
+        }
+
         res.status(200).send("ok");
       } catch (err) {
         logger.error("Failed to activate company plan from subscription checkout", err);

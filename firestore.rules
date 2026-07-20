@@ -92,6 +92,16 @@ service cloud.firestore {
       allow update: if isCompanyAdmin(companyId) && (planFieldsUnchanged() || redeemingAccessCode());
       allow delete: if isCompanyAdmin(companyId);
 
+      // Referral records — written server-side only (Admin SDK, via the
+      // Stripe webhook, when a company someone referred converts to a paid
+      // plan). The referrer can read their own list to see who they've
+      // brought in; nothing about it is ever client-writable, so there's no
+      // way to fake a referral credit.
+      match /referrals/{referredCompanyId} {
+        allow read: if isCompanyMember(companyId);
+        allow write: if false;
+      }
+
       match /invites/{email} {
         // A prospective teammate needs to read their own invite to join;
         // admins can read/manage all invites for their company.

@@ -139,6 +139,16 @@ Every document below also carries a `companyId` field pointing at the `companies
 
 **Migration note:** any test data created before multi-tenancy (a handful of customers, most likely) has no `companyId` and will become invisible under the new rules — it isn't deleted, just orphaned. Easiest fix is to just re-enter that handful of records once you've created your real company; there's no bulk migration script for this since it wasn't worth building for such a small amount of test data.
 
+## Referral program
+
+Team page → "Refer another contractor" gives every company a shareable link (`/welcome?ref={companyId}`). Anyone who signs up through it gets `referredBy` set on their new company doc (see CompanySetup.jsx — the `?ref=` value is stashed in `localStorage` on Welcome/Login first, since it wouldn't otherwise survive the Google OAuth redirect round-trip).
+
+The payout only fires once the referred company actually converts to a paying subscription — not just on trial signup, so credits can't be farmed with fake trial accounts. That check lives in `stripeWebhook`'s `checkout.session.completed` (subscription mode) handler: it looks at the newly-active company's `referredBy` field, and if set (and not already credited), increments the referrer's `referralCreditsOwed` counter and writes a visible record to `companies/{referrerId}/referrals/{referredCompanyId}`.
+
+Credits don't auto-apply as a discount — they queue up as `referralCreditsOwed` until the referrer clicks "Redeem" on their own Team page, which calls `redeemReferralCredit`. That function applies a Stripe customer balance credit (auto-deducted from their next invoice) sized by the `REFERRAL_CREDIT_CENTS` config var (defaults to $49, matching the base plan — set it in `functions/.env` if you want a different reward amount). Redeeming requires the referrer to already have a `stripeCustomerId` (i.e. have subscribed at least once) — a balance credit can't attach to a Stripe customer that doesn't exist yet, so a referrer who's still on trial themselves just sees the credit sitting there until they subscribe.
+
+No new secrets needed — this reuses the existing `STRIPE_SECRET_KEY`. A `firebase deploy --only functions,firestore:rules` picks it up.
+
 ## Estimate e-signatures
 
 Every estimate's "Customer link" button (EstimateDetail) copies a public `/estimate/{estimateId}` link — no login required, same unguessable-Firestore-ID tradeoff as the customer portal. The customer opens it, picks a Good/Better/Best tier, draws a signature (`src/components/SignaturePad.jsx`, plain canvas, no library), and that's written straight to the estimate doc. `firestore.rules` has a narrow `customerSigning()` clause that lets an anonymous visitor set exactly the sign-off fields (status, selectedTier, customerSignature, signedByName, signedAt) and nothing else — they can't touch line items or price. Once signed, the link becomes read-only ("Approved — signed by ___"). No setup needed; this doesn't touch any secrets.
