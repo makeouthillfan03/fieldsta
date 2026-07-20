@@ -85,6 +85,21 @@ export default function Welcome() {
               {t("welcome.getStarted") || "Get started"}
             </Button>
           </Link>
+
+          <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border border-white/20 shadow-2xl">
+            <video
+              src="/fieldsta-ad.mp4"
+              poster="/mascot.png"
+              controls
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="block w-full"
+            >
+              {t("welcome.videoFallback") || "Your browser doesn't support embedded video."}
+            </video>
+          </div>
         </div>
       </section>
 
