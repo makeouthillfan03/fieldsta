@@ -426,20 +426,47 @@ export default function Assistant() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col space-y-4">
-      <div className="flex items-center gap-2">
-        <img src="/mascot.png" alt="" className="h-6 w-6" />
+    <div className="relative mx-auto flex max-w-lg flex-col space-y-4 overflow-hidden">
+      <style>{`
+        @keyframes fs-drift-a { 0% { transform: translate(0, 0); } 50% { transform: translate(18px, -14px); } 100% { transform: translate(0, 0); } }
+        @keyframes fs-drift-b { 0% { transform: translate(0, 0); } 50% { transform: translate(-22px, 12px); } 100% { transform: translate(0, 0); } }
+        @keyframes fs-drift-c { 0% { transform: translate(0, 0); } 50% { transform: translate(14px, 16px); } 100% { transform: translate(0, 0); } }
+        @keyframes fs-pop-in {
+          0% { opacity: 0; transform: scale(0.6) translateY(12px); }
+          60% { opacity: 1; transform: scale(1.06) translateY(-2px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fs-wiggle {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(-8deg) scale(1.05); }
+          75% { transform: rotate(8deg) scale(1.05); }
+        }
+        .fs-cloud { position: absolute; z-index: 0; fill: hsl(221.2 83.2% 53.3%); pointer-events: none; }
+        .fs-cloud-1 { top: -18px; left: -30px; width: 130px; opacity: 0.16; animation: fs-drift-a 9s ease-in-out infinite; }
+        .fs-cloud-2 { top: 60px; right: -36px; width: 160px; opacity: 0.13; animation: fs-drift-b 11s ease-in-out infinite; }
+        .fs-cloud-3 { bottom: 40px; left: -40px; width: 110px; opacity: 0.12; animation: fs-drift-c 8s ease-in-out infinite; }
+        .fs-pop { animation: fs-pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .fs-mascot-idle { animation: fs-wiggle 2.4s ease-in-out infinite; }
+        .fs-content { position: relative; z-index: 1; }
+      `}</style>
+
+      <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-1"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
+      <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-2"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
+      <svg viewBox="0 0 200 100" className="fs-cloud fs-cloud-3"><path d="M40 70 a25 25 0 010-50 30 30 0 0158 -8 25 25 0 0132 38 22 22 0 01-4 44 H45 a20 20 0 01-5 -24z"/></svg>
+
+      <div className="fs-content flex items-center gap-2">
+        <img src="/mascot.png" alt="" className="fs-mascot-idle h-6 w-6" />
         <Sparkles className="h-5 w-5 text-primary" />
         <h1 className="text-lg font-semibold">{t("assistant.title")}</h1>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="fs-content text-sm text-muted-foreground">
         {t("assistant.subtitle")}
       </p>
 
-      <div className="space-y-4">
+      <div className="fs-content space-y-4">
         {turns.length === 0 && !sending && (
-          <div className="space-y-3 rounded-lg border border-dashed border-border p-4 text-center">
-            <img src="/mascot.png" alt="" className="mx-auto h-10 w-10" />
+          <div className="fs-pop space-y-3 rounded-3xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 text-center shadow-sm">
+            <img src="/mascot.png" alt="" className="fs-mascot-idle mx-auto h-12 w-12" />
             <p className="text-sm text-muted-foreground">
               {t("assistant.emptyState") || "Tell me what happened and I'll turn it into jobs, notes, and payments — try one of these:"}
             </p>
@@ -449,7 +476,7 @@ export default function Assistant() {
                   key={s}
                   type="button"
                   onClick={() => setMessageText(s)}
-                  className="rounded-full border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-accent"
+                  className="rounded-full border border-primary/30 bg-white px-3 py-1.5 text-xs font-medium text-secondary-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:scale-105 hover:shadow-md active:scale-95"
                 >
                   {s}
                 </button>
@@ -459,17 +486,17 @@ export default function Assistant() {
         )}
 
         {turns.map((turn) => (
-          <div key={turn.id} className="space-y-2">
+          <div key={turn.id} className="fs-pop space-y-2">
             <div className="flex justify-end">
-              <div className="max-w-[85%] rounded-lg rounded-br-sm bg-primary px-3 py-2 text-sm text-primary-foreground">
+              <div className="max-w-[85%] rounded-3xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground shadow-md">
                 {turn.request}
               </div>
             </div>
 
             {turn.pending && (
-              <div className="flex items-start gap-2">
-                <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0 animate-pulse" />
-                <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2.5">
+              <div className="fs-pop flex items-start gap-2">
+                <img src="/mascot.png" alt="" className="fs-mascot-idle mt-0.5 h-6 w-6 shrink-0" />
+                <div className="flex items-center gap-1 rounded-3xl rounded-tl-md bg-secondary px-3.5 py-3 shadow-sm">
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
@@ -478,25 +505,25 @@ export default function Assistant() {
             )}
 
             {turn.reply && (
-              <div className="flex items-start gap-2">
+              <div className="fs-pop flex items-start gap-2">
                 <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
-                <div className="max-w-[85%] rounded-lg rounded-tl-sm bg-secondary px-3 py-2 text-sm">
+                <div className="max-w-[85%] rounded-3xl rounded-tl-md bg-secondary px-4 py-2.5 text-sm shadow-sm">
                   {turn.reply}
                 </div>
               </div>
             )}
 
             {turn.error && (
-              <div className="flex items-start gap-2">
+              <div className="fs-pop flex items-start gap-2">
                 <img src="/mascot.png" alt="" className="mt-0.5 h-6 w-6 shrink-0" />
-                <div className="max-w-[85%] rounded-lg rounded-tl-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <div className="max-w-[85%] rounded-3xl rounded-tl-md border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive shadow-sm">
                   {turn.error}
                 </div>
               </div>
             )}
 
             {turn.actions.length > 0 && (
-              <Card className="ml-8">
+              <Card className="fs-pop ml-8 rounded-2xl shadow-md">
                 <CardContent className="space-y-3 p-3">
                   {turn.actions.map((action) => (
                     <ActionEditor
@@ -511,7 +538,7 @@ export default function Assistant() {
                   ))}
                   <Button
                     size="sm"
-                    className="w-full"
+                    className="w-full transition-transform duration-150 active:scale-95"
                     onClick={() => applyTurnActions(turn.id)}
                     disabled={turn.actions.every((a) => !a.included || a.status === "done")}
                   >
@@ -536,9 +563,9 @@ export default function Assistant() {
         <div ref={bottomRef} />
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="fs-content text-sm text-destructive">{error}</p>}
 
-      <form onSubmit={handleSend} className="sticky bottom-16 flex gap-2 bg-background pt-2 sm:bottom-0">
+      <form onSubmit={handleSend} className="fs-content sticky bottom-16 flex gap-2 bg-background pt-2 sm:bottom-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -554,6 +581,7 @@ export default function Assistant() {
           title={t("assistant.attachFile") || "Attach a price sheet (PDF/CSV)"}
           onClick={() => fileInputRef.current?.click()}
           disabled={fileBusy || sending}
+          className="rounded-full transition-transform duration-150 hover:scale-110 active:scale-90"
         >
           <Paperclip className="h-4 w-4" />
         </Button>
@@ -563,8 +591,14 @@ export default function Assistant() {
           onChange={(e) => setMessageText(e.target.value)}
           disabled={sending}
           autoFocus
+          className="rounded-full shadow-sm"
         />
-        <Button type="submit" size="icon" disabled={sending || !messageText.trim()}>
+        <Button
+          type="submit"
+          size="icon"
+          disabled={sending || !messageText.trim()}
+          className="rounded-full transition-transform duration-150 hover:scale-110 active:scale-90"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </form>
