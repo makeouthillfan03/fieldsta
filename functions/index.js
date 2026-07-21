@@ -797,3 +797,49 @@ exports.parsePriceBookFile = onCall(
     };
   }
 );
+
+// Owner-only growth stats: total signups, a day-by-day count for the last
+// 30 days, and a breakdown by self-reported trade/team size (see
+// CompanySetup.jsx). Uses the Admin SDK to read across every company doc,
+// which no Firestore rule allows a normal client to do — that's why this
+// has to be a callable instead of a direct client query, and why it's
+// locked to one specific account rather than "isCompanyAdmin" or similar.
+// This never returns anything per-company beyond aggregate counts, so even
+// if the email check were somehow bypassed, no other business's data leaks.
+const OWNER_EMAIL = "jchoihllh@gmail.com";
+
+exports.getGrowthStats = onCall(async (request) => {
+  if (!request.auth || (request.auth.token.email || "").toLowerCase() !== OWNER_EMAIL) {
+    throw new HttpsError("permission-denied", "Not available on this account.");
+  }
+
+  const companiesSnap = await db.collection("companies").get();
+  const byDay = {};
+  const byTrade = {};
+  const byTeamSize = {};
+  let total = 0;
+
+  companiesSnap.forEach((doc) => {
+    const c = doc.data();
+    total += 1;
+    const createdAt = c.createdAt && c.createdAt.toDate ? c.createdAt.toDate() : null;
+    if (createdAt) {
+      const key = createdAt.toISOString().slice(0, 10);
+      byDay[key] = (byDay[key] || 0) + 1;
+    }
+    const trade = c.trade || "unspecified";
+    byTrade[trade] = (byTrade[trade] || 0) + 1;
+    const teamSize = c.teamSize || "unspecified";
+    byTeamSize[teamSize] = (byTeamSize[teamSize] || 0) + 1;
+  });
+
+  let welcomeVisits = 0;
+  try {
+    const visitsSnap = await db.doc("siteAnalytics/welcome").get();
+    welcomeVisits = visitsSnap.exists ? Number(visitsSnap.data().visits) || 0 : 0;
+  } catch (err) {
+    logger.warn("Couldn't read siteAnalytics/welcome", err);
+  }
+
+  return { total, byDay, byTrade, byTeamSize, welcomeVisits };
+});

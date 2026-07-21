@@ -26,6 +26,7 @@ import MaintenanceAgreements from "@/pages/MaintenanceAgreements";
 import Assistant from "@/pages/Assistant";
 import Billing from "@/pages/Billing";
 import Welcome from "@/pages/Welcome";
+import GrowthDashboard from "@/pages/GrowthDashboard";
 
 function PrivateRoute({ children }) {
   const { user, loading, companyLoading, needsCompany } = useAuth();
@@ -91,6 +92,7 @@ export default function App() {
         }
       >
         <Route path="/billing" element={<Billing />} />
+        <Route path="/growth" element={<GrowthDashboard />} />
 
         <Route element={<RequirePlan />}>
           <Route path="/" element={<Dashboard />} />

@@ -280,6 +280,24 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    // ---------------------------------------------------------------
+    // Public site analytics — a single doc (siteAnalytics/welcome) that
+    // anyone (signed in or not) can increment by exactly 1 when the
+    // Welcome page loads. Write-only from the client: the aggregate is
+    // only ever read back out via the getGrowthStats callable (Admin SDK,
+    // bypasses these rules), never directly by a client, so nobody can
+    // see the raw counter or tamper with it beyond bumping it by one.
+    // ---------------------------------------------------------------
+    match /siteAnalytics/{docId} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasOnly(["visits"]) &&
+        request.resource.data.visits == 1;
+      allow update: if resource.data.keys().hasOnly(["visits"]) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["visits"]) &&
+        request.resource.data.visits == resource.data.visits + 1;
+      allow delete: if false;
+    }
+
     // Deny everything else by default.
     match /{document=**} {
       allow read, write: if false;

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { trackWelcomeVisit } from "@/lib/firebase";
 
 // Public marketing page — reachable without signing in. This is the
 // "home / about us / welcome" surface that stays outside the paywall;
@@ -25,6 +26,12 @@ export default function Welcome() {
     const ref = searchParams.get("ref");
     if (ref) localStorage.setItem("fieldsta_ref", ref);
   }, [searchParams]);
+
+  // Fire-and-forget visit counter — one increment per page load, no
+  // per-visitor tracking. See lib/firebase.js trackWelcomeVisit.
+  useEffect(() => {
+    trackWelcomeVisit();
+  }, []);
 
   if (!loading && user) return <Navigate to="/" replace />;
 

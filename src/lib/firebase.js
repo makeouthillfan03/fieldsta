@@ -13,6 +13,8 @@ import {
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
+  doc,
+  runTransaction,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -81,6 +83,37 @@ export function parseQuickNote(text, jobId) {
 export function runAssistant(message, customers, jobs, history) {
   const call = httpsCallable(functions, "runAssistant");
   return call({ message, customers, jobs, history });
+}
+
+// Bumps a single public counter (siteAnalytics/welcome.visits) by 1 every
+// time the Welcome page loads — no cookies, no per-visitor tracking, just a
+// running total. Firestore rules only allow this exact +1 write (see
+// firestore.rules), and the count is only ever read back out via the
+// getGrowthStats callable below, never directly by a client. Best-effort —
+// swallow errors so a blocked/offline write never affects the page itself.
+export async function trackWelcomeVisit() {
+  try {
+    const ref = doc(db, "siteAnalytics", "welcome");
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) {
+        tx.set(ref, { visits: 1 });
+      } else {
+        tx.update(ref, { visits: (Number(snap.data().visits) || 0) + 1 });
+      }
+    });
+  } catch {
+    // Best-effort only — never surface this to the user.
+  }
+}
+
+// Owner-only aggregate growth numbers (total signups, signups by day, and
+// the trade/team-size breakdown from CompanySetup). The Cloud Function
+// itself checks the caller's email server-side, so this quietly fails for
+// anyone but the account it's locked to — see functions/index.js.
+export function getGrowthStats() {
+  const call = httpsCallable(functions, "getGrowthStats");
+  return call({});
 }
 
 // Uploads a price sheet/catalog (PDF or CSV) to Storage, then asks
