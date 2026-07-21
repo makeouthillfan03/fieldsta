@@ -15,15 +15,38 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { auth, db, logout, sendPhoneVerificationCode, confirmPhoneVerificationCode } from "@/lib/firebase";
+
+// Purely informational — not used to gate signup or change pricing. Lets us
+// see, over time, what mix of trades and company sizes are actually signing
+// up (e.g. how much of the base is HVAC vs general contracting), so we can
+// prioritize trade-specific features and content instead of guessing. See
+// Team page discussion in chat — this mirrors the "what trade are you in"
+// question competitors ask during sales-assisted demo requests, but here
+// it's a lightweight, skippable field on self-serve signup instead of a
+// lead-qualification gate.
+const TRADE_OPTIONS = [
+  "hvac",
+  "plumbing",
+  "electrical",
+  "generalContracting",
+  "roofing",
+  "landscaping",
+  "handyman",
+  "other",
+];
+const TEAM_SIZE_OPTIONS = ["justMe", "2to5", "6to15", "16plus"];
 
 export default function CompanySetup() {
   const { user, companyLoading, needsCompany } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [companyName, setCompanyName] = useState("");
   const [accessCode, setAccessCode] = useState("");
+  const [trade, setTrade] = useState("");
+  const [teamSize, setTeamSize] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [inviteCode, setInviteCode] = useState("");
@@ -132,14 +155,14 @@ export default function CompanySetup() {
       const referredBy = refCompanyId && refCompanyId !== "undefined" ? refCompanyId : null;
 
       const companyRef = doc(collection(db, "companies"));
-      const trialEndsAt = Timestamp.fromMillis(Date.now() + 3 * 24 * 60 * 60 * 1000);
+      const trialEndsAt = Timestamp.fromMillis(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const companyDoc = {
         name: companyName.trim(),
         ownerUid: user.uid,
         ownerPhone: auth.currentUser?.phoneNumber || null,
         ...(referredBy ? { referredBy } : {}),
         createdAt: serverTimestamp(),
-        // New companies start on a 3-day free trial, UNLESS a valid access
+        // New companies start on a 7-day free trial, UNLESS a valid access
         // code was redeemed, in which case they start "comped" (free)
         // instead. `plan` otherwise only ever changes via the Stripe
         // webhook (payment) or a manual edit in the Firestore console —
@@ -150,6 +173,10 @@ export default function CompanySetup() {
         stripeCustomerId: null,
         stripeSubscriptionId: null,
         ...(code ? { accessCodeUsed: code } : {}),
+        // Optional, self-reported, never shown back to the user or used to
+        // gate anything — just internal signal on who's signing up.
+        ...(trade ? { trade } : {}),
+        ...(teamSize ? { teamSize } : {}),
       };
       // These writes are sequential (not a batch) on purpose — see the
       // note above about rules needing the company doc already committed
@@ -349,6 +376,30 @@ export default function CompanySetup() {
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value)}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="trade">{t("companySetup.trade") || "Trade (optional)"}</Label>
+                    <Select id="trade" value={trade} onChange={(e) => setTrade(e.target.value)}>
+                      <option value="">{t("companySetup.tradeChoose") || "Prefer not to say"}</option>
+                      {TRADE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {t(`companySetup.trade.${opt}`) || opt}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="teamSize">{t("companySetup.teamSize") || "Team size (optional)"}</Label>
+                    <Select id="teamSize" value={teamSize} onChange={(e) => setTeamSize(e.target.value)}>
+                      <option value="">{t("companySetup.teamSizeChoose") || "Prefer not to say"}</option>
+                      {TEAM_SIZE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {t(`companySetup.teamSize.${opt}`) || opt}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={saving}>

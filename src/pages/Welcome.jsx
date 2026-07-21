@@ -165,7 +165,7 @@ export default function Welcome() {
           </Card>
         </div>
         <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <CheckCircle2 className="h-3.5 w-3.5" /> {t("welcome.trialNote") || "Every account starts with a 3-day free trial."}
+          <CheckCircle2 className="h-3.5 w-3.5" /> {t("welcome.trialNote") || "Every account starts with a 7-day free trial."}
         </p>
       </section>
 
