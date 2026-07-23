@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { db, listOpenLeads } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import MapView from "@/components/MapView";
+import TermsAgreement from "@/components/TermsAgreement";
 
 // Public bidding view — contractors browse open jobs (no PII shown, see
 // functions/index.js listOpenLeads) and submit a bid. Minimal by design,
@@ -63,13 +64,14 @@ function JobCard({ job }) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const Icon = TRADE_ICONS[job.trade] || MoreHorizontal;
 
   async function submitBid(e) {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !amount) return;
+    if (!name.trim() || !phone.trim() || !amount || !agreed) return;
     setSaving(true);
     try {
       await addDoc(collection(db, "marketplaceBids"), {
@@ -130,7 +132,15 @@ function JobCard({ job }) {
             onChange={(e) => setAmount(e.target.value)}
             className="h-8 w-20 text-sm"
           />
-          <Button type="submit" size="sm" className="h-8 rounded-full bg-black text-white hover:bg-black/90" disabled={saving}>
+          <div className="w-full">
+            <TermsAgreement checked={agreed} onChange={setAgreed} id={`bidTermsAgree-${job.id}`} />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            className="h-8 rounded-full bg-black text-white hover:bg-black/90"
+            disabled={saving || !agreed}
+          >
             {saving ? "…" : "Send"}
           </Button>
         </form>

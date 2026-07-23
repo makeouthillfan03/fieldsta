@@ -8,6 +8,7 @@ import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
 import OpenJobs from "@/pages/OpenJobs";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Account from "@/pages/Account";
+import Terms from "@/pages/Terms";
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -44,6 +45,7 @@ export default function App() {
       <Route path="/welcome" element={<FindAPro />} />
       <Route path="/find-a-pro" element={<FindAPro />} />
       <Route path="/open-jobs" element={<OpenJobs />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/profile-setup"

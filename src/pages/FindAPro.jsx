@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import MapView from "@/components/MapView";
 import { useAuth } from "@/context/AuthContext";
+import TermsAgreement from "@/components/TermsAgreement";
 
 // Concierge MVP for the Perth Amboy marketplace pilot (see chat — this is
 // deliberately NOT automated matching yet). Two forms feed two Firestore
@@ -286,6 +287,7 @@ function HomeownerForm() {
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -293,7 +295,7 @@ function HomeownerForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) return;
+    if (!form.name.trim() || !form.phone.trim() || !agreed) return;
     setSaving(true);
     setError("");
     try {
@@ -376,8 +378,9 @@ function HomeownerForm() {
             />
           </div>
           <PhoneVerifyStub />
+          <TermsAgreement checked={agreed} onChange={setAgreed} id="leadTermsAgree" />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving}>
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving || !agreed}>
             {saving ? "Sending…" : "Get matched with a pro"}
           </Button>
         </form>
@@ -391,6 +394,7 @@ function ContractorForm() {
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -400,7 +404,7 @@ function ContractorForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim()) return;
+    if (!form.name.trim() || !form.phone.trim() || !agreed) return;
     setSaving(true);
     setError("");
     try {
@@ -503,8 +507,9 @@ function ContractorForm() {
             <Textarea id="contNotes" rows={2} value={form.notes} onChange={(e) => update("notes", e.target.value)} />
           </div>
           <PhoneVerifyStub />
+          <TermsAgreement checked={agreed} onChange={setAgreed} id="contTermsAgree" />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving}>
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving || !agreed}>
             {saving ? "Submitting…" : "Sign up for jobs"}
           </Button>
         </form>

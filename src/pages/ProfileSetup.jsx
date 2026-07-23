@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
+import TermsAgreement from "@/components/TermsAgreement";
 
 const ROLE_OPTIONS = [
   { value: "client", label: "I need work done" },
@@ -23,6 +24,7 @@ export default function ProfileSetup() {
   const [trade, setTrade] = useState("handyman");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
@@ -31,7 +33,7 @@ export default function ProfileSetup() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) return;
+    if (!name.trim() || !phone.trim() || !agreed) return;
     setSaving(true);
     setError("");
     try {
@@ -44,7 +46,11 @@ export default function ProfileSetup() {
         trade: isContractor ? trade : null,
         createdAt: serverTimestamp(),
       });
-      navigate("/dashboard", { replace: true });
+      // Was "/dashboard" — that route was retired with the old SaaS tool
+      // and no longer exists, so this silently bounced people to "/" via
+      // App.jsx's catch-all instead of actually landing on their new
+      // account page. Fixed to go where Account.jsx actually lives.
+      navigate("/account", { replace: true });
     } catch (err) {
       setError(err.message || "Couldn't save your profile. Try again.");
       setSaving(false);
@@ -102,8 +108,9 @@ export default function ProfileSetup() {
                   </select>
                 </div>
               )}
+              <TermsAgreement checked={agreed} onChange={setAgreed} id="profileTermsAgree" />
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving}>
+              <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving || !agreed}>
                 {saving ? "Saving…" : "Continue"}
               </Button>
             </form>
