@@ -843,3 +843,30 @@ exports.getGrowthStats = onCall(async (request) => {
 
   return { total, byDay, byTrade, byTeamSize, welcomeVisits };
 });
+
+// Owner-only: reads back the marketplace concierge MVP submissions
+// (marketplaceLeads, marketplaceContractors) so they can be matched by
+// hand. Same lock-to-one-account pattern as getGrowthStats, for the same
+// reason — no Firestore rule lets a normal client list these collections.
+exports.getMarketplaceSubmissions = onCall(async (request) => {
+  if (!request.auth || (request.auth.token.email || "").toLowerCase() !== OWNER_EMAIL) {
+    throw new HttpsError("permission-denied", "Not available on this account.");
+  }
+
+  const [leadsSnap, contractorsSnap] = await Promise.all([
+    db.collection("marketplaceLeads").orderBy("createdAt", "desc").get(),
+    db.collection("marketplaceContractors").orderBy("createdAt", "desc").get(),
+  ]);
+
+  const toPlain = (snap) =>
+    snap.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        ...d,
+        createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
+      };
+    });
+
+  return { leads: toPlain(leadsSnap), contractors: toPlain(contractorsSnap) };
+});

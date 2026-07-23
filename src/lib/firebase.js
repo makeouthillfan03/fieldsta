@@ -116,6 +116,14 @@ export function getGrowthStats() {
   return call({});
 }
 
+// Owner-only: pulls the Perth Amboy concierge MVP submissions (homeowner
+// job requests + contractor signups) so they can be matched by hand. See
+// functions/index.js getMarketplaceSubmissions.
+export function getMarketplaceSubmissions() {
+  const call = httpsCallable(functions, "getMarketplaceSubmissions");
+  return call({});
+}
+
 // Uploads a price sheet/catalog (PDF or CSV) to Storage, then asks
 // parsePriceBookFile to turn it into structured {name, category, unitPrice,
 // unit, notes} line items for the caller to review before anything is

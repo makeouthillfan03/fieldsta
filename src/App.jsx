@@ -27,6 +27,8 @@ import Assistant from "@/pages/Assistant";
 import Billing from "@/pages/Billing";
 import Welcome from "@/pages/Welcome";
 import GrowthDashboard from "@/pages/GrowthDashboard";
+import FindAPro from "@/pages/FindAPro";
+import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
 
 function PrivateRoute({ children }) {
   const { user, loading, companyLoading, needsCompany } = useAuth();
@@ -75,6 +77,7 @@ export default function App() {
       <Route path="/portal/:token" element={<CustomerPortal />} />
       <Route path="/estimate/:estimateId" element={<EstimatePortal />} />
       <Route path="/book/:companyId" element={<BookingRequest />} />
+      <Route path="/find-a-pro" element={<FindAPro />} />
       <Route
         path="/setup-company"
         element={
@@ -93,6 +96,7 @@ export default function App() {
       >
         <Route path="/billing" element={<Billing />} />
         <Route path="/growth" element={<GrowthDashboard />} />
+        <Route path="/marketplace-admin" element={<MarketplaceAdmin />} />
 
         <Route element={<RequirePlan />}>
           <Route path="/" element={<Dashboard />} />

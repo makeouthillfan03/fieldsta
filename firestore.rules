@@ -281,6 +281,35 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------
+    // Marketplace concierge MVP (Perth Amboy pilot) — a homeowner submits a
+    // job request, a contractor submits their info to be in the pool.
+    // Public write, no read: matching is done by hand for now (see chat —
+    // the founder texts/calls contractors directly), so the only way this
+    // data is ever read back out is the getMarketplaceSubmissions callable
+    // (Admin SDK, locked to one account — see functions/index.js), never a
+    // direct client query. That also means no one can browse other
+    // homeowners' or contractors' submissions.
+    // ---------------------------------------------------------------
+    match /marketplaceLeads/{id} {
+      allow read: if false;
+      allow create: if request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.size() > 0 &&
+        request.resource.data.status == "new";
+      allow update, delete: if false;
+    }
+
+    match /marketplaceContractors/{id} {
+      allow read: if false;
+      allow create: if request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.size() > 0;
+      allow update, delete: if false;
+    }
+
+    // ---------------------------------------------------------------
     // Public site analytics — a single doc (siteAnalytics/welcome) that
     // anyone (signed in or not) can increment by exactly 1 when the
     // Welcome page loads. Write-only from the client: the aggregate is
