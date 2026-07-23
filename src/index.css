@@ -10,6 +10,43 @@ body {
   @apply bg-background text-foreground antialiased;
 }
 
+/* Smooth transitions on every clickable/interactive element site-wide —
+   see chat: "add smooth transitions to every single button and action."
+   The shared Button component (components/ui/button.jsx) already has its
+   own transition + press-scale; this is the blanket safety net for
+   native buttons/links/inputs/selects not using that component, plus
+   custom elements like the mode-toggle pills and trade icon circles on
+   FindAPro.jsx. prefers-reduced-motion respected below. */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+button:active,
+[role="button"]:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    transition: none;
+  }
+  button:active,
+  [role="button"]:active {
+    transform: none;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;
