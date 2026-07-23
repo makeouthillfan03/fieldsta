@@ -76,7 +76,7 @@ export default function Login() {
     });
   }, []);
 
-  if (!loading && user) return <Navigate to="/" replace />;
+  if (!loading && user) return <Navigate to="/account" replace />;
 
   async function handleLogin() {
     setError("");

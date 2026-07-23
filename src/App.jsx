@@ -6,6 +6,8 @@ import GrowthDashboard from "@/pages/GrowthDashboard";
 import FindAPro from "@/pages/FindAPro";
 import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
 import OpenJobs from "@/pages/OpenJobs";
+import ProfileSetup from "@/pages/ProfileSetup";
+import Account from "@/pages/Account";
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -43,6 +45,22 @@ export default function App() {
       <Route path="/find-a-pro" element={<FindAPro />} />
       <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/login" element={<Login />} />
+      <Route
+        path="/profile-setup"
+        element={
+          <RequireAuthOnly>
+            <ProfileSetup />
+          </RequireAuthOnly>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <RequireAuthOnly>
+            <Account />
+          </RequireAuthOnly>
+        }
+      />
 
       {/* Kept around only so a signed-in owner without a companies/{id} doc
           yet doesn't get stuck — not part of the live product anymore. */}

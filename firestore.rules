@@ -291,12 +291,19 @@ service cloud.firestore {
     // homeowners' or contractors' submissions.
     // ---------------------------------------------------------------
     match /marketplaceLeads/{id} {
-      allow read: if false;
+      // A signed-in client can read/list their own past requests (their
+      // "history" — see Dashboard.jsx); anyone else's data still only
+      // comes out through the owner-locked getMarketplaceSubmissions
+      // callable. Guest (signed-out) submissions are still allowed on
+      // create for backward compatibility, they just won't show up in
+      // anyone's dashboard since there's no uid to query by.
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow create: if request.resource.data.name is string &&
         request.resource.data.name.size() > 0 &&
         request.resource.data.phone is string &&
         request.resource.data.phone.size() > 0 &&
-        request.resource.data.status == "new";
+        request.resource.data.status == "new" &&
+        (!("uid" in request.resource.data) || request.resource.data.uid == request.auth.uid);
       allow update, delete: if false;
     }
 
@@ -305,16 +312,17 @@ service cloud.firestore {
       allow create: if request.resource.data.name is string &&
         request.resource.data.name.size() > 0 &&
         request.resource.data.phone is string &&
-        request.resource.data.phone.size() > 0;
+        request.resource.data.phone.size() > 0 &&
+        (!("uid" in request.resource.data) || request.resource.data.uid == request.auth.uid);
       allow update, delete: if false;
     }
 
     // A contractor's bid on a specific job request (marketplaceLeads doc).
-    // Same public-write/no-read shape — bids are only ever read back out
-    // via the owner-locked getMarketplaceSubmissions callable, same as
-    // leads/contractors above, so contractors can't see each other's bids.
+    // A signed-in contractor can read their own bids back (their "history"
+    // in Dashboard.jsx); nobody can read anyone else's bids on a job
+    // directly — that only comes out through getMarketplaceSubmissions.
     match /marketplaceBids/{id} {
-      allow read: if false;
+      allow read: if isSignedIn() && resource.data.contractorUid == request.auth.uid;
       allow create: if request.resource.data.leadId is string &&
         request.resource.data.leadId.size() > 0 &&
         request.resource.data.contractorName is string &&
@@ -322,8 +330,16 @@ service cloud.firestore {
         request.resource.data.contractorPhone is string &&
         request.resource.data.contractorPhone.size() > 0 &&
         request.resource.data.amount is number &&
-        request.resource.data.amount > 0;
+        request.resource.data.amount > 0 &&
+        (!("contractorUid" in request.resource.data) || request.resource.data.contractorUid == request.auth.uid);
       allow update, delete: if false;
+    }
+
+    // A marketplace user's profile: role(s) — client, contractor, or both
+    // — plus contact info. Only the account owner can ever read or write
+    // it; nobody else, including other marketplace users, can see it.
+    match /marketplaceProfiles/{uid} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
     }
 
     // ---------------------------------------------------------------

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import MapView from "@/components/MapView";
+import { useAuth } from "@/context/AuthContext";
 
 // Concierge MVP for the Perth Amboy marketplace pilot (see chat — this is
 // deliberately NOT automated matching yet). Two forms feed two Firestore
@@ -179,6 +180,7 @@ function PhoneVerifyStub() {
 const STEPS = ["Post", "Match", "Done"];
 
 export default function FindAPro() {
+  const { user } = useAuth();
   const [mode, setMode] = useState("homeowner"); // "homeowner" | "contractor"
 
   return (
@@ -187,40 +189,42 @@ export default function FindAPro() {
       <div className="mx-auto max-w-lg space-y-6">
         <div className="flex items-center justify-between">
           <span className="font-semibold">Fieldsta</span>
-          {/* Existing Fieldsta account holders (trial/paid) still need a way
-              in now that this page replaced the old marketing homepage. */}
-          <Link to="/login" className="text-xs font-medium text-muted-foreground hover:text-foreground">
-            Sign in
+          <Link
+            to={user ? "/account" : "/login"}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            {user ? "My account" : "Sign in"}
           </Link>
         </div>
 
-        {/* Hero — deliberately minimal, per chat "less is more, show not
-            tell": no paragraph pitch, just the headline and the map/chips
-            doing the explaining. */}
-        <div className="space-y-1 pt-2 text-center">
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Find a local pro. <span className="text-primary">Free.</span>
+        {/* Hero — city-specific headline (see chat, matched to how
+            Thumbtack does theirs) instead of generic copy; still minimal,
+            no paragraph pitch. */}
+        <div className="space-y-2 pt-2 text-center">
+          <span className="inline-block rounded-full bg-black px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+            Perth Amboy · testing
+          </span>
+          <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
+            Pros for every project
+            <br />
+            in Perth Amboy. <span className="text-primary">Free.</span>
           </h1>
-          {/* Scope note kept to a single small line, not a paragraph — see
-              chat: "just say right now we are only limiting to perth amboy
-              as early location for early testing." */}
-          <p className="text-xs text-muted-foreground">Perth Amboy only, for now — testing.</p>
         </div>
 
-        <MapView height={180} />
+        <MapView height={200} />
 
-        {/* Trade chips */}
-        <div className="flex flex-wrap justify-center gap-2">
+        {/* Trade row — icon-over-label, horizontal scroll, matched to the
+            category-icon pattern rather than wrapped pill chips. */}
+        <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
           {TRADES.filter((t) => t !== "other").map((t) => {
             const Icon = TRADE_ICONS[t];
             return (
-              <span
-                key={t}
-                className="flex items-center gap-1.5 rounded-full border border-border bg-white/70 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm"
-              >
-                <Icon className="h-3.5 w-3.5 text-primary" />
-                {TRADE_LABELS[t]}
-              </span>
+              <div key={t} className="flex shrink-0 flex-col items-center gap-1.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/5">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <span className="text-[11px] font-medium text-foreground">{TRADE_LABELS[t].split(" /")[0]}</span>
+              </div>
             );
           })}
         </div>
@@ -238,12 +242,12 @@ export default function FindAPro() {
           ))}
         </div>
 
-        <div className="flex rounded-md border border-border bg-white/70 p-1 text-sm backdrop-blur-sm">
+        <div className="flex rounded-full border border-border bg-white p-1 text-sm shadow-sm">
           <button
             type="button"
             onClick={() => setMode("homeowner")}
-            className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
-              mode === "homeowner" ? "bg-black text-white" : "text-muted-foreground"
+            className={`flex-1 rounded-full px-3 py-2 font-medium transition-all ${
+              mode === "homeowner" ? "bg-black text-white shadow" : "text-muted-foreground"
             }`}
           >
             I need something done
@@ -251,8 +255,8 @@ export default function FindAPro() {
           <button
             type="button"
             onClick={() => setMode("contractor")}
-            className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
-              mode === "contractor" ? "bg-black text-white" : "text-muted-foreground"
+            className={`flex-1 rounded-full px-3 py-2 font-medium transition-all ${
+              mode === "contractor" ? "bg-black text-white shadow" : "text-muted-foreground"
             }`}
           >
             I'm a contractor
@@ -272,6 +276,7 @@ export default function FindAPro() {
 }
 
 function HomeownerForm() {
+  const { user } = useAuth();
   const [form, setForm] = useState(emptyLeadForm);
   const [saving, setSaving] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -288,6 +293,7 @@ function HomeownerForm() {
     setError("");
     try {
       await addDoc(collection(db, "marketplaceLeads"), {
+        ...(user ? { uid: user.uid } : {}),
         name: form.name.trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
@@ -308,7 +314,7 @@ function HomeownerForm() {
 
   if (submitted) {
     return (
-      <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
+      <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
           <p className="font-medium">Got it!</p>
@@ -321,7 +327,7 @@ function HomeownerForm() {
   }
 
   return (
-    <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
+    <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
       <CardHeader>
         <CardTitle className="text-base">What do you need done?</CardTitle>
       </CardHeader>
@@ -414,7 +420,7 @@ function ContractorForm() {
 
   if (submitted) {
     return (
-      <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
+      <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
           <p className="font-medium">You're on the list!</p>
@@ -427,7 +433,7 @@ function ContractorForm() {
   }
 
   return (
-    <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
+    <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
       <CardHeader>
         <CardTitle className="text-base">Get sent local jobs</CardTitle>
       </CardHeader>
