@@ -22,10 +22,12 @@
  */
 
 const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret, defineString } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
+const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -33,6 +35,39 @@ const db = admin.firestore();
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 const anthropicApiKey = defineSecret("ANTHROPIC_API_KEY");
+
+// SMTP app password for the mailbox that sends the automated marketplace
+// notification emails below (see onNewLead/onNewBid). Using Zoho Mail
+// Lite ($1/mo) at support@fieldsta.com — see chat: "jchoihllh is my
+// personal, is that ok" -> decided on a real fieldsta.com mailbox instead
+// of a personal or unrelated-business Gmail. Set up once via:
+//   1. zoho.com/mail -> sign up, add fieldsta.com as your domain
+//   2. Add the MX records Zoho gives you at your domain's DNS (mx.zoho.com
+//      priority 10, mx2.zoho.com priority 20, mx3.zoho.com priority 50),
+//      plus their SPF/DKIM records — Zoho's setup wizard walks through this
+//   3. Upgrade to Mail Lite ($1/mo) — the free tier blocks SMTP access,
+//      which is exactly what this needs, so Lite is the real floor cost
+//   4. Create the support@fieldsta.com mailbox, enable 2FA, generate an
+//      app-specific password under My Account -> Security -> App Passwords
+//   5. firebase functions:secrets:set EMAIL_APP_PASSWORD  (paste it in)
+// If send volume ever grows past what Zoho/Lite comfortably handles, swap
+// this transporter for a dedicated transactional provider (Resend/
+// SendGrid) later — everything that calls sendEmail() below stays the
+// same, only this function's internals change.
+const emailAppPassword = defineSecret("EMAIL_APP_PASSWORD");
+
+// Which mailbox actually sends these — deliberately NOT the same constant
+// as OWNER_EMAIL below (that one gates admin access and is jc's real
+// personal login, never shown to homeowners/contractors). Just a config
+// string, not a secret, so switching addresses/providers later needs no
+// code change — set FROM_EMAIL in functions/.env.
+const senderEmail = defineString("FROM_EMAIL", { default: "support@fieldsta.com" });
+
+// Zoho's SMTP endpoint (smtp.zoho.com, port 465/SSL). Also just config,
+// not secrets, so this transporter can point at a different provider later
+// by changing functions/.env instead of code.
+const smtpHost = defineString("SMTP_HOST", { default: "smtp.zoho.com" });
+const smtpPort = defineString("SMTP_PORT", { default: "465" });
 
 // Base URL of the deployed web app, used to build the Stripe success/cancel
 // redirect links. Set in functions/.env (not a secret — just config), e.g.
@@ -899,3 +934,170 @@ exports.listOpenLeads = onCall(async () => {
     }),
   };
 });
+
+// ---------------------------------------------------------------------
+// Automated notifications (email now, SMS later)
+//
+// This replaces jc manually checking /marketplace-admin and texting
+// people by hand — see chat "can u make it so its automated." Two
+// triggers, both fire the instant a document is created:
+//   - onNewLead: a homeowner posts a job -> email jc + every contractor
+//     signed up for that trade, so contractors find out and can go bid
+//     without anyone relaying it by hand.
+//   - onNewBid: a contractor bids on a job -> email the homeowner (if
+//     they gave an email) the contractor's name/phone/price directly,
+//     plus jc as a backup.
+//
+// Deliberately NOT automated yet: auto-picking a "best" bid for the
+// homeowner. That's a real matching algorithm to design and trust, and
+// removes homeowner choice — safer to keep surfacing bids and let the
+// homeowner choose, at least until this has real usage behind it.
+//
+// SMS is the other half of this (jc: "do both email and phone number,
+// ill setup twilio at the very end") — once Twilio is set up, the plan is
+// to add an SMS send alongside each email call below, same trigger, same
+// data, just a second notify call. Nothing here needs to change shape for
+// that, it's additive.
+// ---------------------------------------------------------------------
+
+const TRADE_LABELS = {
+  electrical: "Electrical",
+  plumbing: "Plumbing",
+  hvac: "HVAC",
+  handyman: "Handyman",
+  painting: "Painting",
+  landscaping: "Landscaping",
+  cleaning: "Cleaning",
+  movingHauling: "Moving / Hauling",
+  other: "Other",
+};
+
+let cachedTransporter = null;
+function getTransporter() {
+  // Cached per warm instance — cheap re-use across invocations, still
+  // fine to recreate cold since it's just local config, no network call.
+  if (cachedTransporter) return cachedTransporter;
+  cachedTransporter = nodemailer.createTransport({
+    host: smtpHost.value(),
+    port: Number(smtpPort.value()),
+    secure: Number(smtpPort.value()) === 465,
+    auth: { user: senderEmail.value(), pass: emailAppPassword.value() },
+  });
+  return cachedTransporter;
+}
+
+async function sendEmail({ to, subject, text }) {
+  if (!to) return;
+  try {
+    await getTransporter().sendMail({
+      from: `Fieldsta <${senderEmail.value()}>`,
+      to,
+      subject,
+      text,
+    });
+  } catch (err) {
+    // Never let a notification failure block the underlying write that
+    // already succeeded — the lead/bid is safely in Firestore either way,
+    // this is just best-effort outreach on top of it.
+    logger.warn(`sendEmail failed (to=${to}, subject=${subject})`, err);
+  }
+}
+
+exports.onNewLead = onDocumentCreated(
+  { document: "marketplaceLeads/{leadId}", secrets: [emailAppPassword] },
+  async (event) => {
+    const lead = event.data?.data();
+    if (!lead) return;
+    const leadId = event.params.leadId;
+    const tradeLabel = TRADE_LABELS[lead.trade] || lead.trade || "a job";
+
+    // 1. Tell jc immediately — replaces polling /marketplace-admin.
+    await sendEmail({
+      to: OWNER_EMAIL,
+      subject: `New lead: ${tradeLabel} in ${lead.area || "Perth Amboy"}`,
+      text: [
+        `${lead.name || "Someone"} posted a ${tradeLabel} job.`,
+        `Phone: ${lead.phone || "—"}`,
+        `Email: ${lead.email || "—"}`,
+        `Area: ${lead.area || "Perth Amboy"}`,
+        `Description: ${lead.description || "—"}`,
+        ``,
+        `Manage at ${appUrl.value()}/marketplace-admin`,
+      ].join("\n"),
+    });
+
+    // 2. Tell every contractor signed up for this trade — this is the
+    // step that used to be jc texting people by hand.
+    const contractorsSnap = await db
+      .collection("marketplaceContractors")
+      .where("trade", "==", lead.trade)
+      .limit(50)
+      .get();
+
+    const notifyList = contractorsSnap.docs
+      .map((d) => d.data())
+      .filter((c) => c.email);
+
+    await Promise.all(
+      notifyList.map((c) =>
+        sendEmail({
+          to: c.email,
+          subject: `New ${tradeLabel} job in ${lead.area || "Perth Amboy"}`,
+          text: [
+            `A new ${tradeLabel} job just came in near ${lead.area || "Perth Amboy"}:`,
+            `"${lead.description || "(no description)"}"`,
+            ``,
+            `Bid on it here: ${appUrl.value()}/open-jobs`,
+          ].join("\n"),
+        })
+      )
+    );
+
+    logger.info(`onNewLead ${leadId}: notified owner + ${notifyList.length} contractor(s)`);
+  }
+);
+
+exports.onNewBid = onDocumentCreated(
+  { document: "marketplaceBids/{bidId}", secrets: [emailAppPassword] },
+  async (event) => {
+    const bid = event.data?.data();
+    if (!bid) return;
+    const bidId = event.params.bidId;
+
+    const leadSnap = bid.leadId ? await db.collection("marketplaceLeads").doc(bid.leadId).get() : null;
+    const lead = leadSnap?.exists ? leadSnap.data() : null;
+
+    // Tell the homeowner directly, if they gave an email — this is the
+    // "relay the bid" step that used to be jc's job.
+    if (lead?.email) {
+      await sendEmail({
+        to: lead.email,
+        subject: `You got a bid on your ${TRADE_LABELS[lead.trade] || lead.trade || ""} job`,
+        text: [
+          `${bid.contractorName || "A contractor"} bid $${bid.amount} on your job.`,
+          `Phone: ${bid.contractorPhone || "—"}`,
+          bid.contractorEmail ? `Email: ${bid.contractorEmail}` : null,
+          ``,
+          `Reach out directly to follow up.`,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      });
+    }
+
+    // Backup copy to jc either way, in case the homeowner didn't give an
+    // email (only phone is required on the form).
+    await sendEmail({
+      to: OWNER_EMAIL,
+      subject: `New bid: $${bid.amount} on lead ${bid.leadId || "?"}`,
+      text: [
+        `${bid.contractorName || "Someone"} bid $${bid.amount}.`,
+        `Contractor phone: ${bid.contractorPhone || "—"}`,
+        lead ? `Homeowner: ${lead.name || "—"} (${lead.phone || "—"})` : `Homeowner: (lead not found)`,
+        lead?.email ? "Homeowner was emailed directly." : "Homeowner has no email on file — relay this by phone.",
+      ].join("\n"),
+    });
+
+    logger.info(`onNewBid ${bidId}: notified ${lead?.email ? "homeowner + " : ""}owner`);
+  }
+);

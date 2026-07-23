@@ -5,6 +5,7 @@ import { Zap, Wrench, Snowflake, Hammer, Paintbrush, Leaf, Sparkles, Truck, More
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { db, listOpenLeads } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
 import MapView from "@/components/MapView";
 
 // Public bidding view — contractors browse open jobs (no PII shown, see
@@ -56,9 +57,11 @@ export default function OpenJobs() {
 }
 
 function JobCard({ job }) {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
@@ -73,6 +76,11 @@ function JobCard({ job }) {
         leadId: job.id,
         contractorName: name.trim(),
         contractorPhone: phone.trim(),
+        contractorEmail: email.trim(),
+        // Attach the signed-in contractor's uid (if any) so it shows up in
+        // their /account "My bids" history — mirrors the uid attach already
+        // done on FindAPro.jsx's HomeownerForm.
+        contractorUid: user?.uid || null,
         amount: Number(amount),
         createdAt: serverTimestamp(),
       });
@@ -108,6 +116,13 @@ function JobCard({ job }) {
         <form onSubmit={submitBid} className="mt-3 flex flex-wrap gap-2">
           <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="h-8 flex-1 text-sm" />
           <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-8 flex-1 text-sm" />
+          <Input
+            placeholder="Email (optional)"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-8 flex-1 text-sm"
+          />
           <Input
             placeholder="$"
             type="number"
