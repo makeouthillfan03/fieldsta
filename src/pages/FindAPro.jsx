@@ -197,33 +197,38 @@ export default function FindAPro() {
           </Link>
         </div>
 
-        {/* Hero — city-specific headline (see chat, matched to how
-            Thumbtack does theirs) instead of generic copy; still minimal,
-            no paragraph pitch. */}
+        {/* Hero — city-specific but in our own voice, not a paraphrase of a
+            competitor's homepage copy (see chat: "don't make it too similar
+            with thumbtack they r a competitior"). Still minimal, no
+            paragraph pitch. */}
         <div className="space-y-2 pt-2 text-center">
           <span className="inline-block rounded-full bg-black px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
             Perth Amboy · testing
           </span>
           <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-            Pros for every project
+            Perth Amboy's own
             <br />
-            in Perth Amboy. <span className="text-primary">Free.</span>
+            job board. <span className="text-primary">Free.</span>
           </h1>
         </div>
 
         <MapView height={200} />
 
-        {/* Trade row — icon-over-label, horizontal scroll, matched to the
-            category-icon pattern rather than wrapped pill chips. */}
-        <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
+        {/* Trade grid — icon-over-label, wraps into rows instead of
+            scrolling (see chat: "remove the horizontal scroll bar" — a
+            fixed 4-column grid fits all 8 trades with no scroll at all,
+            cleaner than a scroll strip for a set this small). */}
+        <div className="grid grid-cols-4 gap-x-2 gap-y-4">
           {TRADES.filter((t) => t !== "other").map((t) => {
             const Icon = TRADE_ICONS[t];
             return (
-              <div key={t} className="flex shrink-0 flex-col items-center gap-1.5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/5">
+              <div key={t} className="flex flex-col items-center gap-1.5">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/5 transition-transform hover:scale-105">
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
-                <span className="text-[11px] font-medium text-foreground">{TRADE_LABELS[t].split(" /")[0]}</span>
+                <span className="text-center text-[11px] font-medium leading-tight text-foreground">
+                  {TRADE_LABELS[t].split(" /")[0]}
+                </span>
               </div>
             );
           })}

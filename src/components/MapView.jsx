@@ -46,7 +46,7 @@ export default function MapView({ center = PERTH_AMBOY, zoom = 13, height = 220,
     <div
       ref={containerRef}
       style={{ height }}
-      className="w-full overflow-hidden rounded-xl border border-border/60"
+      className="w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-black/5"
       aria-label="Map of Perth Amboy"
     />
   );
