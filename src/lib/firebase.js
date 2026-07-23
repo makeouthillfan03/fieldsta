@@ -16,7 +16,7 @@ import {
   doc,
   runTransaction,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 const firebaseConfig = {
@@ -41,6 +41,17 @@ export const db = initializeFirestore(app, {
 
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
+
+// Shared by ProfileSetup.jsx and Account.jsx — uploads to
+// avatars/{uid}/avatar (see storage.rules; owner-write, public-read) and
+// hands back the public URL to save on the profile doc. Always the same
+// filename per user so re-uploading replaces the old picture instead of
+// piling up orphaned files in Storage.
+export async function uploadAvatar(uid, file) {
+  const avatarRef = ref(storage, `avatars/${uid}/avatar`);
+  await uploadBytes(avatarRef, file, { contentType: file.type });
+  return getDownloadURL(avatarRef);
+}
 
 // Calls the createCheckoutSession Cloud Function, which creates a real
 // Stripe Checkout Session server-side (the Stripe secret key never touches

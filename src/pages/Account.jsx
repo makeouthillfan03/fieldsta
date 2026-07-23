@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { collection, doc, getDoc, getDocs, orderBy, query, setDoc, serverTimestamp, where } from "firebase/firestore";
+import { Link, Navigate } from "react-router-dom";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
-import { db, logout } from "@/lib/firebase";
+import { db, logout, uploadAvatar } from "@/lib/firebase";
+import AvatarUpload from "@/components/AvatarUpload";
 
 const ROLE_OPTIONS = [
   { value: "client", label: "I need work done" },
@@ -49,6 +62,7 @@ export default function Account() {
   const [loadingData, setLoadingData] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
+  const [avatarFile, setAvatarFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
@@ -95,7 +109,13 @@ export default function Account() {
       phone: profile.phone || "",
       roles: profile.roles || "client",
       trade: profile.trade || "handyman",
+      photoURL: profile.photoURL || "",
+      businessName: profile.businessName || "",
+      bio: profile.bio || "",
+      serviceArea: profile.serviceArea || "Perth Amboy",
+      public: !!profile.public,
     });
+    setAvatarFile(null);
     setSaveError("");
     setEditing(true);
   }
@@ -107,15 +127,45 @@ export default function Account() {
     setSaveError("");
     try {
       const isContractor = editForm.roles === "contractor" || editForm.roles === "both";
+      let photoURL = editForm.photoURL;
+      if (avatarFile) {
+        photoURL = await uploadAvatar(user.uid, avatarFile);
+      }
+
       const updated = {
         ...profile,
         name: editForm.name.trim(),
         phone: editForm.phone.trim(),
         roles: editForm.roles,
         trade: isContractor ? editForm.trade : null,
+        photoURL,
+        businessName: isContractor ? editForm.businessName.trim() : "",
+        bio: isContractor ? editForm.bio.trim() : "",
+        serviceArea: isContractor ? editForm.serviceArea.trim() || "Perth Amboy" : "",
+        public: isContractor ? editForm.public : false,
         updatedAt: serverTimestamp(),
       };
       await setDoc(doc(db, "marketplaceProfiles", user.uid), updated, { merge: true });
+
+      // Public business page lives in its own document (see firestore.rules)
+      // so it can be publicly readable without exposing phone/email.
+      // Write/delete it here to match whatever the toggle says now.
+      const publicRef = doc(db, "marketplacePublicProfiles", user.uid);
+      if (isContractor && editForm.public) {
+        await setDoc(publicRef, {
+          uid: user.uid,
+          name: updated.name,
+          businessName: updated.businessName,
+          trade: updated.trade,
+          serviceArea: updated.serviceArea,
+          bio: updated.bio,
+          photoURL: updated.photoURL,
+          updatedAt: serverTimestamp(),
+        });
+      } else {
+        await deleteDoc(publicRef).catch(() => {});
+      }
+
       setProfile(updated);
       setEditing(false);
     } catch (err) {
@@ -137,20 +187,36 @@ export default function Account() {
       {profile && !editing && (
         <Card className="border-border/60">
           <CardContent className="flex items-center justify-between p-4">
-            <div>
-              <p className="text-sm font-medium">{profile.name}</p>
-              <p className="text-xs text-muted-foreground">{profile.phone}</p>
-              {profile.trade && (roles === "contractor" || roles === "both") && (
-                <p className="text-xs capitalize text-muted-foreground">{profile.trade}</p>
+            <div className="flex items-center gap-3">
+              {profile.photoURL ? (
+                <img src={profile.photoURL} alt="" className="h-10 w-10 rounded-full object-cover" />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
+                  {(profile.name || "?").charAt(0).toUpperCase()}
+                </div>
               )}
+              <div>
+                <p className="text-sm font-medium">{profile.name}</p>
+                <p className="text-xs text-muted-foreground">{profile.phone}</p>
+                {profile.trade && (roles === "contractor" || roles === "both") && (
+                  <p className="text-xs capitalize text-muted-foreground">{profile.trade}</p>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="capitalize">
-                {profile.roles}
-              </Badge>
-              <Button type="button" size="sm" variant="outline" onClick={startEditing}>
-                Edit
-              </Button>
+            <div className="flex flex-col items-end gap-1.5">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="capitalize">
+                  {profile.roles}
+                </Badge>
+                <Button type="button" size="sm" variant="outline" onClick={startEditing}>
+                  Edit
+                </Button>
+              </div>
+              {profile.public && (
+                <Link to={`/pro/${user.uid}`} className="text-xs font-medium underline underline-offset-2">
+                  View business page
+                </Link>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -160,6 +226,10 @@ export default function Account() {
         <Card className="border-border/60">
           <CardContent className="p-4">
             <form onSubmit={saveEdit} className="space-y-3">
+              <AvatarUpload
+                preview={avatarFile ? URL.createObjectURL(avatarFile) : editForm.photoURL}
+                onSelect={(file) => setAvatarFile(file)}
+              />
               <div className="space-y-1.5">
                 <Label>I am</Label>
                 <div className="flex gap-2">
@@ -199,21 +269,60 @@ export default function Account() {
                 </div>
               </div>
               {editIsContractor && (
-                <div className="space-y-1">
-                  <Label htmlFor="editTrade">Trade</Label>
-                  <select
-                    id="editTrade"
-                    value={editForm.trade}
-                    onChange={(e) => setEditForm((f) => ({ ...f, trade: e.target.value }))}
-                    className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
-                  >
-                    {TRADE_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <>
+                  <div className="space-y-1">
+                    <Label htmlFor="editTrade">Trade</Label>
+                    <select
+                      id="editTrade"
+                      value={editForm.trade}
+                      onChange={(e) => setEditForm((f) => ({ ...f, trade: e.target.value }))}
+                      className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
+                    >
+                      {TRADE_OPTIONS.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="editBusinessName">Business name (optional)</Label>
+                    <Input
+                      id="editBusinessName"
+                      value={editForm.businessName}
+                      onChange={(e) => setEditForm((f) => ({ ...f, businessName: e.target.value }))}
+                      placeholder="Defaults to your name if blank"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="editServiceArea">Service area</Label>
+                    <Input
+                      id="editServiceArea"
+                      value={editForm.serviceArea}
+                      onChange={(e) => setEditForm((f) => ({ ...f, serviceArea: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="editBio">About your business (optional)</Label>
+                    <Textarea
+                      id="editBio"
+                      rows={2}
+                      value={editForm.bio}
+                      onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))}
+                    />
+                  </div>
+                  <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={editForm.public}
+                      onChange={(e) => setEditForm((f) => ({ ...f, public: e.target.checked }))}
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-border"
+                    />
+                    <span>
+                      Make a public business page other homeowners can see (no phone/email shown).
+                    </span>
+                  </label>
+                </>
               )}
               {saveError && <p className="text-sm text-destructive">{saveError}</p>}
               <div className="flex gap-2">

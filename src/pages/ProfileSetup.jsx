@@ -5,15 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
+import { db, uploadAvatar } from "@/lib/firebase";
 import TermsAgreement from "@/components/TermsAgreement";
+import AvatarUpload from "@/components/AvatarUpload";
 
 const ROLE_OPTIONS = [
   { value: "client", label: "I need work done" },
   { value: "contractor", label: "I do the work" },
   { value: "both", label: "Both" },
 ];
+
+const TRADE_OPTIONS = ["electrical", "plumbing", "hvac", "handyman", "painting", "landscaping", "cleaning", "movingHauling"];
 
 export default function ProfileSetup() {
   const { user, loading } = useAuth();
@@ -22,6 +26,12 @@ export default function ProfileSetup() {
   const [name, setName] = useState(user?.displayName || "");
   const [phone, setPhone] = useState("");
   const [trade, setTrade] = useState("handyman");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(user?.photoURL || "");
+  const [businessName, setBusinessName] = useState("");
+  const [bio, setBio] = useState("");
+  const [serviceArea, setServiceArea] = useState("Perth Amboy");
+  const [makePublic, setMakePublic] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -37,6 +47,11 @@ export default function ProfileSetup() {
     setSaving(true);
     setError("");
     try {
+      let photoURL = user.photoURL || "";
+      if (avatarFile) {
+        photoURL = await uploadAvatar(user.uid, avatarFile);
+      }
+
       await setDoc(doc(db, "marketplaceProfiles", user.uid), {
         uid: user.uid,
         name: name.trim(),
@@ -44,8 +59,30 @@ export default function ProfileSetup() {
         phone: phone.trim(),
         roles,
         trade: isContractor ? trade : null,
+        photoURL,
+        businessName: isContractor ? businessName.trim() : "",
+        bio: isContractor ? bio.trim() : "",
+        serviceArea: isContractor ? serviceArea.trim() || "Perth Amboy" : "",
         createdAt: serverTimestamp(),
       });
+
+      // Public business page is a separate document with no phone/email on
+      // it at all (see firestore.rules "marketplacePublicProfiles") — only
+      // written when a contractor opts in here, never for client-only
+      // accounts since there's nothing to show a stranger.
+      if (isContractor && makePublic) {
+        await setDoc(doc(db, "marketplacePublicProfiles", user.uid), {
+          uid: user.uid,
+          name: name.trim(),
+          businessName: businessName.trim(),
+          trade,
+          serviceArea: serviceArea.trim() || "Perth Amboy",
+          bio: bio.trim(),
+          photoURL,
+          updatedAt: serverTimestamp(),
+        });
+      }
+
       // Was "/dashboard" — that route was retired with the old SaaS tool
       // and no longer exists, so this silently bounced people to "/" via
       // App.jsx's catch-all instead of actually landing on their new
@@ -64,6 +101,13 @@ export default function ProfileSetup() {
         <Card className="border-border/60">
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              <AvatarUpload
+                preview={avatarPreview}
+                onSelect={(file, previewUrl) => {
+                  setAvatarFile(file);
+                  setAvatarPreview(previewUrl);
+                }}
+              />
               <div className="space-y-1.5">
                 <Label>I am</Label>
                 <div className="flex gap-2">
@@ -90,23 +134,52 @@ export default function ProfileSetup() {
                 <Input id="psPhone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
               </div>
               {isContractor && (
-                <div className="space-y-1">
-                  <Label htmlFor="psTrade">Trade</Label>
-                  <select
-                    id="psTrade"
-                    value={trade}
-                    onChange={(e) => setTrade(e.target.value)}
-                    className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
-                  >
-                    {["electrical", "plumbing", "hvac", "handyman", "painting", "landscaping", "cleaning", "movingHauling"].map(
-                      (t) => (
+                <>
+                  <div className="space-y-1">
+                    <Label htmlFor="psTrade">Trade</Label>
+                    <select
+                      id="psTrade"
+                      value={trade}
+                      onChange={(e) => setTrade(e.target.value)}
+                      className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
+                    >
+                      {TRADE_OPTIONS.map((t) => (
                         <option key={t} value={t}>
                           {t}
                         </option>
-                      )
-                    )}
-                  </select>
-                </div>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="psBusinessName">Business name (optional)</Label>
+                    <Input
+                      id="psBusinessName"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      placeholder="Defaults to your name if blank"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="psServiceArea">Service area</Label>
+                    <Input id="psServiceArea" value={serviceArea} onChange={(e) => setServiceArea(e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="psBio">About your business (optional)</Label>
+                    <Textarea id="psBio" rows={2} value={bio} onChange={(e) => setBio(e.target.value)} />
+                  </div>
+                  <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={makePublic}
+                      onChange={(e) => setMakePublic(e.target.checked)}
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-border"
+                    />
+                    <span>
+                      Make a public business page other homeowners can see (no phone/email shown — they'll
+                      reach you through Fieldsta). You can turn this on or off anytime from your account.
+                    </span>
+                  </label>
+                </>
               )}
               <TermsAgreement checked={agreed} onChange={setAgreed} id="profileTermsAgree" />
               {error && <p className="text-sm text-destructive">{error}</p>}

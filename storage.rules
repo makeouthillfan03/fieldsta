@@ -29,6 +29,19 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    // Profile avatars for the Find a Pro marketplace — path is
+    // avatars/{uid}/{fileName}. Publicly readable (avatars show on public
+    // business pages, see pages/BusinessPage.jsx), but only the owner can
+    // upload to their own folder. See chat: "u also need to be able to
+    // upload profile pictures too."
+    match /avatars/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
     // Price book imports (catalogs/price sheets uploaded for AI parsing) —
     // path-scoped by companyId directly, since there's no Firestore doc to
     // look the company up from until after the file exists. The

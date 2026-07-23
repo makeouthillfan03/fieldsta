@@ -339,7 +339,32 @@ service cloud.firestore {
     // — plus contact info. Only the account owner can ever read or write
     // it; nobody else, including other marketplace users, can see it.
     match /marketplaceProfiles/{uid} {
+      // Stays fully private — has phone/email on it. Only the owner can
+      // ever read or write it; nobody else, including other marketplace
+      // users, can see it.
       allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Opt-in public business page (see chat: "make a business page if u
+    // wanted to"). Deliberately a SEPARATE document from
+    // marketplaceProfiles, not just a "public: true" flag on the private
+    // one — Firestore security rules can't do field-level reads (a client
+    // fetching a doc gets every field on it), so if this lived on the
+    // same private doc, anyone reading it because it's "public" would
+    // also be able to read the phone/email fields on that same doc,
+    // whether or not the UI chooses to display them. Keeping public data
+    // in its own document with no phone/email field on it at all closes
+    // that off at the rules level instead of trusting the client not to
+    // render something. Written by ProfileSetup.jsx/Account.jsx only when
+    // a contractor opts in; read by BusinessPage.jsx.
+    match /marketplacePublicProfiles/{uid} {
+      allow read: if true;
+      allow write: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(["uid", "name", "businessName", "trade", "serviceArea", "bio", "photoURL", "updatedAt"])
+        && !("phone" in request.resource.data)
+        && !("email" in request.resource.data);
+      allow delete: if isSignedIn() && request.auth.uid == uid;
     }
 
     // ---------------------------------------------------------------
