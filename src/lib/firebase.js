@@ -124,6 +124,14 @@ export function getMarketplaceSubmissions() {
   return call({});
 }
 
+// Public — any contractor can browse open job requests to bid on. Returns
+// sanitized fields only (no homeowner name/phone/address). See
+// functions/index.js listOpenLeads.
+export function listOpenLeads() {
+  const call = httpsCallable(functions, "listOpenLeads");
+  return call({});
+}
+
 // Uploads a price sheet/catalog (PDF or CSV) to Storage, then asks
 // parsePriceBookFile to turn it into structured {name, category, unitPrice,
 // unit, notes} line items for the caller to review before anything is

@@ -1,11 +1,54 @@
 import { useEffect, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
-import { Calendar, MapPin, FileText, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { loginWithGoogle, getRedirectRoundtripError } from "@/lib/firebase";
+
+// Distinct gradient variant from FindAPro's (same blue family, different
+// blob placement/sizing) so pages don't all read as one copy-pasted
+// background — see chat "make every page different." This one sits
+// centered behind a single sign-in card instead of a top-down hero.
+function LoginGradientBackground() {
+  return (
+    <>
+      <style>{`
+        .login-bg {
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          overflow: hidden;
+          background: #ffffff;
+        }
+        .login-bg::before,
+        .login-bg::after {
+          content: "";
+          position: absolute;
+          border-radius: 9999px;
+          filter: blur(80px);
+          opacity: 0.55;
+        }
+        .login-bg::before {
+          top: 15%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50vw;
+          height: 50vw;
+          background: radial-gradient(circle, #a9c9ec, #dcebf9 65%, transparent 78%);
+        }
+        .login-bg::after {
+          bottom: -20%;
+          right: -15%;
+          width: 45vw;
+          height: 45vw;
+          background: radial-gradient(circle, #cfe1f5, #f2f8fd 60%, transparent 75%);
+        }
+      `}</style>
+      <div className="login-bg" aria-hidden="true" />
+    </>
+  );
+}
 
 export default function Login() {
   const { user, loading } = useAuth();
@@ -35,12 +78,6 @@ export default function Login() {
 
   if (!loading && user) return <Navigate to="/" replace />;
 
-  const features = [
-    { icon: Calendar, text: t("login.feature1") },
-    { icon: MapPin, text: t("login.feature2") },
-    { icon: FileText, text: t("login.feature3") },
-  ];
-
   async function handleLogin() {
     setError("");
     setSigningIn(true);
@@ -56,53 +93,33 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="relative overflow-hidden bg-primary px-6 pb-8 pt-8 text-primary-foreground sm:pb-10 sm:pt-10">
-        <button
-          type="button"
-          onClick={() => setLang(lang === "en" ? "es" : "en")}
-          className="absolute right-4 top-4 z-10 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold"
-          aria-label="Switch language"
-        >
-          {t("lang.toggle")}
-        </button>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10 sm:h-56 sm:w-56"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-14 -left-10 h-32 w-32 rounded-full bg-white/10"
-        />
-        <div className="relative mx-auto flex max-w-sm flex-col items-center text-center">
-          <img src="/mascot.png" alt="" className="mb-2 h-16 w-16" />
-          <h1 className="text-xl font-semibold sm:text-2xl">{t("login.title")}</h1>
-          <p className="mt-1 text-xs text-primary-foreground/80 sm:text-sm">{t("login.tagline")}</p>
-        </div>
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center px-6">
+      <LoginGradientBackground />
+      <button
+        type="button"
+        onClick={() => setLang(lang === "en" ? "es" : "en")}
+        className="absolute right-4 top-4 rounded-full border border-border bg-white/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm"
+        aria-label="Switch language"
+      >
+        {t("lang.toggle")}
+      </button>
 
-      <div className="mx-auto -mt-4 flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-16 pt-4">
-        <Card className="border border-border bg-background shadow-xl">
-          <CardContent className="space-y-6 p-8">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-semibold">Account sign in</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            For Find a Pro's admin tools — homeowners and contractors don't need an account.
+          </p>
+        </div>
+
+        <Card className="border-border/60 bg-white/85 shadow-xl backdrop-blur-sm">
+          <CardContent className="space-y-4 p-8">
             <Button className="w-full" size="lg" onClick={handleLogin} disabled={signingIn}>
-              {signingIn ? t("login.signingIn") : t("login.signIn")}
+              {signingIn ? "Signing in…" : "Sign in with Google"}
             </Button>
             {error && <p className="text-center text-sm text-destructive">{error}</p>}
-
-            <ul className="space-y-4 border-t border-border pt-6">
-              {features.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>{text}</span>
-                </li>
-              ))}
-            </ul>
           </CardContent>
         </Card>
-
-        <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-          <CheckCircle2 className="h-3.5 w-3.5" /> {t("login.footer")}
-        </p>
       </div>
     </div>
   );

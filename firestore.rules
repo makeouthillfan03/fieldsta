@@ -309,6 +309,23 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // A contractor's bid on a specific job request (marketplaceLeads doc).
+    // Same public-write/no-read shape — bids are only ever read back out
+    // via the owner-locked getMarketplaceSubmissions callable, same as
+    // leads/contractors above, so contractors can't see each other's bids.
+    match /marketplaceBids/{id} {
+      allow read: if false;
+      allow create: if request.resource.data.leadId is string &&
+        request.resource.data.leadId.size() > 0 &&
+        request.resource.data.contractorName is string &&
+        request.resource.data.contractorName.size() > 0 &&
+        request.resource.data.contractorPhone is string &&
+        request.resource.data.contractorPhone.size() > 0 &&
+        request.resource.data.amount is number &&
+        request.resource.data.amount > 0;
+      allow update, delete: if false;
+    }
+
     // ---------------------------------------------------------------
     // Public site analytics — a single doc (siteAnalytics/welcome) that
     // anyone (signed in or not) can increment by exactly 1 when the

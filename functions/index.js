@@ -853,9 +853,10 @@ exports.getMarketplaceSubmissions = onCall(async (request) => {
     throw new HttpsError("permission-denied", "Not available on this account.");
   }
 
-  const [leadsSnap, contractorsSnap] = await Promise.all([
+  const [leadsSnap, contractorsSnap, bidsSnap] = await Promise.all([
     db.collection("marketplaceLeads").orderBy("createdAt", "desc").get(),
     db.collection("marketplaceContractors").orderBy("createdAt", "desc").get(),
+    db.collection("marketplaceBids").orderBy("createdAt", "desc").get(),
   ]);
 
   const toPlain = (snap) =>
@@ -868,5 +869,33 @@ exports.getMarketplaceSubmissions = onCall(async (request) => {
       };
     });
 
-  return { leads: toPlain(leadsSnap), contractors: toPlain(contractorsSnap) };
+  return { leads: toPlain(leadsSnap), contractors: toPlain(contractorsSnap), bids: toPlain(bidsSnap) };
+});
+
+// Public (no auth/email check — this one's meant for any contractor
+// browsing open jobs to bid on, not just the owner). Deliberately returns
+// only non-identifying fields (trade, area, a short description, when it
+// came in) — never the homeowner's name/phone/address, so a stranger
+// bidding can't harvest contact info before actually being matched. Full
+// details still only ever come out through getMarketplaceSubmissions.
+exports.listOpenLeads = onCall(async () => {
+  const snap = await db
+    .collection("marketplaceLeads")
+    .where("status", "==", "new")
+    .orderBy("createdAt", "desc")
+    .limit(50)
+    .get();
+
+  return {
+    leads: snap.docs.map((doc) => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        trade: d.trade || "other",
+        area: d.area || "Perth Amboy",
+        description: d.description || "",
+        createdAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
+      };
+    }),
+  };
 });

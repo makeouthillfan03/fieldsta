@@ -5,6 +5,7 @@ import CompanySetup from "@/pages/CompanySetup";
 import GrowthDashboard from "@/pages/GrowthDashboard";
 import FindAPro from "@/pages/FindAPro";
 import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
+import OpenJobs from "@/pages/OpenJobs";
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/" element={<FindAPro />} />
       <Route path="/welcome" element={<FindAPro />} />
       <Route path="/find-a-pro" element={<FindAPro />} />
+      <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/login" element={<Login />} />
 
       {/* Kept around only so a signed-in owner without a companies/{id} doc

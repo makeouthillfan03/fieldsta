@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { CheckCircle2, Zap, Wrench, Snowflake, Hammer, Paintbrush, Leaf, Sparkles, Truck, MoreHorizontal } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Zap, Wrench, Snowflake, Hammer, Paintbrush, Leaf, Sparkles, Truck, MoreHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
+import MapView from "@/components/MapView";
 
 // Concierge MVP for the Perth Amboy marketplace pilot (see chat — this is
 // deliberately NOT automated matching yet). Two forms feed two Firestore
@@ -125,11 +126,57 @@ function GradientBackground() {
   );
 }
 
-const STEPS = [
-  { title: "Post what you need", body: "Tell us the job — electrical, plumbing, handyman, whatever it is." },
-  { title: "Get matched", body: "We connect you with a local pro who can actually do it, by phone or text." },
-  { title: "Get it done", body: "Talk pricing and scheduling directly with the pro. No fees, no middleman markup." },
-];
+// Phone verification UI scaffold — see chat: "add a phone number
+// verification setup but dont complete it because i needa do twillo."
+// This is deliberately NOT wired to anything real yet. Once a Twilio
+// account/number is set up, "Send code" should call a Cloud Function that
+// sends a real SMS via Twilio's Verify API and a second callable should
+// confirm the code before the form is allowed to submit — same shape as
+// the phone verification already built for the old Fieldsta signup (see
+// lib/firebase.js sendPhoneVerificationCode, though that used Firebase's
+// own phone auth, not Twilio — worth deciding which provider before
+// wiring this up for real, since Firebase phone auth might be simpler).
+// For now it's just a visible, honest "coming soon" so the concierge MVP
+// doesn't silently pretend to verify something it isn't.
+function PhoneVerifyStub() {
+  const [phone, setPhone] = useState("");
+  const [requested, setRequested] = useState(false);
+
+  return (
+    <div className="space-y-2 rounded-md border border-dashed border-border bg-muted/30 p-3">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <ShieldCheck className="h-3.5 w-3.5" />
+        Phone verification (coming soon)
+      </div>
+      {!requested ? (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Your phone number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="h-8 text-sm"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!phone.trim()}
+            onClick={() => setRequested(true)}
+          >
+            Send code
+          </Button>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          SMS verification isn't turned on yet — for now we'll just call or text you directly to
+          confirm. This won't block your submission below.
+        </p>
+      )}
+    </div>
+  );
+}
+
+const STEPS = ["Post", "Match", "Done"];
 
 export default function FindAPro() {
   const [mode, setMode] = useState("homeowner"); // "homeowner" | "contractor"
@@ -139,27 +186,28 @@ export default function FindAPro() {
       <GradientBackground />
       <div className="mx-auto max-w-lg space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/mascot.png" alt="" className="h-7 w-7" />
-            <span className="font-semibold">Find a Pro — Perth Amboy</span>
-          </div>
+          <span className="font-semibold">Fieldsta</span>
           {/* Existing Fieldsta account holders (trial/paid) still need a way
               in now that this page replaced the old marketing homepage. */}
           <Link to="/login" className="text-xs font-medium text-muted-foreground hover:text-foreground">
-            Already have an account? Sign in
+            Sign in
           </Link>
         </div>
 
-        {/* Hero */}
-        <div className="space-y-2 pt-2 text-center">
+        {/* Hero — deliberately minimal, per chat "less is more, show not
+            tell": no paragraph pitch, just the headline and the map/chips
+            doing the explaining. */}
+        <div className="space-y-1 pt-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Find a local pro. <span className="text-primary">Free.</span>
           </h1>
-          <p className="mx-auto max-w-md text-sm text-muted-foreground">
-            Post your job and get matched with a real, local contractor in Perth Amboy — no fees
-            to post, no fees to sign up.
-          </p>
+          {/* Scope note kept to a single small line, not a paragraph — see
+              chat: "just say right now we are only limiting to perth amboy
+              as early location for early testing." */}
+          <p className="text-xs text-muted-foreground">Perth Amboy only, for now — testing.</p>
         </div>
+
+        <MapView height={180} />
 
         {/* Trade chips */}
         <div className="flex flex-wrap justify-center gap-2">
@@ -177,27 +225,25 @@ export default function FindAPro() {
           })}
         </div>
 
-        {/* How it works */}
-        <Card className="border-border/60 bg-white/70 backdrop-blur-sm">
-          <CardContent className="grid grid-cols-3 gap-3 p-4 text-center">
-            {STEPS.map((step, i) => (
-              <div key={step.title} className="space-y-1">
-                <div className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-                  {i + 1}
-                </div>
-                <p className="text-xs font-semibold">{step.title}</p>
-                <p className="text-[11px] leading-snug text-muted-foreground">{step.body}</p>
+        {/* How it works — numbers + one word each, no explanatory copy */}
+        <div className="flex items-center justify-center gap-6">
+          {STEPS.map((step, i) => (
+            <div key={step} className="flex items-center gap-1.5">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+                {i + 1}
               </div>
-            ))}
-          </CardContent>
-        </Card>
+              <span className="text-xs font-medium">{step}</span>
+              {i < STEPS.length - 1 && <span className="text-muted-foreground">→</span>}
+            </div>
+          ))}
+        </div>
 
         <div className="flex rounded-md border border-border bg-white/70 p-1 text-sm backdrop-blur-sm">
           <button
             type="button"
             onClick={() => setMode("homeowner")}
             className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
-              mode === "homeowner" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              mode === "homeowner" ? "bg-black text-white" : "text-muted-foreground"
             }`}
           >
             I need something done
@@ -206,7 +252,7 @@ export default function FindAPro() {
             type="button"
             onClick={() => setMode("contractor")}
             className={`flex-1 rounded px-3 py-1.5 font-medium transition-colors ${
-              mode === "contractor" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              mode === "contractor" ? "bg-black text-white" : "text-muted-foreground"
             }`}
           >
             I'm a contractor
@@ -215,10 +261,11 @@ export default function FindAPro() {
 
         {mode === "homeowner" ? <HomeownerForm /> : <ContractorForm />}
 
-        <footer className="pt-4 text-center text-xs text-muted-foreground">
-          Perth Amboy pilot — {new Date().getFullYear()}. Licensed trades (electrical, plumbing,
-          HVAC) are asked for their NJ license; other trades don't require one.
-        </footer>
+        {mode === "contractor" && (
+          <Link to="/open-jobs" className="block text-center text-xs font-medium underline underline-offset-2">
+            Browse open jobs
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -317,8 +364,9 @@ function HomeownerForm() {
               onChange={(e) => update("description", e.target.value)}
             />
           </div>
+          <PhoneVerifyStub />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={saving}>
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving}>
             {saving ? "Sending…" : "Get matched with a pro"}
           </Button>
         </form>
@@ -443,8 +491,9 @@ function ContractorForm() {
             <Label htmlFor="contNotes">Anything else? (years of experience, etc.)</Label>
             <Textarea id="contNotes" rows={2} value={form.notes} onChange={(e) => update("notes", e.target.value)} />
           </div>
+          <PhoneVerifyStub />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={saving}>
+          <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={saving}>
             {saving ? "Submitting…" : "Sign up for jobs"}
           </Button>
         </form>
