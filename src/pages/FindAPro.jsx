@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Zap, Wrench, Snowflake, Hammer, Paintbrush, Leaf, Sparkles, Truck, MoreHorizontal } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,18 @@ const TRADE_LABELS = {
   other: "Other",
 };
 
+const TRADE_ICONS = {
+  electrical: Zap,
+  plumbing: Wrench,
+  hvac: Snowflake,
+  handyman: Hammer,
+  painting: Paintbrush,
+  landscaping: Leaf,
+  cleaning: Sparkles,
+  movingHauling: Truck,
+  other: MoreHorizontal,
+};
+
 const LICENSED_TRADES = new Set(["electrical", "plumbing", "hvac"]);
 
 const emptyLeadForm = {
@@ -63,12 +75,69 @@ const emptyContractorForm = {
   notes: "",
 };
 
+// Soft blue/white gradient swirl behind the whole page (see chat — matched
+// to a reference image). Pure CSS, no images: a handful of large, blurred
+// radial gradients layered on a white base and drifted very slowly so it
+// doesn't feel static, but it's subtle enough not to fight with the forms.
+function GradientBackground() {
+  return (
+    <>
+      <style>{`
+        @keyframes fap-drift {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(-3%, 2%) scale(1.05); }
+          100% { transform: translate(0, 0) scale(1); }
+        }
+        .fap-bg {
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          overflow: hidden;
+          background: #ffffff;
+        }
+        .fap-bg::before,
+        .fap-bg::after {
+          content: "";
+          position: absolute;
+          border-radius: 9999px;
+          filter: blur(70px);
+          opacity: 0.65;
+        }
+        .fap-bg::before {
+          top: -10%;
+          right: -10%;
+          width: 60vw;
+          height: 60vw;
+          background: radial-gradient(circle at 40% 40%, #8fb8e8, #cfe1f5 60%, transparent 75%);
+          animation: fap-drift 22s ease-in-out infinite;
+        }
+        .fap-bg::after {
+          bottom: -15%;
+          left: -10%;
+          width: 55vw;
+          height: 55vw;
+          background: radial-gradient(circle at 60% 60%, #bcdcf7, #e9f3fc 60%, transparent 75%);
+          animation: fap-drift 26s ease-in-out infinite reverse;
+        }
+      `}</style>
+      <div className="fap-bg" aria-hidden="true" />
+    </>
+  );
+}
+
+const STEPS = [
+  { title: "Post what you need", body: "Tell us the job — electrical, plumbing, handyman, whatever it is." },
+  { title: "Get matched", body: "We connect you with a local pro who can actually do it, by phone or text." },
+  { title: "Get it done", body: "Talk pricing and scheduling directly with the pro. No fees, no middleman markup." },
+];
+
 export default function FindAPro() {
   const [mode, setMode] = useState("homeowner"); // "homeowner" | "contractor"
 
   return (
-    <div className="min-h-screen bg-muted/30 px-4 py-6">
-      <div className="mx-auto max-w-lg space-y-4">
+    <div className="min-h-screen px-4 py-6">
+      <GradientBackground />
+      <div className="mx-auto max-w-lg space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/mascot.png" alt="" className="h-7 w-7" />
@@ -80,12 +149,50 @@ export default function FindAPro() {
             Already have an account? Sign in
           </Link>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Need work done at your house? Post what you need and a local pro will reach out. Are
-          you a contractor? Sign up to get sent local jobs.
-        </p>
 
-        <div className="flex rounded-md border border-border bg-background p-1 text-sm">
+        {/* Hero */}
+        <div className="space-y-2 pt-2 text-center">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Find a local pro. <span className="text-primary">Free.</span>
+          </h1>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
+            Post your job and get matched with a real, local contractor in Perth Amboy — no fees
+            to post, no fees to sign up.
+          </p>
+        </div>
+
+        {/* Trade chips */}
+        <div className="flex flex-wrap justify-center gap-2">
+          {TRADES.filter((t) => t !== "other").map((t) => {
+            const Icon = TRADE_ICONS[t];
+            return (
+              <span
+                key={t}
+                className="flex items-center gap-1.5 rounded-full border border-border bg-white/70 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm"
+              >
+                <Icon className="h-3.5 w-3.5 text-primary" />
+                {TRADE_LABELS[t]}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* How it works */}
+        <Card className="border-border/60 bg-white/70 backdrop-blur-sm">
+          <CardContent className="grid grid-cols-3 gap-3 p-4 text-center">
+            {STEPS.map((step, i) => (
+              <div key={step.title} className="space-y-1">
+                <div className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {i + 1}
+                </div>
+                <p className="text-xs font-semibold">{step.title}</p>
+                <p className="text-[11px] leading-snug text-muted-foreground">{step.body}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <div className="flex rounded-md border border-border bg-white/70 p-1 text-sm backdrop-blur-sm">
           <button
             type="button"
             onClick={() => setMode("homeowner")}
@@ -107,6 +214,11 @@ export default function FindAPro() {
         </div>
 
         {mode === "homeowner" ? <HomeownerForm /> : <ContractorForm />}
+
+        <footer className="pt-4 text-center text-xs text-muted-foreground">
+          Perth Amboy pilot — {new Date().getFullYear()}. Licensed trades (electrical, plumbing,
+          HVAC) are asked for their NJ license; other trades don't require one.
+        </footer>
       </div>
     </div>
   );
@@ -149,7 +261,7 @@ function HomeownerForm() {
 
   if (submitted) {
     return (
-      <Card>
+      <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
           <p className="font-medium">Got it!</p>
@@ -162,7 +274,7 @@ function HomeownerForm() {
   }
 
   return (
-    <Card>
+    <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-base">What do you need done?</CardTitle>
       </CardHeader>
@@ -254,7 +366,7 @@ function ContractorForm() {
 
   if (submitted) {
     return (
-      <Card>
+      <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
         <CardContent className="flex flex-col items-center gap-2 p-6 text-center">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
           <p className="font-medium">You're on the list!</p>
@@ -267,7 +379,7 @@ function ContractorForm() {
   }
 
   return (
-    <Card>
+    <Card className="border-border/60 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-base">Get sent local jobs</CardTitle>
       </CardHeader>

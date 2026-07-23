@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/favicon-32.png", "icons/apple-touch-icon.png"],
       manifest: {
-        name: "Fieldsta",
-        short_name: "Fieldsta",
-        description: "Dispatch and job management for HVAC contractors",
+        name: "Find a Pro — Perth Amboy",
+        short_name: "Find a Pro",
+        description: "Free local contractor matching for Perth Amboy — electrical, plumbing, HVAC, handyman, and more.",
         theme_color: "#185FA5",
         background_color: "#ffffff",
         display: "standalone",
