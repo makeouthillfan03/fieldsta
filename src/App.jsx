@@ -1,49 +1,32 @@
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import AddJob from "@/pages/AddJob";
-import CustomerList from "@/pages/CustomerList";
-import CustomerDetail from "@/pages/CustomerDetail";
-import JobDetail from "@/pages/JobDetail";
-import DispatchBoard from "@/pages/DispatchBoard";
-import Technicians from "@/pages/Technicians";
-import StoreOrders from "@/pages/StoreOrders";
-import InvoicePreview from "@/pages/InvoicePreview";
-import PriceBook from "@/pages/PriceBook";
-import Estimates from "@/pages/Estimates";
-import EstimateDetail from "@/pages/EstimateDetail";
-import MyRoute from "@/pages/MyRoute";
-import Reports from "@/pages/Reports";
-import CustomerPortal from "@/pages/CustomerPortal";
-import EstimatePortal from "@/pages/EstimatePortal";
-import BookingRequest from "@/pages/BookingRequest";
-import BookingRequests from "@/pages/BookingRequests";
 import CompanySetup from "@/pages/CompanySetup";
-import Team from "@/pages/Team";
-import MaintenanceAgreements from "@/pages/MaintenanceAgreements";
-import Assistant from "@/pages/Assistant";
-import Billing from "@/pages/Billing";
-import Welcome from "@/pages/Welcome";
 import GrowthDashboard from "@/pages/GrowthDashboard";
 import FindAPro from "@/pages/FindAPro";
 import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
 
-function PrivateRoute({ children }) {
-  const { user, loading, companyLoading, needsCompany } = useAuth();
-  if (loading || (user && companyLoading)) {
-    return (
-      <div className="flex h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
-  }
-  if (!user) return <Navigate to="/welcome" replace />;
-  if (needsCompany) return <Navigate to="/setup-company" replace />;
-  return children;
-}
+// ---------------------------------------------------------------------
+// The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
+// customers, dispatch, technicians, price book, estimates, billing/paywall,
+// booking requests, the AI assistant, etc.) is intentionally no longer
+// routed here — see chat: "no one is using regular fieldsta, just replace
+// it completely and remove the fees." Every one of those page files is
+// still sitting untouched in src/pages/, and functions/index.js and
+// firestore.rules still have all their backing logic — nothing was
+// deleted, it's just not live. If this ever needs to come back, it's a
+// routing change here, not a rebuild.
+//
+// The live site is now just the Find a Pro marketplace concierge MVP
+// (Perth Amboy pilot, see FindAPro.jsx/MarketplaceAdmin.jsx) — free for
+// both homeowners and contractors, no subscription/billing anywhere.
+// ---------------------------------------------------------------------
 
+// The owner-only pages (growth stats, marketplace matchmaking list) only
+// need "is this a signed-in Google account," full stop — the real access
+// control happens server-side in the Cloud Functions themselves (locked to
+// one email, see functions/index.js). No company/plan check anymore since
+// there's no paywall left to gate.
 function RequireAuthOnly({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -51,33 +34,16 @@ function RequireAuthOnly({ children }) {
   return children;
 }
 
-function AdminRoute({ children }) {
-  const { isAdmin, loading } = useAuth();
-  if (loading) return null;
-  if (!isAdmin) return <Navigate to="/" replace />;
-  return children;
-}
-
-// Blocks access to the working app once a company's trial has expired and
-// it isn't comped or actively subscribed — redirects to /billing instead.
-// /billing itself lives outside this gate so a blocked company can still
-// reach it to subscribe.
-function RequirePlan() {
-  const { planLoading, planActive } = useAuth();
-  if (planLoading) return null;
-  if (!planActive) return <Navigate to="/billing" replace />;
-  return <Outlet />;
-}
-
 export default function App() {
   return (
     <Routes>
-      <Route path="/welcome" element={<Welcome />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/portal/:token" element={<CustomerPortal />} />
-      <Route path="/estimate/:estimateId" element={<EstimatePortal />} />
-      <Route path="/book/:companyId" element={<BookingRequest />} />
+      <Route path="/" element={<FindAPro />} />
+      <Route path="/welcome" element={<FindAPro />} />
       <Route path="/find-a-pro" element={<FindAPro />} />
+      <Route path="/login" element={<Login />} />
+
+      {/* Kept around only so a signed-in owner without a companies/{id} doc
+          yet doesn't get stuck — not part of the live product anymore. */}
       <Route
         path="/setup-company"
         element={
@@ -88,86 +54,21 @@ export default function App() {
       />
 
       <Route
+        path="/growth"
         element={
-          <PrivateRoute>
-            <Layout />
-          </PrivateRoute>
+          <RequireAuthOnly>
+            <GrowthDashboard />
+          </RequireAuthOnly>
         }
-      >
-        <Route path="/billing" element={<Billing />} />
-        <Route path="/growth" element={<GrowthDashboard />} />
-        <Route path="/marketplace-admin" element={<MarketplaceAdmin />} />
-
-        <Route element={<RequirePlan />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/jobs/new" element={<AddJob />} />
-          <Route path="/jobs/:jobId" element={<JobDetail />} />
-          <Route path="/jobs/:jobId/invoice" element={<InvoicePreview />} />
-          <Route path="/customers" element={<CustomerList />} />
-          <Route path="/customers/:customerId" element={<CustomerDetail />} />
-          <Route path="/my-route" element={<MyRoute />} />
-          <Route path="/estimates" element={<Estimates />} />
-          <Route path="/estimates/:estimateId" element={<EstimateDetail />} />
-          <Route path="/agreements" element={<MaintenanceAgreements />} />
-          <Route path="/assistant" element={<Assistant />} />
-          <Route
-            path="/dispatch"
-            element={
-              <AdminRoute>
-                <DispatchBoard />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/technicians"
-            element={
-              <AdminRoute>
-                <Technicians />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/store-orders"
-            element={
-              <AdminRoute>
-                <StoreOrders />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/price-book"
-            element={
-              <AdminRoute>
-                <PriceBook />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <AdminRoute>
-                <Reports />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/team"
-            element={
-              <AdminRoute>
-                <Team />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="/booking-requests"
-            element={
-              <AdminRoute>
-                <BookingRequests />
-              </AdminRoute>
-            }
-          />
-        </Route>
-      </Route>
+      />
+      <Route
+        path="/marketplace-admin"
+        element={
+          <RequireAuthOnly>
+            <MarketplaceAdmin />
+          </RequireAuthOnly>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

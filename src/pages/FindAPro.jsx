@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,9 +69,16 @@ export default function FindAPro() {
   return (
     <div className="min-h-screen bg-muted/30 px-4 py-6">
       <div className="mx-auto max-w-lg space-y-4">
-        <div className="flex items-center gap-2">
-          <img src="/mascot.png" alt="" className="h-7 w-7" />
-          <span className="font-semibold">Find a Pro — Perth Amboy</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/mascot.png" alt="" className="h-7 w-7" />
+            <span className="font-semibold">Find a Pro — Perth Amboy</span>
+          </div>
+          {/* Existing Fieldsta account holders (trial/paid) still need a way
+              in now that this page replaced the old marketing homepage. */}
+          <Link to="/login" className="text-xs font-medium text-muted-foreground hover:text-foreground">
+            Already have an account? Sign in
+          </Link>
         </div>
         <p className="text-sm text-muted-foreground">
           Need work done at your house? Post what you need and a local pro will reach out. Are
