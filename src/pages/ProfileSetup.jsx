@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { db, uploadAvatar } from "@/lib/firebase";
 import TermsAgreement from "@/components/TermsAgreement";
 import AvatarUpload from "@/components/AvatarUpload";
+import GradientBackground from "@/components/GradientBackground";
 
 const ROLE_OPTIONS = [
   { value: "client", label: "I need work done" },
@@ -96,9 +97,10 @@ export default function ProfileSetup() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <GradientBackground variant="corner" />
       <div className="w-full max-w-sm">
         <h1 className="mb-4 text-center text-xl font-semibold">Set up your profile</h1>
-        <Card className="border-border/60">
+        <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <AvatarUpload

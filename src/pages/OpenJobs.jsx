@@ -8,6 +8,7 @@ import { db, listOpenLeads } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import MapView from "@/components/MapView";
 import TermsAgreement from "@/components/TermsAgreement";
+import GradientBackground from "@/components/GradientBackground";
 
 // Public bidding view — contractors browse open jobs (no PII shown, see
 // functions/index.js listOpenLeads) and submit a bid. Minimal by design,
@@ -36,9 +37,13 @@ export default function OpenJobs() {
 
   return (
     <div className="mx-auto min-h-screen max-w-lg space-y-3 px-4 py-6">
+      <GradientBackground variant="corner" />
       <div className="flex items-center justify-between">
         <Link to="/find-a-pro" className="text-sm font-medium">
           ← Find a Pro
+        </Link>
+        <Link to="/account" className="text-xs font-medium text-muted-foreground hover:text-foreground">
+          My account
         </Link>
       </div>
 
@@ -76,6 +81,13 @@ function JobCard({ job }) {
     try {
       await addDoc(collection(db, "marketplaceBids"), {
         leadId: job.id,
+        // Denormalized copy of the (already-sanitized, no-PII) job info
+        // onto the bid itself — see chat: Account.jsx's "My bids" was
+        // showing raw leadId.slice(0,6), which is meaningless to look at.
+        // Storing these here means that history doesn't need a second
+        // fetch per bid to look up the job just to show what it even was.
+        trade: job.trade,
+        description: job.description,
         contractorName: name.trim(),
         contractorPhone: phone.trim(),
         contractorEmail: email.trim(),
@@ -93,7 +105,7 @@ function JobCard({ job }) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-white p-3">
+    <div className="rounded-2xl border-0 bg-white p-3 shadow-md ring-1 ring-black/5">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
           <Icon className="h-4 w-4" />

@@ -10,6 +10,7 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import Account from "@/pages/Account";
 import Terms from "@/pages/Terms";
 import BusinessPage from "@/pages/BusinessPage";
+import ProsDirectory from "@/pages/ProsDirectory";
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -48,6 +49,7 @@ export default function App() {
       <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/pro/:uid" element={<BusinessPage />} />
+      <Route path="/pros" element={<ProsDirectory />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/profile-setup"

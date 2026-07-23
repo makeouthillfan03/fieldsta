@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { db, logout, uploadAvatar } from "@/lib/firebase";
 import AvatarUpload from "@/components/AvatarUpload";
+import GradientBackground from "@/components/GradientBackground";
 
 const ROLE_OPTIONS = [
   { value: "client", label: "I need work done" },
@@ -177,15 +178,28 @@ export default function Account() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4 px-4 py-6">
+      <GradientBackground variant="centered" />
       <div className="flex items-center justify-between">
-        <span className="font-semibold">Fieldsta</span>
-        <button type="button" onClick={logout} className="text-xs font-medium text-muted-foreground">
-          Sign out
-        </button>
+        <Link to="/find-a-pro" className="font-semibold">
+          Fieldsta
+        </Link>
+        <div className="flex items-center gap-3">
+          {showContractorHistory && (
+            <Link to="/open-jobs" className="text-xs font-medium text-muted-foreground hover:text-foreground">
+              Open jobs
+            </Link>
+          )}
+          <Link to="/pros" className="text-xs font-medium text-muted-foreground hover:text-foreground">
+            Browse pros
+          </Link>
+          <button type="button" onClick={logout} className="text-xs font-medium text-muted-foreground">
+            Sign out
+          </button>
+        </div>
       </div>
 
       {profile && !editing && (
-        <Card className="border-border/60">
+        <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
           <CardContent className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
               {profile.photoURL ? (
@@ -223,7 +237,7 @@ export default function Account() {
       )}
 
       {profile && editing && (
-        <Card className="border-border/60">
+        <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
           <CardContent className="p-4">
             <form onSubmit={saveEdit} className="space-y-3">
               <AvatarUpload
@@ -341,7 +355,7 @@ export default function Account() {
       {loadingData && <p className="text-sm text-muted-foreground">Loading…</p>}
 
       {showClientHistory && (
-        <Card className="border-border/60">
+        <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
           <CardHeader>
             <CardTitle className="text-sm">My requests</CardTitle>
           </CardHeader>
@@ -363,7 +377,7 @@ export default function Account() {
       )}
 
       {showContractorHistory && (
-        <Card className="border-border/60">
+        <Card className="rounded-2xl border-0 bg-white shadow-lg ring-1 ring-black/5">
           <CardHeader>
             <CardTitle className="text-sm">My bids</CardTitle>
           </CardHeader>
@@ -371,16 +385,23 @@ export default function Account() {
             {myBids.length === 0 && <p className="text-sm text-muted-foreground">No bids yet.</p>}
             {myBids.map((bid) => (
               <div key={bid.id} className="flex items-center justify-between rounded-md border border-border p-2 text-sm">
-                <span>{bid.leadId.slice(0, 6)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{bid.description || bid.trade || "Job"}</p>
+                  <p className="text-xs text-muted-foreground">{fmt(bid.createdAt)}</p>
+                </div>
                 <span className="font-medium">${bid.amount}</span>
-                <span className="text-xs text-muted-foreground">{fmt(bid.createdAt)}</span>
               </div>
             ))}
+            {myBids.some((b) => !b.trade && !b.description) && (
+              <p className="text-xs text-muted-foreground">
+                (Bids placed before this update show without a job description.)
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
 
-      <Card className="border-dashed border-border/60 bg-muted/20">
+      <Card className="rounded-2xl border-dashed border-border/60 bg-muted/20">
         <CardContent className="p-4 text-center text-xs text-muted-foreground">
           Payments aren't built yet — for now, pay/get paid directly once you're matched. Real
           in-app payments are a bigger piece we'll add once matching is proven out.

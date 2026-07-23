@@ -12,6 +12,7 @@ import { db } from "@/lib/firebase";
 import MapView from "@/components/MapView";
 import { useAuth } from "@/context/AuthContext";
 import TermsAgreement from "@/components/TermsAgreement";
+import GradientBackground from "@/components/GradientBackground";
 
 // Concierge MVP for the Perth Amboy marketplace pilot (see chat — this is
 // deliberately NOT automated matching yet). Two forms feed two Firestore
@@ -78,56 +79,6 @@ const emptyContractorForm = {
   notes: "",
 };
 
-// Soft blue/white gradient swirl behind the whole page (see chat — matched
-// to a reference image). Pure CSS, no images: a handful of large, blurred
-// radial gradients layered on a white base and drifted very slowly so it
-// doesn't feel static, but it's subtle enough not to fight with the forms.
-function GradientBackground() {
-  return (
-    <>
-      <style>{`
-        @keyframes fap-drift {
-          0%   { transform: translate(0, 0) scale(1); }
-          50%  { transform: translate(-3%, 2%) scale(1.05); }
-          100% { transform: translate(0, 0) scale(1); }
-        }
-        .fap-bg {
-          position: fixed;
-          inset: 0;
-          z-index: -1;
-          overflow: hidden;
-          background: #ffffff;
-        }
-        .fap-bg::before,
-        .fap-bg::after {
-          content: "";
-          position: absolute;
-          border-radius: 9999px;
-          filter: blur(70px);
-          opacity: 0.65;
-        }
-        .fap-bg::before {
-          top: -10%;
-          right: -10%;
-          width: 60vw;
-          height: 60vw;
-          background: radial-gradient(circle at 40% 40%, #8fb8e8, #cfe1f5 60%, transparent 75%);
-          animation: fap-drift 22s ease-in-out infinite;
-        }
-        .fap-bg::after {
-          bottom: -15%;
-          left: -10%;
-          width: 55vw;
-          height: 55vw;
-          background: radial-gradient(circle at 60% 60%, #bcdcf7, #e9f3fc 60%, transparent 75%);
-          animation: fap-drift 26s ease-in-out infinite reverse;
-        }
-      `}</style>
-      <div className="fap-bg" aria-hidden="true" />
-    </>
-  );
-}
-
 // Phone verification UI scaffold — see chat: "add a phone number
 // verification setup but dont complete it because i needa do twillo."
 // This is deliberately NOT wired to anything real yet. Once a Twilio
@@ -190,12 +141,17 @@ export default function FindAPro() {
       <div className="mx-auto max-w-lg space-y-6">
         <div className="flex items-center justify-between">
           <span className="font-semibold">Fieldsta</span>
-          <Link
-            to={user ? "/account" : "/login"}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            {user ? "My account" : "Sign in"}
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/pros" className="text-xs font-medium text-muted-foreground hover:text-foreground">
+              Browse pros
+            </Link>
+            <Link
+              to={user ? "/account" : "/login"}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              {user ? "My account" : "Sign in"}
+            </Link>
+          </div>
         </div>
 
         {/* Hero — city-specific but in our own voice, not a paraphrase of a
