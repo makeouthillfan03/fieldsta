@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Zap,
   ShieldCheck,
@@ -21,6 +21,16 @@ import { Select } from "@/components/ui/select";
 // ahead of the 2026-07-25 cold-call push. No fabricated logos, metrics,
 // or testimonials — nothing here claims a customer/number we can't back up.
 export default function DemoLanding() {
+  // The browser tries to scroll to the #demo/#how-it-works anchor before
+  // this SPA has rendered that element, so a direct deep link (e.g. one
+  // texted during a cold call) lands on the hero instead of the target
+  // section. Retry the scroll once mounted.
+  useEffect(() => {
+    if (!window.location.hash) return;
+    const el = document.getElementById(window.location.hash.slice(1));
+    el?.scrollIntoView();
+  }, []);
+
   return (
     <div className="bg-white text-slate-900">
       <Nav />
