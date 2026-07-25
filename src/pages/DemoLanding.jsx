@@ -7,19 +7,22 @@ import {
   MessageSquareText,
   Plug,
   ArrowRight,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import { cn } from "@/lib/utils";
 
-// Replaces the old inline-styled single-hero page ported from the
-// standalone fieldsta-lead-booker project. Same value prop and same
-// /api/lead submit target — just built out into a full page and restyled
-// to look like a real product site instead of a one-off landing page,
-// ahead of the 2026-07-25 cold-call push. No fabricated logos, metrics,
-// or testimonials — nothing here claims a customer/number we can't back up.
+// Clean/engineered monochrome restyle of the cold-call landing page ahead of
+// the 2026-07-25 push (replacing an earlier dark-luxury/serif direction that
+// read as too old-school). One consistent sans (Inter) throughout, black/
+// white base, warm red reserved strictly for bold accents. Same value prop,
+// same /api/lead target, same honesty policy — no fabricated logos,
+// metrics, testimonials, or claims about where the company is based.
 export default function DemoLanding() {
   // The browser tries to scroll to the #demo/#how-it-works anchor before
   // this SPA has rendered that element, so a direct deep link (e.g. one
@@ -32,9 +35,10 @@ export default function DemoLanding() {
   }, []);
 
   return (
-    <div className="bg-white text-slate-900">
+    <div className="font-body bg-[#060607] text-[#F5F5F5]">
       <Nav />
       <Hero />
+      <CitySection />
       <HowItWorks />
       <Features />
       <FAQ />
@@ -45,14 +49,145 @@ export default function DemoLanding() {
   );
 }
 
+// Fires once an element enters the viewport, then stays true. Skips the
+// observer entirely under prefers-reduced-motion so content is just present,
+// not animated in.
+function useReveal() {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, visible];
+}
+
+function Reveal({ children, delay = 0, className = "" }) {
+  const [ref, visible] = useReveal();
+  return (
+    <div
+      ref={ref}
+      data-reveal
+      style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
+      className={cn(
+        "transition-all duration-700 ease-out",
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Wireframe skyline — an original outline composition (tapered spire, no
+// specific building or photograph) standing in for "NYC" as ambient
+// background texture rather than literal photography. Small dots along the
+// rooftops twinkle like windows; the spire carries a slow red beacon pulse,
+// the one warm-red accent in the scene.
+const windowLights = [
+  { left: "5%", top: "58%", delay: "0s", duration: "3.2s" },
+  { left: "11%", top: "42%", delay: "0.6s", duration: "4s" },
+  { left: "18%", top: "63%", delay: "1.1s", duration: "3.6s" },
+  { left: "27%", top: "38%", delay: "0.3s", duration: "4.4s" },
+  { left: "36%", top: "70%", delay: "1.4s", duration: "3s" },
+  { left: "48%", top: "52%", delay: "0.8s", duration: "3.8s" },
+  { left: "56%", top: "66%", delay: "0.2s", duration: "4.2s" },
+  { left: "66%", top: "45%", delay: "1.6s", duration: "3.4s" },
+  { left: "76%", top: "60%", delay: "0.9s", duration: "4s" },
+  { left: "85%", top: "50%", delay: "0.4s", duration: "3.6s" },
+  { left: "93%", top: "62%", delay: "1.2s", duration: "3.9s" },
+];
+
+function SkylineSilhouette({ className = "" }) {
+  return (
+    <div className={cn("relative", className)}>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 1200 220"
+        preserveAspectRatio="none"
+        className="h-full w-full text-[#F5F5F5]/25"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <rect x="0" y="120" width="90" height="100" />
+        <rect x="95" y="90" width="60" height="130" />
+        <rect x="160" y="140" width="70" height="80" />
+        <rect x="235" y="70" width="50" height="150" />
+        <rect x="290" y="110" width="85" height="110" />
+        <polygon points="410,220 410,60 445,10 480,60 480,220" />
+        <rect x="490" y="95" width="65" height="125" />
+        <rect x="560" y="130" width="55" height="90" />
+        <rect x="620" y="80" width="70" height="140" />
+        <rect x="695" y="115" width="60" height="105" />
+        <rect x="760" y="60" width="45" height="160" />
+        <rect x="810" y="125" width="80" height="95" />
+        <rect x="895" y="95" width="55" height="125" />
+        <rect x="955" y="135" width="65" height="85" />
+        <rect x="1025" y="75" width="50" height="145" />
+        <rect x="1080" y="115" width="120" height="105" />
+      </svg>
+      {windowLights.map((light, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className="animate-twinkle absolute h-[3px] w-[3px] rounded-full bg-[#F5F5F5] sm:h-1 sm:w-1"
+          style={{ left: light.left, top: light.top, animationDelay: light.delay, animationDuration: light.duration }}
+        />
+      ))}
+      <span
+        aria-hidden="true"
+        className="animate-beacon absolute h-1.5 w-1.5 rounded-full bg-[#EF4444] shadow-[0_0_6px_2px_rgba(239,68,68,0.6)]"
+        style={{ left: "37%", top: "3%" }}
+      />
+    </div>
+  );
+}
+
 function Nav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0b0c10]/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-[#F5F5F5]/10 bg-[#060607]/90 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
-        <span className="text-lg font-extrabold tracking-tight text-white">Fieldsta</span>
+        <div className="flex items-center gap-2">
+          <svg width="11" height="11" viewBox="0 0 12 12" className="text-[#F5F5F5]" aria-hidden="true">
+            <polygon points="6,0 12,12 0,12" fill="currentColor" />
+          </svg>
+          <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
+            Fieldsta
+          </span>
+        </div>
+        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#9A9A9E] md:flex">
+          <a href="#how-it-works" className="hover:text-[#F5F5F5]">
+            How It Works
+          </a>
+          <a href="#features" className="hover:text-[#F5F5F5]">
+            Features
+          </a>
+          <a href="#faq" className="hover:text-[#F5F5F5]">
+            FAQ
+          </a>
+        </nav>
         <a href="#demo">
-          <Button size="sm" className="bg-white text-[#0b0c10] hover:bg-white/90">
-            Get a Live Demo
+          <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
+            Request a Demo
           </Button>
         </a>
       </div>
@@ -62,26 +197,45 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#0b0c10] text-white">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[-10rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-primary/30 blur-[120px]"
-      />
-      <div className="container relative py-24 text-center sm:py-32">
-        <span className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/70">
+    <section className="relative flex min-h-[88vh] flex-col overflow-hidden bg-[#060607] sm:min-h-[92vh]">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <SkylineSilhouette className="absolute inset-x-0 bottom-0 h-[65%] w-full opacity-70" />
+        <div
+          className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#060607] via-[#060607]/20 to-[#060607]" />
+        <div className="animate-drift absolute left-1/2 top-1/3 h-[30rem] w-[30rem] rounded-full bg-[#F5F5F5]/10 blur-[140px]" />
+      </div>
+
+      <div className="absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 text-right sm:right-10 sm:block">
+        <div className="ml-auto mb-3 h-px w-10 bg-[#F5F5F5]/30" />
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#F5F5F5]">
+          AI Lead Response · Qualification · Scheduling
+        </p>
+        <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#9A9A9E]">
+          Home Services · Field Service · Sales Teams
+        </p>
+      </div>
+
+      <div className="container relative z-10 mt-auto pb-12 pt-32 sm:pb-16">
+        <span className="animate-fade-up inline-flex items-center rounded-full border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">
           AI-Powered Lead Response
         </span>
-        <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl">
-          Never Lose a Lead to Slow Response Time Again
+        <h1 className="animate-fade-up [animation-delay:120ms] mt-6 max-w-4xl text-left text-4xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-7xl">
+          Never lose a lead to slow response time <span className="text-[#EF4444]">again</span>.
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-white/70 sm:text-xl">
-          Fieldsta replies to every inbound lead in under 5 minutes, qualifies them, and books
-          the meeting straight onto your calendar — with a human reviewing every booking.
+        <p className="animate-fade-up [animation-delay:240ms] mt-6 max-w-xl text-left text-base text-[#9A9A9E] sm:text-lg">
+          Fieldsta responds to every inbound lead, qualifies them, and books the meeting
+          straight onto your calendar — with a human reviewing every booking.
         </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="animate-fade-up [animation-delay:360ms] mt-8 flex flex-col gap-3 sm:flex-row">
           <a href="#demo">
-            <Button size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto">
-              Get a Live Demo
+            <Button size="lg" className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white sm:w-auto">
+              Request a Live Demo
               <ArrowRight className="h-4 w-4" />
             </Button>
           </a>
@@ -89,30 +243,67 @@ function Hero() {
             <Button
               size="lg"
               variant="outline"
-              className="w-full border-white/20 bg-transparent text-white hover:bg-white/10 sm:w-auto"
+              className="w-full border-[#F5F5F5]/20 bg-transparent text-[#F5F5F5] hover:bg-[#F5F5F5]/10 sm:w-auto"
             >
               See how it works
             </Button>
           </a>
         </div>
       </div>
+
+      <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#9A9A9E]/70">
+        <span>Human-Reviewed · Any CRM · Always-On</span>
+        <span className="hidden items-center gap-2 sm:flex">
+          Scroll
+          <ArrowDown className="h-3 w-3 animate-bounce" />
+        </span>
+      </div>
     </section>
+  );
+}
+
+// Placeholder background (gradient + the wireframe skyline) standing in for
+// a real photo. Drop a licensed/AI-generated NYC image at
+// src/assets/nyc-hero.jpg and swap the div below for an <img> once one
+// exists — everything else (tilt/scale/reduced-motion handling) stays the
+// same.
+function CitySection() {
+  return (
+    <ContainerScroll
+      titleComponent={
+        <h2 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+          Built for the city that doesn&apos;t wait for business hours.
+        </h2>
+      }
+    >
+      <div className="relative flex h-full w-full items-end justify-center overflow-hidden bg-gradient-to-b from-[#050506] via-[#131315] to-[#212124]">
+        <div
+          aria-hidden="true"
+          className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 rounded-full bg-[#F5F5F5]/10 blur-[100px]"
+        />
+        <SkylineSilhouette className="relative h-2/3 w-full" />
+      </div>
+    </ContainerScroll>
   );
 }
 
 const steps = [
   {
     icon: Inbox,
+    n: "01",
     title: "A lead comes in",
     description: "From your website, a call, or wherever leads already reach you.",
   },
   {
     icon: MessageSquareText,
+    n: "02",
     title: "Fieldsta responds and qualifies",
-    description: "Under 5 minutes, every time — asking the right questions before anyone's time is wasted.",
+    description:
+      "Right away, every time — asking the right questions before anyone's time is wasted.",
   },
   {
     icon: CalendarCheck,
+    n: "03",
     title: "The meeting gets booked",
     description: "Straight onto your calendar. A human reviews every booking before it's confirmed.",
   },
@@ -120,23 +311,25 @@ const steps = [
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-white py-24">
+    <section id="how-it-works" className="border-t border-[#F5F5F5]/10 py-24">
       <div className="container">
-        <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-          How it works
-        </h2>
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            The Standard
+          </h2>
+        </Reveal>
         <div className="mx-auto mt-16 grid max-w-4xl gap-12 sm:grid-cols-3">
           {steps.map((step, i) => (
-            <div key={step.title} className="relative text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <step.icon className="h-7 w-7" />
+            <Reveal key={step.title} delay={i * 100} className="relative text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#F5F5F5]/15 bg-[#F5F5F5]/5 text-[#F5F5F5]">
+                <step.icon className="h-6 w-6" />
               </div>
-              <div className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Step {i + 1}
+              <div className="mt-4 text-sm font-extrabold tracking-[0.2em] text-[#EF4444]">
+                {step.n}
               </div>
-              <h3 className="mt-1 text-lg font-bold">{step.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-            </div>
+              <h3 className="mt-1 text-lg font-semibold text-[#F5F5F5]">{step.title}</h3>
+              <p className="mt-2 text-sm text-[#9A9A9E]">{step.description}</p>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -148,7 +341,7 @@ const features = [
   {
     icon: Zap,
     title: "Instant response",
-    description: "Every inbound lead hears back in under 5 minutes, day or night.",
+    description: "Every inbound lead hears back right away, day or night.",
   },
   {
     icon: MessageSquareText,
@@ -169,20 +362,24 @@ const features = [
 
 function Features() {
   return (
-    <section className="bg-slate-50 py-24">
+    <section id="features" className="border-t border-[#F5F5F5]/10 py-24">
       <div className="container">
-        <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Built to stop leads from going cold
-        </h2>
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            What separates a missed call from a closed deal
+          </h2>
+        </Reveal>
         <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
-          {features.map((f) => (
-            <Card key={f.title} className="border-slate-200 p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <f.icon className="h-5 w-5" />
-              </div>
-              <h3 className="mt-4 text-base font-bold">{f.title}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{f.description}</p>
-            </Card>
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={i * 80}>
+              <Card className="h-full border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-6 transition-colors hover:border-[#F5F5F5]/25 hover:bg-[#F5F5F5]/[0.05]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#F5F5F5]/15 bg-[#F5F5F5]/5 text-[#F5F5F5]">
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-[#F5F5F5]">{f.title}</h3>
+                <p className="mt-1.5 text-sm text-[#9A9A9E]">{f.description}</p>
+              </Card>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -196,8 +393,8 @@ const faqs = [
     a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
   },
   {
-    q: "What does \"under 5 minutes\" mean exactly?",
-    a: "From the moment a lead comes in, Fieldsta responds and starts qualifying them in under 5 minutes — instead of the hours it can take a busy team to get back to someone.",
+    q: "How fast does Fieldsta actually respond?",
+    a: "Fast enough that the lead is still warm — Fieldsta starts responding and qualifying immediately, instead of the hours it can take a busy team to get back to someone.",
   },
   {
     q: "Is a real person involved at all?",
@@ -207,24 +404,26 @@ const faqs = [
 
 function FAQ() {
   return (
-    <section className="bg-white py-24">
+    <section id="faq" className="border-t border-[#F5F5F5]/10 py-24">
       <div className="container max-w-2xl">
-        <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Questions
-        </h2>
-        <div className="mt-12 divide-y divide-slate-200">
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Questions Worth Asking
+          </h2>
+        </Reveal>
+        <Reveal delay={100} className="mt-12 divide-y divide-[#F5F5F5]/10">
           {faqs.map((item) => (
             <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold text-[#F5F5F5]">
                 {item.q}
-                <span className="ml-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-45">
+                <span className="ml-4 shrink-0 text-[#9A9A9E] transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>
-              <p className="mt-3 text-sm text-muted-foreground">{item.a}</p>
+              <p className="mt-3 text-sm text-[#9A9A9E]">{item.a}</p>
             </details>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -232,20 +431,29 @@ function FAQ() {
 
 function FinalCTA() {
   return (
-    <section className="bg-[#0b0c10] py-20 text-center text-white">
-      <div className="container">
-        <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Ready to stop losing leads?
-        </h2>
-        <p className="mx-auto mt-4 max-w-md text-white/70">
-          See Fieldsta on a live call with your own leads and workflow.
-        </p>
-        <a href="#demo">
-          <Button size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90">
-            Get a Live Demo
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </a>
+    <section className="relative overflow-hidden border-t border-[#F5F5F5]/10 py-20 text-center">
+      <div
+        aria-hidden="true"
+        className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] rounded-full bg-[#F5F5F5]/10 blur-[120px]"
+      />
+      <div className="container relative">
+        <Reveal>
+          <h2 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
+            Your next lead is already <span className="text-[#EF4444]">waiting</span>.
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-[#9A9A9E]">
+            See Fieldsta on a live call with your own leads and workflow.
+          </p>
+          <a href="#demo">
+            <Button
+              size="lg"
+              className="mt-8 bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+            >
+              Request a Live Demo
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </a>
+        </Reveal>
       </div>
     </section>
   );
@@ -294,71 +502,100 @@ function DemoForm() {
     }
   }
 
+  const fieldClass =
+    "mt-1.5 border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.04] text-[#F5F5F5] placeholder:text-[#9A9A9E]/70 focus-visible:ring-[#F5F5F5]/40";
+
   return (
-    <section id="demo" className="bg-slate-50 py-24">
+    <section id="demo" className="border-t border-[#F5F5F5]/10 py-24">
       <div className="container">
-        <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Get a Live Demo
-        </h2>
-        <Card className="mx-auto mt-10 max-w-md border-slate-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" ref={firstNameRef} required className="mt-1.5" />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" ref={lastNameRef} className="mt-1.5" />
-            </div>
-            <div>
-              <Label htmlFor="email">Business Email</Label>
-              <Input id="email" type="email" ref={emailRef} required className="mt-1.5" />
-            </div>
-            <div>
-              <Label htmlFor="crm">What CRM do you use?</Label>
-              <Input
-                id="crm"
-                ref={crmRef}
-                placeholder="e.g. HubSpot, Salesforce, none"
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label htmlFor="source">How did you hear about us?</Label>
-              <Select id="source" ref={sourceRef} defaultValue="" className="mt-1.5">
-                <option value="">Select one</option>
-                <option value="Referral">Referral</option>
-                <option value="Google Search">Google Search</option>
-                <option value="LinkedIn">LinkedIn</option>
-                <option value="Email/Cold Outreach">Email / Cold Outreach</option>
-                <option value="Other">Other</option>
-              </Select>
-            </div>
-            <Button
-              type="submit"
-              disabled={status === "submitting"}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              size="lg"
-            >
-              {status === "submitting" ? "Submitting..." : "Get a Live Demo"}
-            </Button>
-            {message && (
-              <p
-                className={
-                  "text-center text-sm " +
-                  (status === "success"
-                    ? "text-green-700"
-                    : status === "error"
-                    ? "text-red-600"
-                    : "text-muted-foreground")
-                }
-                role="status"
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Request a Live Demo
+          </h2>
+        </Reveal>
+        <Reveal delay={100}>
+          <Card className="mx-auto mt-10 max-w-md border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="firstName" className="text-[#F5F5F5]">
+                  First Name
+                </Label>
+                <Input id="firstName" ref={firstNameRef} required className={fieldClass} />
+              </div>
+              <div>
+                <Label htmlFor="lastName" className="text-[#F5F5F5]">
+                  Last Name
+                </Label>
+                <Input id="lastName" ref={lastNameRef} className={fieldClass} />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-[#F5F5F5]">
+                  Business Email
+                </Label>
+                <Input id="email" type="email" ref={emailRef} required className={fieldClass} />
+              </div>
+              <div>
+                <Label htmlFor="crm" className="text-[#F5F5F5]">
+                  What CRM do you use?
+                </Label>
+                <Input
+                  id="crm"
+                  ref={crmRef}
+                  placeholder="e.g. HubSpot, Salesforce, none"
+                  className={fieldClass}
+                />
+              </div>
+              <div>
+                <Label htmlFor="source" className="text-[#F5F5F5]">
+                  How did you hear about us?
+                </Label>
+                <Select id="source" ref={sourceRef} defaultValue="" className={fieldClass}>
+                  <option value="" className="bg-[#0a0a0a]">
+                    Select one
+                  </option>
+                  <option value="Referral" className="bg-[#0a0a0a]">
+                    Referral
+                  </option>
+                  <option value="Google Search" className="bg-[#0a0a0a]">
+                    Google Search
+                  </option>
+                  <option value="LinkedIn" className="bg-[#0a0a0a]">
+                    LinkedIn
+                  </option>
+                  <option value="Email/Cold Outreach" className="bg-[#0a0a0a]">
+                    Email / Cold Outreach
+                  </option>
+                  <option value="Other" className="bg-[#0a0a0a]">
+                    Other
+                  </option>
+                </Select>
+              </div>
+              <Button
+                type="submit"
+                disabled={status === "submitting"}
+                className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+                size="lg"
               >
-                {message}
-              </p>
-            )}
-          </form>
-        </Card>
+                {status === "submitting" ? "Submitting..." : "Request a Live Demo"}
+              </Button>
+              {message && (
+                <p
+                  className={
+                    "text-center text-sm " +
+                    (status === "success"
+                      ? "text-emerald-400"
+                      : status === "error"
+                      ? "text-red-400"
+                      : "text-[#9A9A9E]")
+                  }
+                  role="status"
+                >
+                  {message}
+                </p>
+              )}
+            </form>
+          </Card>
+        </Reveal>
       </div>
     </section>
   );
@@ -366,14 +603,16 @@ function DemoForm() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white py-12 text-center text-sm text-muted-foreground">
+    <footer className="border-t border-[#F5F5F5]/10 py-12 text-center text-sm text-[#9A9A9E]">
       <div className="container flex flex-col items-center gap-3">
-        <span className="font-bold text-slate-900">Fieldsta</span>
+        <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
+          Fieldsta
+        </span>
         <div className="flex items-center gap-4">
-          <a href="/terms" className="hover:text-slate-900">
+          <a href="/terms" className="hover:text-[#F5F5F5]">
             Terms
           </a>
-          <a href="mailto:support@fieldsta.com" className="hover:text-slate-900">
+          <a href="mailto:support@fieldsta.com" className="hover:text-[#F5F5F5]">
             support@fieldsta.com
           </a>
         </div>

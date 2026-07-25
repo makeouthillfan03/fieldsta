@@ -45,6 +45,23 @@ button:active,
   [role="button"]:active {
     transform: none;
   }
+  .animate-fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-reveal] {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .animate-twinkle,
+  .animate-beacon,
+  .animate-drift {
+    animation: none !important;
+    opacity: 0.5 !important;
+    transform: translate(-50%, -50%) !important;
+  }
 }
 
 @media print {

@@ -44,6 +44,33 @@ export default {
         md: "0.375rem",
         sm: "0.25rem",
       },
+      fontFamily: {
+        body: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+      keyframes: {
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(16px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        twinkle: {
+          "0%, 100%": { opacity: "0.15" },
+          "50%": { opacity: "0.9" },
+        },
+        beacon: {
+          "0%, 100%": { opacity: "0.25" },
+          "50%": { opacity: "1" },
+        },
+        drift: {
+          "0%, 100%": { transform: "translate(-50%, -50%)" },
+          "50%": { transform: "translate(-46%, -54%)" },
+        },
+      },
+      animation: {
+        "fade-up": "fade-up 0.8s cubic-bezier(0.16,1,0.3,1) both",
+        twinkle: "twinkle 4s ease-in-out infinite",
+        beacon: "beacon 2.4s ease-in-out infinite",
+        drift: "drift 14s ease-in-out infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
