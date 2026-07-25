@@ -4,6 +4,7 @@ import Login from "@/pages/Login";
 import CompanySetup from "@/pages/CompanySetup";
 import GrowthDashboard from "@/pages/GrowthDashboard";
 import FindAPro from "@/pages/FindAPro";
+import DemoLanding from "@/pages/DemoLanding";
 import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
 import OpenJobs from "@/pages/OpenJobs";
 import ProfileSetup from "@/pages/ProfileSetup";
@@ -23,9 +24,16 @@ import ProsDirectory from "@/pages/ProsDirectory";
 // deleted, it's just not live. If this ever needs to come back, it's a
 // routing change here, not a rebuild.
 //
-// The live site is now just the Find a Pro marketplace concierge MVP
-// (Perth Amboy pilot, see FindAPro.jsx/MarketplaceAdmin.jsx) — free for
-// both homeowners and contractors, no subscription/billing anywhere.
+// The Find a Pro marketplace concierge MVP (Perth Amboy pilot, see
+// FindAPro.jsx/MarketplaceAdmin.jsx) is still live — free for both
+// homeowners and contractors, no subscription/billing anywhere — just
+// reachable at /find-a-pro and /welcome rather than "/".
+//
+// "/" is now the demo-request landing page (DemoLanding.jsx), ported over
+// from the standalone fieldsta-lead-booker Vercel project, which was a
+// deploy that wasn't supposed to exist as its own project — this app is
+// the one and only place Fieldsta's HTML should live. The lead form posts
+// to api/lead.js, which pushes qualified leads into Apollo.
 // ---------------------------------------------------------------------
 
 // The owner-only pages (growth stats, marketplace matchmaking list) only
@@ -43,7 +51,7 @@ function RequireAuthOnly({ children }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<FindAPro />} />
+      <Route path="/" element={<DemoLanding />} />
       <Route path="/welcome" element={<FindAPro />} />
       <Route path="/find-a-pro" element={<FindAPro />} />
       <Route path="/open-jobs" element={<OpenJobs />} />
