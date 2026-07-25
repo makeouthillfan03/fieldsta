@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import ParticleSkyline from "@/components/ParticleSkyline";
 import { cn } from "@/lib/utils";
 
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
@@ -197,65 +198,71 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-[88vh] flex-col overflow-hidden bg-[#060607] sm:min-h-[92vh]">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <SkylineSilhouette className="absolute inset-x-0 bottom-0 h-[65%] w-full opacity-70" />
-        <div
-          className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#060607] via-[#060607]/20 to-[#060607]" />
-        <div className="animate-drift absolute left-1/2 top-1/3 h-[30rem] w-[30rem] rounded-full bg-[#F5F5F5]/10 blur-[140px]" />
+    <section className="relative flex min-h-[92vh] flex-col overflow-hidden bg-[#060607]">
+      {/* Particle field occupies the upper half and dissolves downward into
+          the page, so the headline sits in clean negative space rather than
+          fighting the artwork for contrast. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[68%]">
+        {/* Lit air behind the skyline. In the reference photographs the sky
+            is never black — it's luminous at the horizon and falls off
+            upward, and that gradient is what puts the buildings at a
+            distance instead of on the surface of the screen. Kept
+            near-neutral with the faintest warm bias so it reads as city
+            light without introducing a second accent colour. */}
+        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_100%,rgba(255,241,232,0.16)_0%,rgba(255,235,225,0.06)_28%,transparent_62%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(239,68,68,0.05)_0%,transparent_38%)]" />
+
+        <ParticleSkyline className="absolute inset-0 h-full w-full" />
+
+        {/* Depth fog across the lower third, so the base of the city
+            dissolves rather than terminating on a line. */}
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,6,7,0.55)_45%,#060607_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#060607] to-transparent" />
       </div>
 
-      <div className="absolute right-6 top-1/2 z-10 hidden -translate-y-1/2 text-right sm:right-10 sm:block">
-        <div className="ml-auto mb-3 h-px w-10 bg-[#F5F5F5]/30" />
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#F5F5F5]">
-          AI Lead Response · Qualification · Scheduling
-        </p>
-        <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#9A9A9E]">
-          Home Services · Field Service · Sales Teams
-        </p>
-      </div>
+      {/* Film grain over the whole hero, type included — grain that stops at
+          the edge of the artwork reads as a sticker. Kept under 5% so it
+          textures the image without muddying text contrast. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-20 opacity-[0.045] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E\")",
+        }}
+      />
 
-      <div className="container relative z-10 mt-auto pb-12 pt-32 sm:pb-16">
-        <span className="animate-fade-up inline-flex items-center rounded-full border border-[#EF4444]/40 bg-[#EF4444]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">
-          AI-Powered Lead Response
-        </span>
-        <h1 className="animate-fade-up [animation-delay:120ms] mt-6 max-w-4xl text-left text-4xl font-extrabold uppercase leading-[0.95] tracking-tight sm:text-7xl">
-          Never lose a lead to slow response time <span className="text-[#EF4444]">again</span>.
-        </h1>
-        <p className="animate-fade-up [animation-delay:240ms] mt-6 max-w-xl text-left text-base text-[#9A9A9E] sm:text-lg">
-          Fieldsta responds to every inbound lead, qualifies them, and books the meeting
-          straight onto your calendar — with a human reviewing every booking.
-        </p>
-        <div className="animate-fade-up [animation-delay:360ms] mt-8 flex flex-col gap-3 sm:flex-row">
-          <a href="#demo">
-            <Button size="lg" className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white sm:w-auto">
-              Request a Live Demo
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </a>
-          <a href="#how-it-works">
+      <div className="container relative z-10 mt-auto pb-14 pt-40">
+        <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+          <h1 className="animate-fade-up max-w-3xl text-4xl font-light leading-[1.12] tracking-tight text-[#6F6F75] sm:text-5xl lg:text-6xl">
+            <span className="text-[#F5F5F5]">Answer every lead</span>
+            <br />
+            before your competitor
+            <br />
+            picks up the phone
+          </h1>
+
+          <a href="#demo" className="animate-fade-up [animation-delay:160ms] shrink-0">
             <Button
               size="lg"
-              variant="outline"
-              className="w-full border-[#F5F5F5]/20 bg-transparent text-[#F5F5F5] hover:bg-[#F5F5F5]/10 sm:w-auto"
+              className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white md:w-auto"
             >
-              See how it works
+              Request a demo
             </Button>
           </a>
         </div>
+
+        <p className="animate-fade-up [animation-delay:280ms] mt-10 max-w-lg text-[15px] leading-relaxed text-[#9A9A9E]">
+          Fieldsta responds to every inbound lead, qualifies them, and books the meeting
+          straight onto your calendar — with a human reviewing every booking.
+        </p>
       </div>
 
-      <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#9A9A9E]/70">
-        <span>Human-Reviewed · Any CRM · Always-On</span>
+      <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
+        <span>Human-reviewed · Any CRM · Always-on</span>
         <span className="hidden items-center gap-2 sm:flex">
           Scroll
-          <ArrowDown className="h-3 w-3 animate-bounce" />
+          <ArrowDown className="h-3 w-3" />
         </span>
       </div>
     </section>
