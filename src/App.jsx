@@ -11,6 +11,7 @@ import ProfileSetup from "@/pages/ProfileSetup";
 import Account from "@/pages/Account";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
+import Agreement from "@/pages/Agreement";
 import BusinessPage from "@/pages/BusinessPage";
 import ProsDirectory from "@/pages/ProsDirectory";
 
@@ -58,6 +59,7 @@ export default function App() {
       <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/agreement" element={<Agreement />} />
       <Route path="/pro/:uid" element={<BusinessPage />} />
       <Route path="/pros" element={<ProsDirectory />} />
       <Route path="/login" element={<Login />} />

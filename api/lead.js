@@ -9,30 +9,15 @@
 // if the responder is down, unreachable, or slow, this endpoint still
 // returns success and the lead still reaches Apollo.
 
-import nodemailer from "nodemailer";
-
-let cachedTransporter = null;
-function getTransporter() {
-  if (cachedTransporter) return cachedTransporter;
-  // Same Zoho mailbox already configured for the Firebase functions
-  // notifications — one set of SMTP credentials, reused here so a demo
-  // request on the marketing site notifies jc the same way a marketplace
-  // lead does. Vercel env: SMTP_HOST, SMTP_PORT, FROM_EMAIL, SMTP_PASS,
-  // NOTIFY_EMAIL (where the alert goes — defaults to FROM_EMAIL itself).
-  cachedTransporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.zoho.com",
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: true,
-    auth: { user: process.env.FROM_EMAIL, pass: process.env.SMTP_PASS },
-  });
-  return cachedTransporter;
-}
+import { getTransporter, smtpConfigured } from "./_lib/mailer.js";
 
 // Notifying jc is nice-to-have, not the job this endpoint exists to do —
 // same fire-and-forget contract as forwardToResponder below. A down SMTP
-// mailbox must never fail a form submission.
+// mailbox must never fail a form submission. Vercel env: SMTP_HOST,
+// SMTP_PORT, FROM_EMAIL, SMTP_PASS, NOTIFY_EMAIL (where the alert goes —
+// defaults to FROM_EMAIL itself).
 async function notifyOwner(lead) {
-  if (!process.env.SMTP_PASS || !process.env.FROM_EMAIL) return;
+  if (!smtpConfigured()) return;
 
   try {
     await getTransporter().sendMail({
