@@ -586,19 +586,19 @@ function DemoForm() {
                 {status === "submitting" ? "Submitting..." : "Request a Live Demo"}
               </Button>
               {message && (
-                <p
+                <div
                   className={
-                    "text-center text-sm " +
+                    "rounded-lg p-4 text-center font-medium " +
                     (status === "success"
-                      ? "text-emerald-400"
+                      ? "bg-emerald-400/10 text-emerald-400"
                       : status === "error"
-                      ? "text-red-400"
+                      ? "bg-red-400/10 text-red-400"
                       : "text-[#9A9A9E]")
                   }
                   role="status"
                 >
                   {message}
-                </p>
+                </div>
               )}
             </form>
           </Card>
