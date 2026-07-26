@@ -168,8 +168,27 @@ function Nav() {
     <header className="sticky top-0 z-50 border-b border-[#F5F5F5]/10 bg-[#060607]/90 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <svg width="11" height="11" viewBox="0 0 12 12" className="text-[#F5F5F5]" aria-hidden="true">
-            <polygon points="6,0 12,12 0,12" fill="currentColor" />
+          <svg width="24" height="24" viewBox="0 0 200 200" className="text-[#F5F5F5]" aria-hidden="true">
+            <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
+            <g fill="none" stroke="currentColor" strokeWidth="1.2">
+              {/* Left building cluster */}
+              <rect x="20" y="110" width="15" height="50" />
+              <rect x="38" y="85" width="12" height="75" />
+              <rect x="53" y="120" width="14" height="40" />
+              {/* Center tower */}
+              <rect x="72" y="60" width="11" height="100" />
+              <polygon points="77.5,50 82,60 73,60" />
+              {/* Chrysler building style */}
+              <polygon points="85,95 92,85 99,95" />
+              <rect x="85" y="95" width="14" height="65" />
+              {/* Right cluster */}
+              <rect x="105" y="90" width="13" height="70" />
+              <rect x="122" y="130" width="11" height="30" />
+              <rect x="138" y="105" width="15" height="55" />
+              <polygon points="145,100 150,105 140,105" />
+              {/* Far right */}
+              <rect x="158" y="115" width="20" height="35" />
+            </g>
           </svg>
           <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
             Fieldsta
