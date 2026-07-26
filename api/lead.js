@@ -16,8 +16,12 @@ import { getTransporter, smtpConfigured } from "./_lib/mailer.js";
 // mailbox must never fail a form submission. Vercel env: SMTP_HOST,
 // SMTP_PORT, FROM_EMAIL, SMTP_PASS, NOTIFY_EMAIL (where the alert goes —
 // defaults to FROM_EMAIL itself).
+// Returns whether the notification actually sent — the caller uses this to
+// report real status back in the response, since this endpoint has no other
+// way to see whether the send silently failed (fire-and-forget by design,
+// but "fire-and-forget" shouldn't also mean "un-diagnosable").
 async function notifyOwner(lead) {
-  if (!smtpConfigured()) return;
+  if (!smtpConfigured()) return { sent: false, reason: "SMTP not configured" };
 
   try {
     await getTransporter().sendMail({
@@ -36,8 +40,10 @@ async function notifyOwner(lead) {
         .filter(Boolean)
         .join("\n"),
     });
+    return { sent: true };
   } catch (err) {
     console.error("Owner notification failed (lead still captured):", err.message);
+    return { sent: false, reason: err.message };
   }
 }
 
@@ -113,12 +119,15 @@ export default async function handler(req, res) {
       source: source || 'Website form',
     };
 
-    await Promise.all([
+    const [, notifyResult] = await Promise.all([
       forwardToResponder(leadForForwarding),
       notifyOwner(leadForForwarding),
     ]);
 
-    return res.status(200).json({ message: 'Demo request received — our team will follow up soon.' });
+    return res.status(200).json({
+      message: 'Demo request received — our team will follow up soon.',
+      ownerNotified: notifyResult.sent,
+    });
   } catch (err) {
     console.error('Lead handler error:', err);
     return res.status(500).json({ message: 'Something went wrong on our end.' });
