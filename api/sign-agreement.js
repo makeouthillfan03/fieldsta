@@ -57,6 +57,7 @@ export default async function handler(req, res) {
     // record, so make the gap loud in logs rather than silent.
     console.error("sign-agreement: SMTP not configured — signature NOT recorded by email:", record);
     return res.status(200).json({
+      recorded: false,
       message: "Signed, but no email record was sent — SMTP isn't configured yet. Contact support@fieldsta.com to confirm.",
     });
   }
@@ -113,5 +114,5 @@ export default async function handler(req, res) {
     console.error("sign-agreement: signer receipt failed (agreement still recorded):", err.message);
   }
 
-  return res.status(200).json({ message: "Signed. A copy has been sent to your email." });
+  return res.status(200).json({ recorded: true, message: "Signed. A copy has been sent to your email." });
 }

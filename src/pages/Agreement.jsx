@@ -40,6 +40,7 @@ export default function Agreement() {
   const [agreed, setAgreed] = useState(false);
   const [status, setStatus] = useState("idle"); // idle | submitting | done | error
   const [errorMessage, setErrorMessage] = useState("");
+  const [emailRecorded, setEmailRecorded] = useState(true);
 
   const field = (key) => ({
     value: form[key],
@@ -69,6 +70,11 @@ export default function Agreement() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong.");
+      // The agreement is validly signed either way (the checkbox + typed
+      // name is the legal signature), but whether a record actually
+      // reached an inbox is a separate fact worth showing honestly rather
+      // than always displaying the same "a copy has been sent" message.
+      setEmailRecorded(data.recorded !== false);
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -82,8 +88,17 @@ export default function Agreement() {
         <h1 className="text-2xl font-bold">Signed</h1>
         <p className="text-sm text-muted-foreground">
           Thanks, {form.signerName.split(" ")[0]} — this agreement is now in effect for{" "}
-          {form.companyName}. A copy has been sent to {form.signerEmail} for your records.
+          {form.companyName}.{" "}
+          {emailRecorded
+            ? `A copy has been sent to ${form.signerEmail} for your records.`
+            : "The signature was recorded, but no confirmation email could be sent right now."}
         </p>
+        {!emailRecorded && (
+          <p className="text-xs font-medium text-destructive">
+            Please email support@fieldsta.com to confirm this signature was received —
+            our mail delivery isn't working at the moment.
+          </p>
+        )}
         <Link to="/" className="inline-block text-sm font-medium underline underline-offset-2">
           Back to Fieldsta
         </Link>
