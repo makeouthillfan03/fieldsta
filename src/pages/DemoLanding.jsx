@@ -619,6 +619,9 @@ function Footer() {
           <a href="/terms" className="hover:text-[#F5F5F5]">
             Terms
           </a>
+          <a href="/privacy" className="hover:text-[#F5F5F5]">
+            Privacy
+          </a>
           <a href="mailto:support@fieldsta.com" className="hover:text-[#F5F5F5]">
             support@fieldsta.com
           </a>

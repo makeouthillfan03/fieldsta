@@ -9,6 +9,53 @@
 // if the responder is down, unreachable, or slow, this endpoint still
 // returns success and the lead still reaches Apollo.
 
+import nodemailer from "nodemailer";
+
+let cachedTransporter = null;
+function getTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+  // Same Zoho mailbox already configured for the Firebase functions
+  // notifications — one set of SMTP credentials, reused here so a demo
+  // request on the marketing site notifies jc the same way a marketplace
+  // lead does. Vercel env: SMTP_HOST, SMTP_PORT, FROM_EMAIL, SMTP_PASS,
+  // NOTIFY_EMAIL (where the alert goes — defaults to FROM_EMAIL itself).
+  cachedTransporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.zoho.com",
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: true,
+    auth: { user: process.env.FROM_EMAIL, pass: process.env.SMTP_PASS },
+  });
+  return cachedTransporter;
+}
+
+// Notifying jc is nice-to-have, not the job this endpoint exists to do —
+// same fire-and-forget contract as forwardToResponder below. A down SMTP
+// mailbox must never fail a form submission.
+async function notifyOwner(lead) {
+  if (!process.env.SMTP_PASS || !process.env.FROM_EMAIL) return;
+
+  try {
+    await getTransporter().sendMail({
+      from: `Fieldsta <${process.env.FROM_EMAIL}>`,
+      to: process.env.NOTIFY_EMAIL || process.env.FROM_EMAIL,
+      subject: `New demo request — ${lead.firstName} ${lead.lastName || ""}`.trim(),
+      text: [
+        `Name: ${lead.firstName} ${lead.lastName || ""}`,
+        `Email: ${lead.email}`,
+        lead.phone ? `Phone: ${lead.phone}` : null,
+        lead.company ? `Company: ${lead.company}` : null,
+        lead.source ? `Source: ${lead.source}` : null,
+        "",
+        lead.message ? `Message:\n${lead.message}` : "(no message)",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    });
+  } catch (err) {
+    console.error("Owner notification failed (lead still captured):", err.message);
+  }
+}
+
 async function forwardToResponder(lead) {
   const url = process.env.RESPONDER_WEBHOOK_URL;
   if (!url) return;
@@ -68,7 +115,7 @@ export default async function handler(req, res) {
       console.warn('APOLLO_API_KEY not set — skipping Apollo push. Lead logged only:', { firstName, lastName, email, crm, source });
     }
 
-    await forwardToResponder({
+    const leadForForwarding = {
       firstName,
       lastName,
       email,
@@ -79,7 +126,12 @@ export default async function handler(req, res) {
       // their contact details.
       message: message || (crm ? `CRM in use: ${crm}` : undefined),
       source: source || 'Website form',
-    });
+    };
+
+    await Promise.all([
+      forwardToResponder(leadForForwarding),
+      notifyOwner(leadForForwarding),
+    ]);
 
     return res.status(200).json({ message: 'Demo request received — our team will follow up soon.' });
   } catch (err) {

@@ -10,6 +10,7 @@ import OpenJobs from "@/pages/OpenJobs";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Account from "@/pages/Account";
 import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
 import BusinessPage from "@/pages/BusinessPage";
 import ProsDirectory from "@/pages/ProsDirectory";
 
@@ -56,6 +57,7 @@ export default function App() {
       <Route path="/find-a-pro" element={<FindAPro />} />
       <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
       <Route path="/pro/:uid" element={<BusinessPage />} />
       <Route path="/pros" element={<ProsDirectory />} />
       <Route path="/login" element={<Login />} />
