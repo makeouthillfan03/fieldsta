@@ -2,50 +2,13 @@
 // Pushes new leads into Apollo as contacts automatically.
 // Requires APOLLO_API_KEY set as a Vercel environment variable (Production scope).
 //
-// Optionally also forwards the lead to the Fieldsta responder agent
-// (fieldsta-agents, `npm run serve`) which qualifies it and drafts a reply
-// for human review. Set RESPONDER_WEBHOOK_URL to enable. Capturing the
-// lead is the job that must never fail, so the forward is fire-and-forget:
-// if the responder is down, unreachable, or slow, this endpoint still
-// returns success and the lead still reaches Apollo.
-
-import { getTransporter, smtpConfigured } from "./_lib/mailer.js";
-
-// Notifying jc is nice-to-have, not the job this endpoint exists to do —
-// same fire-and-forget contract as forwardToResponder below. A down SMTP
-// mailbox must never fail a form submission. Vercel env: SMTP_HOST,
-// SMTP_PORT, FROM_EMAIL, SMTP_PASS, NOTIFY_EMAIL (where the alert goes —
-// defaults to FROM_EMAIL itself).
-// Returns whether the notification actually sent — the caller uses this to
-// report real status back in the response, since this endpoint has no other
-// way to see whether the send silently failed (fire-and-forget by design,
-// but "fire-and-forget" shouldn't also mean "un-diagnosable").
-async function notifyOwner(lead) {
-  if (!smtpConfigured()) return { sent: false, reason: "SMTP not configured" };
-
-  try {
-    await getTransporter().sendMail({
-      from: `Fieldsta <${process.env.FROM_EMAIL}>`,
-      to: process.env.NOTIFY_EMAIL || process.env.FROM_EMAIL,
-      subject: `New demo request — ${lead.firstName} ${lead.lastName || ""}`.trim(),
-      text: [
-        `Name: ${lead.firstName} ${lead.lastName || ""}`,
-        `Email: ${lead.email}`,
-        lead.phone ? `Phone: ${lead.phone}` : null,
-        lead.company ? `Company: ${lead.company}` : null,
-        lead.source ? `Source: ${lead.source}` : null,
-        "",
-        lead.message ? `Message:\n${lead.message}` : "(no message)",
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    });
-    return { sent: true };
-  } catch (err) {
-    console.error("Owner notification failed (lead still captured):", err.message);
-    return { sent: false, reason: err.message };
-  }
-}
+// Also forwards the lead to the Fieldsta responder agent (fieldsta-agents,
+// `npm run serve`) which qualifies it and drafts a reply for human review,
+// notifying via Slack rather than email. Set RESPONDER_WEBHOOK_URL to
+// enable. Capturing the lead is the job that must never fail, so the
+// forward is fire-and-forget: if the responder is down, unreachable, or
+// slow, this endpoint still returns success and the lead still reaches
+// Apollo.
 
 async function forwardToResponder(lead) {
   const url = process.env.RESPONDER_WEBHOOK_URL;
@@ -119,14 +82,10 @@ export default async function handler(req, res) {
       source: source || 'Website form',
     };
 
-    const [, notifyResult] = await Promise.all([
-      forwardToResponder(leadForForwarding),
-      notifyOwner(leadForForwarding),
-    ]);
+    await forwardToResponder(leadForForwarding);
 
     return res.status(200).json({
       message: 'Demo request received — our team will follow up soon.',
-      ownerNotified: notifyResult.sent,
     });
   } catch (err) {
     console.error('Lead handler error:', err);
