@@ -167,7 +167,7 @@ function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#F5F5F5]/10 bg-[#060607]/90 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
+        <a href="/" className="flex items-center gap-2">
           <svg width="24" height="24" viewBox="0 0 200 200" className="text-[#F5F5F5]" aria-hidden="true">
             <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
             <g fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -193,7 +193,7 @@ function Nav() {
           <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
             Fieldsta
           </span>
-        </div>
+        </a>
         <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#9A9A9E] md:flex">
           <a href="#how-it-works" className="hover:text-[#F5F5F5]">
             How It Works

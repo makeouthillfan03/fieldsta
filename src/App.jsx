@@ -1,19 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import Login from "@/pages/Login";
-import CompanySetup from "@/pages/CompanySetup";
 import GrowthDashboard from "@/pages/GrowthDashboard";
-import FindAPro from "@/pages/FindAPro";
 import DemoLanding from "@/pages/DemoLanding";
-import MarketplaceAdmin from "@/pages/MarketplaceAdmin";
-import OpenJobs from "@/pages/OpenJobs";
-import ProfileSetup from "@/pages/ProfileSetup";
-import Account from "@/pages/Account";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
-import BusinessPage from "@/pages/BusinessPage";
-import ProsDirectory from "@/pages/ProsDirectory";
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -26,10 +18,20 @@ import ProsDirectory from "@/pages/ProsDirectory";
 // deleted, it's just not live. If this ever needs to come back, it's a
 // routing change here, not a rebuild.
 //
-// The Find a Pro marketplace concierge MVP (Perth Amboy pilot, see
-// FindAPro.jsx/MarketplaceAdmin.jsx) is still live — free for both
-// homeowners and contractors, no subscription/billing anywhere — just
-// reachable at /find-a-pro and /welcome rather than "/".
+// The Find a Pro marketplace concierge MVP (Perth Amboy pilot) has been
+// unrouted the same way — see chat: "remove the findapro and perth amboy
+// and marketplace everything." FindAPro.jsx, MarketplaceAdmin.jsx,
+// BusinessPage.jsx, ProsDirectory.jsx, OpenJobs.jsx, ProfileSetup.jsx,
+// Account.jsx, and CompanySetup.jsx are all still sitting untouched in
+// src/pages/, and their backing Cloud Functions + Firestore rules are
+// untouched too — nothing was deleted, it's just not reachable. Bringing
+// any of it back is a routing change here, not a rebuild.
+//
+// Note: /growth (GrowthDashboard) only reports Find a Pro signup stats, so
+// with the marketplace unrouted it'll just show zeros going forward — left
+// in place since removing it wasn't asked for, but it has nothing left to
+// track. The live "personal dashboard" for actual demo-request leads is
+// the separate fieldsta-agents Railway service, not this route.
 //
 // "/" is now the demo-request landing page (DemoLanding.jsx), ported over
 // from the standalone fieldsta-lead-booker Vercel project, which was a
@@ -38,11 +40,9 @@ import ProsDirectory from "@/pages/ProsDirectory";
 // to api/lead.js, which pushes qualified leads into Apollo.
 // ---------------------------------------------------------------------
 
-// The owner-only pages (growth stats, marketplace matchmaking list) only
-// need "is this a signed-in Google account," full stop — the real access
-// control happens server-side in the Cloud Functions themselves (locked to
-// one email, see functions/index.js). No company/plan check anymore since
-// there's no paywall left to gate.
+// The owner-only growth stats page only needs "is this a signed-in Google
+// account," full stop — the real access control happens server-side in the
+// Cloud Functions themselves (locked to one email, see functions/index.js).
 function RequireAuthOnly({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
@@ -54,56 +54,16 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<DemoLanding />} />
-      <Route path="/welcome" element={<FindAPro />} />
-      <Route path="/find-a-pro" element={<FindAPro />} />
-      <Route path="/open-jobs" element={<OpenJobs />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/agreement" element={<Agreement />} />
-      <Route path="/pro/:uid" element={<BusinessPage />} />
-      <Route path="/pros" element={<ProsDirectory />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/profile-setup"
-        element={
-          <RequireAuthOnly>
-            <ProfileSetup />
-          </RequireAuthOnly>
-        }
-      />
-      <Route
-        path="/account"
-        element={
-          <RequireAuthOnly>
-            <Account />
-          </RequireAuthOnly>
-        }
-      />
-
-      {/* Kept around only so a signed-in owner without a companies/{id} doc
-          yet doesn't get stuck — not part of the live product anymore. */}
-      <Route
-        path="/setup-company"
-        element={
-          <RequireAuthOnly>
-            <CompanySetup />
-          </RequireAuthOnly>
-        }
-      />
 
       <Route
         path="/growth"
         element={
           <RequireAuthOnly>
             <GrowthDashboard />
-          </RequireAuthOnly>
-        }
-      />
-      <Route
-        path="/marketplace-admin"
-        element={
-          <RequireAuthOnly>
-            <MarketplaceAdmin />
           </RequireAuthOnly>
         }
       />
