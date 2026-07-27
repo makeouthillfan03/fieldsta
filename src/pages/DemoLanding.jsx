@@ -508,7 +508,8 @@ function DemoForm() {
     };
 
     try {
-      const res = await fetch("/api/lead", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3100";
+      const res = await fetch(`${apiUrl}/api/lead`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
