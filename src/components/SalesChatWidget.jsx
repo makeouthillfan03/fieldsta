@@ -1,0 +1,149 @@
+import { useEffect, useRef, useState } from "react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+
+// Talks to the real conversational sales agent (fieldsta-agents'
+// src/agents/sales-agent.ts via POST /api/sales-chat) — not a scripted
+// bot. It can hold a real back-and-forth, look up the visitor's website,
+// and either book a real meeting on the operator's calendar or spin up a
+// pilot account directly, gated on its own stated confidence.
+//
+// sessionId is per-browser-tab (sessionStorage, not localStorage) — a
+// fresh visit gets a fresh conversation, but a page refresh mid-chat
+// doesn't lose it. The backend is the source of truth for the transcript
+// either way (POST /admin/sales-chats lets the operator/openclaw review
+// it), so losing the local copy would only cost the visible history, not
+// the actual conversation state the agent reasons from.
+const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
+const SESSION_KEY = "fieldsta_chat_session";
+const HISTORY_KEY = "fieldsta_chat_history";
+
+function getSessionId() {
+  let id = sessionStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
+const GREETING = {
+  role: "assistant",
+  content:
+    "Hey — I'm Harper, Fieldsta's AI. I can walk you through how this would work for your business right now, or if you'd rather talk to a person, just say so and I'll get someone on your calendar.",
+};
+
+export default function SalesChatWidget() {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState(() => {
+    const saved = sessionStorage.getItem(HISTORY_KEY);
+    return saved ? JSON.parse(saved) : [GREETING];
+  });
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages));
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  async function send(e) {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || sending) return;
+
+    setInput("");
+    setError("");
+    setMessages((m) => [...m, { role: "user", content: text }]);
+    setSending(true);
+
+    try {
+      const res = await fetch(`${AGENTS_BASE}/api/sales-chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: getSessionId(), message: text }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Something went wrong.");
+      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+    } catch (err) {
+      setError(err.message || "Something went wrong. Try again in a moment.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6">
+      {open && (
+        <div className="mb-3 flex h-[28rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-[#F5F5F5]/15 bg-[#0a0a0b] shadow-2xl">
+          <div className="flex items-center justify-between border-b border-[#F5F5F5]/10 px-4 py-3">
+            <div>
+              <div className="text-sm font-semibold text-[#F5F5F5]">Harper · Fieldsta AI</div>
+              <div className="text-[11px] text-[#6F6F75]">Usually replies in seconds</div>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close chat"
+              className="text-[#6F6F75] hover:text-[#F5F5F5]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+            {messages.map((m, i) => (
+              <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                <div
+                  className={
+                    "max-w-[85%] rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed " +
+                    (m.role === "user"
+                      ? "bg-[#F5F5F5] text-[#0a0a0a]"
+                      : "bg-[#F5F5F5]/[0.06] text-[#E5E5E7]")
+                  }
+                >
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {sending && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl bg-[#F5F5F5]/[0.06] px-3.5 py-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-[#9A9A9E]" />
+                </div>
+              </div>
+            )}
+            {error && <div className="text-xs text-[#FF9A93]">{error}</div>}
+          </div>
+
+          <form onSubmit={send} className="flex items-center gap-2 border-t border-[#F5F5F5]/10 p-3">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type a message…"
+              maxLength={2000}
+              className="flex-1 rounded-full border border-[#F5F5F5]/15 bg-[#0d0d0f] px-4 py-2 text-[13.5px] text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || sending}
+              aria-label="Send"
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#F5F5F5] text-[#0a0a0a] disabled:opacity-40"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        </div>
+      )}
+
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? "Close chat" : "Chat with Fieldsta"}
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F5F5F5] text-[#0a0a0a] shadow-2xl transition-transform hover:scale-105"
+      >
+        {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+      </button>
+    </div>
+  );
+}

@@ -15,9 +15,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
+import SalesChatWidget from "@/components/SalesChatWidget";
 import { cn } from "@/lib/utils";
 
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
@@ -41,13 +41,14 @@ export default function DemoLanding() {
     <div className="font-body bg-[#060607] text-[#F5F5F5]">
       <Nav />
       <Hero />
-      <CitySection />
       <HowItWorks />
       <Features />
+      <WhySwitch />
       <FAQ />
       <FinalCTA />
       <DemoForm />
       <Footer />
+      <SalesChatWidget />
     </div>
   );
 }
@@ -96,71 +97,6 @@ function Reveal({ children, delay = 0, className = "" }) {
       )}
     >
       {children}
-    </div>
-  );
-}
-
-// Wireframe skyline — an original outline composition (tapered spire, no
-// specific building or photograph) standing in for "NYC" as ambient
-// background texture rather than literal photography. Small dots along the
-// rooftops twinkle like windows; the spire carries a slow red beacon pulse,
-// the one warm-red accent in the scene.
-const windowLights = [
-  { left: "5%", top: "58%", delay: "0s", duration: "3.2s" },
-  { left: "11%", top: "42%", delay: "0.6s", duration: "4s" },
-  { left: "18%", top: "63%", delay: "1.1s", duration: "3.6s" },
-  { left: "27%", top: "38%", delay: "0.3s", duration: "4.4s" },
-  { left: "36%", top: "70%", delay: "1.4s", duration: "3s" },
-  { left: "48%", top: "52%", delay: "0.8s", duration: "3.8s" },
-  { left: "56%", top: "66%", delay: "0.2s", duration: "4.2s" },
-  { left: "66%", top: "45%", delay: "1.6s", duration: "3.4s" },
-  { left: "76%", top: "60%", delay: "0.9s", duration: "4s" },
-  { left: "85%", top: "50%", delay: "0.4s", duration: "3.6s" },
-  { left: "93%", top: "62%", delay: "1.2s", duration: "3.9s" },
-];
-
-function SkylineSilhouette({ className = "" }) {
-  return (
-    <div className={cn("relative", className)}>
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 1200 220"
-        preserveAspectRatio="none"
-        className="h-full w-full text-[#F5F5F5]/25"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <rect x="0" y="120" width="90" height="100" />
-        <rect x="95" y="90" width="60" height="130" />
-        <rect x="160" y="140" width="70" height="80" />
-        <rect x="235" y="70" width="50" height="150" />
-        <rect x="290" y="110" width="85" height="110" />
-        <polygon points="410,220 410,60 445,10 480,60 480,220" />
-        <rect x="490" y="95" width="65" height="125" />
-        <rect x="560" y="130" width="55" height="90" />
-        <rect x="620" y="80" width="70" height="140" />
-        <rect x="695" y="115" width="60" height="105" />
-        <rect x="760" y="60" width="45" height="160" />
-        <rect x="810" y="125" width="80" height="95" />
-        <rect x="895" y="95" width="55" height="125" />
-        <rect x="955" y="135" width="65" height="85" />
-        <rect x="1025" y="75" width="50" height="145" />
-        <rect x="1080" y="115" width="120" height="105" />
-      </svg>
-      {windowLights.map((light, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className="animate-twinkle absolute h-[3px] w-[3px] rounded-full bg-[#F5F5F5] sm:h-1 sm:w-1"
-          style={{ left: light.left, top: light.top, animationDelay: light.delay, animationDuration: light.duration }}
-        />
-      ))}
-      <span
-        aria-hidden="true"
-        className="animate-beacon absolute h-1.5 w-1.5 rounded-full bg-[#EF4444] shadow-[0_0_6px_2px_rgba(239,68,68,0.6)]"
-        style={{ left: "37%", top: "3%" }}
-      />
     </div>
   );
 }
@@ -257,30 +193,45 @@ function Hero() {
       />
 
       <div className="container relative z-10 mt-auto pb-14 pt-40">
-        <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-          <h1 className="animate-fade-up max-w-3xl text-4xl font-light leading-[1.12] tracking-tight text-[#6F6F75] sm:text-5xl lg:text-6xl">
-            <span className="text-[#F5F5F5]">Answer every lead</span>
-            <br />
-            before your competitor
-            <br />
-            picks up the phone
-          </h1>
+        <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div>
+            <h1 className="animate-fade-up max-w-xl text-4xl font-light leading-[1.12] tracking-tight text-[#6F6F75] sm:text-5xl lg:text-6xl">
+              <span className="text-[#F5F5F5]">Answer every lead</span>
+              <br />
+              before your competitor
+              <br />
+              picks up the phone
+            </h1>
 
-          <a href="#demo" className="animate-fade-up [animation-delay:160ms] shrink-0">
-            <Button
-              size="lg"
-              className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white md:w-auto"
-            >
-              Request a demo
-            </Button>
-          </a>
+            <p className="animate-fade-up [animation-delay:280ms] mt-8 max-w-md text-[15px] leading-relaxed text-[#9A9A9E]">
+              AI that responds, qualifies, and books meetings automatically for every
+              inbound lead.
+            </p>
+
+            <p className="animate-fade-up [animation-delay:340ms] mt-5 text-[13px] text-[#6F6F75]">
+              <span className="font-semibold text-[#F5F5F5]">Under a minute</span> — median
+              time to a drafted reply, measured on real leads.
+            </p>
+
+            <a href="#demo" className="animate-fade-up [animation-delay:160ms] mt-9 inline-block">
+              <Button
+                size="lg"
+                className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white sm:w-auto"
+              >
+                Request a demo
+              </Button>
+            </a>
+          </div>
+
+          <div className="animate-fade-up [animation-delay:220ms]">
+            <div className="mb-3 text-xs uppercase tracking-[0.18em] text-[#6F6F75]">
+              Know exactly why a lead is worth your time
+            </div>
+            <div className="h-[22rem] overflow-hidden rounded-2xl border border-[#F5F5F5]/15 shadow-2xl sm:h-[26rem]">
+              <DashboardMockup />
+            </div>
+          </div>
         </div>
-
-        <p className="animate-fade-up [animation-delay:280ms] mt-10 max-w-lg text-[15px] leading-relaxed text-[#9A9A9E]">
-          Fieldsta drafts a reply the moment a lead comes in, learns how you'd say it from
-          every edit you make, and books the meeting on your calendar — you decide how much
-          to review, from every reply to none.
-        </p>
       </div>
 
       <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
@@ -378,20 +329,6 @@ function DashboardMockup() {
   );
 }
 
-function CitySection() {
-  return (
-    <ContainerScroll
-      titleComponent={
-        <h2 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-          See exactly why a lead is worth your time.
-        </h2>
-      }
-    >
-      <DashboardMockup />
-    </ContainerScroll>
-  );
-}
-
 const steps = [
   {
     icon: Inbox,
@@ -445,8 +382,8 @@ function HowItWorks() {
 const features = [
   {
     icon: Zap,
-    title: "Drafts in under a minute",
-    description: "Every inbound lead gets a qualified draft reply fast, day or night — not whenever someone gets a chance.",
+    title: "Your leads hear back immediately — even while you sleep",
+    description: "The faster you respond, the more deals you close. Fieldsta makes that automatic, day or night.",
   },
   {
     icon: MessageSquareText,
@@ -455,8 +392,8 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: "Learns your voice",
-    description: "Every time you edit a draft before sending, Fieldsta remembers — its own dedicated memory per client, so it sounds more like you over time, not less.",
+    title: "Gets better the more you use it",
+    description: "Every edit you make teaches it — its own dedicated memory per client, so replies sound more like you over time, not less.",
   },
   {
     icon: ShieldCheck,
@@ -466,8 +403,13 @@ const features = [
   {
     icon: Plug,
     title: "Works alongside your CRM",
-    description: "Tell us what you use — HubSpot, Salesforce, or nothing at all — and we'll fit in.",
+    description: "Pushes qualified leads straight into HubSpot, or works standalone with any CRM or none.",
   },
+];
+
+const integrations = [
+  { name: "HubSpot", note: "Pushes qualified leads and status" },
+  { name: "Meta Lead Ads", note: "Facebook & Instagram lead forms" },
 ];
 
 function Features() {
@@ -491,6 +433,88 @@ function Features() {
               </Card>
             </Reveal>
           ))}
+        </div>
+
+        <Reveal delay={features.length * 80}>
+          <div className="mx-auto mt-14 max-w-5xl">
+            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
+              Actually wired up today
+            </div>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+              {integrations.map((i) => (
+                <div
+                  key={i.name}
+                  title={i.note}
+                  className="rounded-full border border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] px-5 py-2 text-sm font-semibold text-[#F5F5F5]"
+                >
+                  {i.name}
+                </div>
+              ))}
+              <div className="rounded-full border border-dashed border-[#F5F5F5]/15 px-5 py-2 text-sm text-[#6F6F75]">
+                + tell us what else you use
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+const WITHOUT_FIELDSTA = [
+  "Lead waits 3+ hours for a reply",
+  "Qualification happens manually, if at all",
+  "Follow-ups get forgotten",
+  "Slow response means the deal goes to whoever called back first",
+];
+
+const WITH_FIELDSTA = [
+  "Replies in under a minute, day or night",
+  "Every lead qualified automatically, against your own criteria",
+  "Meeting booked on your calendar, reviewed by you",
+  "Gets better at sounding like you the more you use it",
+];
+
+function WhySwitch() {
+  return (
+    <section className="border-t border-[#F5F5F5]/10 py-24">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Why businesses switch
+          </h2>
+        </Reveal>
+        <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
+          <Reveal delay={80}>
+            <Card className="h-full border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-7">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-[#6F6F75]">
+                Without Fieldsta
+              </div>
+              <ul className="mt-4 space-y-3">
+                {WITHOUT_FIELDSTA.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#9A9A9E]">
+                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-[#6F6F75]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </Reveal>
+          <Reveal delay={160}>
+            <Card className="h-full border-emerald-400/20 bg-emerald-400/[0.04] p-7">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-emerald-400">
+                With Fieldsta
+              </div>
+              <ul className="mt-4 space-y-3">
+                {WITH_FIELDSTA.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#F5F5F5]">
+                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-emerald-400" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </Reveal>
         </div>
       </div>
     </section>
