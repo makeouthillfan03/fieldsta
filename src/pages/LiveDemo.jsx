@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScoreRing } from "@/components/ScoreRing";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -126,10 +127,10 @@ export default function LiveDemo() {
                   type="button"
                   onClick={() => setVertical(v.value)}
                   className={
-                    "rounded-lg border px-3 py-2.5 text-left transition-colors " +
+                    "rounded-lg border px-3 py-2.5 text-left transition-all duration-200 " +
                     (vertical === v.value
-                      ? "border-[#F5F5F5]/40 bg-[#F5F5F5]/[0.06]"
-                      : "border-[#F5F5F5]/10 hover:border-[#F5F5F5]/25")
+                      ? "border-[#F5F5F5]/40 bg-[#F5F5F5]/[0.06] scale-[1.02]"
+                      : "border-[#F5F5F5]/10 hover:border-[#F5F5F5]/25 hover:bg-[#F5F5F5]/[0.02]")
                   }
                 >
                   <div className="text-sm font-medium">{v.label}</div>
@@ -162,14 +163,14 @@ export default function LiveDemo() {
               rows={5}
               maxLength={4000}
               placeholder="Paste or type what a lead sent you…"
-              className="w-full rounded-lg border border-[#F5F5F5]/15 bg-[#0d0d0f] px-3.5 py-3 text-[15px] leading-relaxed text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+              className="w-full rounded-lg border border-[#F5F5F5]/15 bg-[#0d0d0f] px-3.5 py-3 text-[15px] leading-relaxed text-[#F5F5F5] placeholder:text-[#4A4A50] transition-colors duration-200 focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
             />
           </div>
 
           <Button
             type="submit"
             disabled={!message.trim() || status === "running"}
-            className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white sm:w-auto"
+            className="w-full bg-[#F5F5F5] text-[#0a0a0a] transition-all duration-200 hover:bg-white sm:w-auto"
           >
             {status === "running" ? (
               <>
@@ -217,7 +218,15 @@ function Result({ result }) {
 
   return (
     <div className="mt-10 space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-4">
+        {result.score && (
+          <div className="flex items-center gap-3">
+            <ScoreRing score={result.score.score} size={64} stroke={5} />
+            <span className="max-w-[9rem] text-xs leading-snug text-[#9A9A9E]">
+              {result.score.tierLabel}
+            </span>
+          </div>
+        )}
         <span
           className={
             "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium " +
@@ -236,6 +245,22 @@ function Result({ result }) {
         <Block title="Why">
           <p>{result.reasoning}</p>
         </Block>
+
+        {result.criteriaBreakdown?.length > 0 && (
+          <Block title="Criteria checked">
+            <ul className="space-y-2.5">
+              {result.criteriaBreakdown.map((c, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <CritMark met={c.met} />
+                  <div>
+                    <div className="font-medium text-[#F5F5F5]">{c.criterion}</div>
+                    <div className="mt-0.5 text-[13px] text-[#9A9A9E]">{c.evidence}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Block>
+        )}
 
         {result.missingInfo?.length > 0 && (
           <Block title="Couldn't confirm">
@@ -266,6 +291,26 @@ function Result({ result }) {
         </p>
       </Card>
     </div>
+  );
+}
+
+const CRIT_STYLE = {
+  yes: { mark: "✓", className: "text-emerald-400 border-emerald-400/40" },
+  no: { mark: "✕", className: "text-[#FF4438] border-[#FF4438]/40" },
+  unclear: { mark: "?", className: "text-amber-400 border-amber-400/40" },
+};
+
+function CritMark({ met }) {
+  const s = CRIT_STYLE[met] ?? CRIT_STYLE.unclear;
+  return (
+    <span
+      className={
+        "mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold " +
+        s.className
+      }
+    >
+      {s.mark}
+    </span>
   );
 }
 

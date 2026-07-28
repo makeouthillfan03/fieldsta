@@ -8,6 +8,7 @@ import {
   Plug,
   ArrowRight,
   ArrowDown,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import ParticleSkyline from "@/components/ParticleSkyline";
+import { ScoreRing } from "@/components/ScoreRing";
 import { cn } from "@/lib/utils";
 
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
@@ -291,27 +293,100 @@ function Hero() {
   );
 }
 
-// Placeholder background (gradient + the wireframe skyline) standing in for
-// a real photo. Drop a licensed/AI-generated NYC image at
-// src/assets/nyc-hero.jpg and swap the div below for an <img> once one
-// exists — everything else (tilt/scale/reduced-motion handling) stays the
-// same.
+const EXAMPLE_CRITERIA = [
+  {
+    criterion: "Property is within the service area",
+    met: true,
+    evidence: "“About 20 minutes from Raleigh” — inside the 45-mile radius",
+  },
+  {
+    criterion: "Needs the service offered — storm/hail damage",
+    met: true,
+    evidence: "“Hailstorm last week, dented gutters and shingles in the yard”",
+  },
+  {
+    criterion: "Wants an actual visit, not just information",
+    met: true,
+    evidence: "“Can someone come take a look this week?” — a real ask, not browsing",
+  },
+  {
+    criterion: "Owns the property or can authorize the work",
+    met: false,
+    evidence: "Not stated — the one thing keeping this from a perfect score",
+  },
+];
+
+// Real product screenshot goes here eventually; this mockup uses the exact
+// data shape and copy voice the live dashboard (studio.fieldsta.com)
+// actually produces — see server.ts's renderCriteriaBreakdown and
+// computeLeadScore — not an invented UI. Labeled "Example" throughout
+// rather than shown as a captured lead, per the no-fabricated-claims rule
+// everywhere else on this site.
+function DashboardMockup() {
+  return (
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0a0a0b] text-left">
+      <div className="flex items-center gap-2 border-b border-[#F5F5F5]/10 px-4 py-3 sm:px-6">
+        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#6F6F75]">
+          Fieldsta
+        </span>
+        <span className="text-[10px] text-[#4A4A50]">·</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-[#4A4A50]">Lead review</span>
+        <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.1em] text-amber-400">
+          Example
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-5 overflow-hidden p-4 sm:flex-row sm:gap-8 sm:p-6">
+        <div className="flex flex-shrink-0 flex-row items-center gap-4 sm:flex-col sm:items-start sm:gap-3">
+          <ScoreRing score={88} />
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-amber-400">
+              Needs one more detail
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-[#9A9A9E] sm:max-w-[11rem]">
+              Strong lead — one thing unconfirmed below is the only gap between this and a perfect score.
+            </p>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">
+            Why this lead scored 88, not 100
+          </div>
+          <ul className="mt-2.5 space-y-2.5">
+            {EXAMPLE_CRITERIA.map((c) => (
+              <li key={c.criterion} className="flex items-start gap-2.5">
+                <span
+                  className={
+                    "mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold " +
+                    (c.met ? "border-emerald-400/40 text-emerald-400" : "border-amber-400/40 text-amber-400")
+                  }
+                >
+                  {c.met ? "✓" : "?"}
+                </span>
+                <div>
+                  <div className="text-[13px] font-medium text-[#F5F5F5]">{c.criterion}</div>
+                  <div className="mt-0.5 text-[12px] text-[#9A9A9E]">{c.evidence}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CitySection() {
   return (
     <ContainerScroll
       titleComponent={
         <h2 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-          Built for the city that doesn&apos;t wait for business hours.
+          See exactly why a lead is worth your time.
         </h2>
       }
     >
-      <div className="relative flex h-full w-full items-end justify-center overflow-hidden bg-gradient-to-b from-[#050506] via-[#131315] to-[#212124]">
-        <div
-          aria-hidden="true"
-          className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 rounded-full bg-[#F5F5F5]/10 blur-[100px]"
-        />
-        <SkylineSilhouette className="relative h-2/3 w-full" />
-      </div>
+      <DashboardMockup />
     </ContainerScroll>
   );
 }
@@ -369,13 +444,18 @@ function HowItWorks() {
 const features = [
   {
     icon: Zap,
-    title: "Instant response",
-    description: "Every inbound lead hears back right away, day or night.",
+    title: "Drafts in under a minute",
+    description: "Every inbound lead gets a qualified draft reply fast, day or night — not whenever someone gets a chance.",
   },
   {
     icon: MessageSquareText,
     title: "Real qualification",
     description: "Leads are asked the questions your team would ask, before they hit your calendar.",
+  },
+  {
+    icon: Sparkles,
+    title: "Learns your voice",
+    description: "Every time you edit a draft before sending, Fieldsta remembers — its own dedicated memory per client, so it sounds more like you over time, not less.",
   },
   {
     icon: ShieldCheck,
