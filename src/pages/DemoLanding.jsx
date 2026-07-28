@@ -277,8 +277,9 @@ function Hero() {
         </div>
 
         <p className="animate-fade-up [animation-delay:280ms] mt-10 max-w-lg text-[15px] leading-relaxed text-[#9A9A9E]">
-          Fieldsta responds to every inbound lead, qualifies them, and books the meeting
-          straight onto your calendar — with a human reviewing every booking.
+          Fieldsta drafts a reply the moment a lead comes in, learns how you'd say it from
+          every edit you make, and books the meeting on your calendar — you decide how much
+          to review, from every reply to none.
         </p>
       </div>
 
@@ -409,7 +410,7 @@ const steps = [
     icon: CalendarCheck,
     n: "03",
     title: "The meeting gets booked",
-    description: "Straight onto your calendar. A human reviews every booking before it's confirmed.",
+    description: "Straight onto your calendar — reviewed by you by default, or sent automatically once you trust the voice it's learned.",
   },
 ];
 
@@ -459,8 +460,8 @@ const features = [
   },
   {
     icon: ShieldCheck,
-    title: "Human-reviewed booking",
-    description: "Nothing lands on your calendar without a person checking it first.",
+    title: "Your call, always",
+    description: "Every reply waits for your review by default. Once you trust how it sounds, you can let it send on its own for the leads it's confident about — you set the boundary, not us.",
   },
   {
     icon: Plug,
@@ -507,7 +508,11 @@ const faqs = [
   },
   {
     q: "Is a real person involved at all?",
-    a: "Yes — every meeting Fieldsta books is reviewed by a human before it's confirmed on your calendar.",
+    a: "By default, yes — every reply waits for you to review it before it sends. As Fieldsta learns your voice and you see it consistently getting things right, you can turn on auto-send for the leads it's confident about, and keep manual review for anything it flags as unsure. That's your setting to change whenever you want, not ours.",
+  },
+  {
+    q: "Can I control how it talks, or what it's never allowed to say?",
+    a: "Yes — you tell us what to never claim on your behalf (pricing, guarantees, anything you haven't approved), and Fieldsta won't say it, ever. Combined with the voice it learns from your edits, this is how replies end up sounding like your business, not a generic bot.",
   },
 ];
 
