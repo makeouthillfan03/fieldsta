@@ -3,6 +3,7 @@ import { useAuth } from "@/context/AuthContext";
 import Login from "@/pages/Login";
 import GrowthDashboard from "@/pages/GrowthDashboard";
 import DemoLanding from "@/pages/DemoLanding";
+import LiveDemo from "@/pages/LiveDemo";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
@@ -54,6 +55,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<DemoLanding />} />
+      <Route path="/try" element={<LiveDemo />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/agreement" element={<Agreement />} />

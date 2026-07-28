@@ -204,6 +204,9 @@ function Nav() {
           <a href="#faq" className="hover:text-[#F5F5F5]">
             FAQ
           </a>
+          <a href="/try" className="text-[#F5F5F5] hover:text-white">
+            Try It Live
+          </a>
         </nav>
         <a href="#demo">
           <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
@@ -635,6 +638,9 @@ function Footer() {
           Fieldsta
         </span>
         <div className="flex items-center gap-4">
+          <a href="/try" className="hover:text-[#F5F5F5]">
+            Try It Live
+          </a>
           <a href="/terms" className="hover:text-[#F5F5F5]">
             Terms
           </a>
