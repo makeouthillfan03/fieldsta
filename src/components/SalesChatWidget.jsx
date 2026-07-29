@@ -48,6 +48,14 @@ export default function SalesChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    // Auto-open Harper on first page load (fresh session with only greeting)
+    const hasExistingChat = sessionStorage.getItem(HISTORY_KEY);
+    if (!hasExistingChat) {
+      setTimeout(() => setOpen(true), 500);
+    }
+  }, []);
+
   async function send(e) {
     e.preventDefault();
     const text = input.trim();
