@@ -23,21 +23,18 @@ const VERTICALS = [
   {
     value: "home-services",
     label: "Home services",
-    hint: "Roofing, HVAC, solar, remodeling",
     sample:
       "We had that big hailstorm come through last week and I'm seeing dented gutters and shingles in the yard. Insurance adjuster is coming Friday but I want a roofer's opinion before then. Can someone come take a look this week?",
   },
   {
     value: "legal",
     label: "Legal intake",
-    hint: "Personal injury, mass tort, consumer",
     sample:
       "I was rear ended on the highway last Tuesday. Other driver admitted fault to the officer but their insurance is already lowballing me. I have a police report and went to urgent care same day, still getting neck pain. Do you handle cases like this?",
   },
   {
     value: "saas",
     label: "B2B / SaaS",
-    hint: "Software, agencies, services",
     sample:
       "We run paid ads for about a dozen contractor clients and generate maybe 400 leads a month between them. Honestly our follow-up is inconsistent — leads sit for hours before anyone calls. What does something like this cost?",
   },
@@ -108,11 +105,6 @@ export default function LiveDemo() {
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Watch it qualify a real lead
           </h1>
-          <p className="max-w-xl text-[15px] leading-relaxed text-[#9A9A9E]">
-            Paste in a lead the way one actually arrives — messy, vague, half the details
-            missing. This runs the same agent our customers run. It isn't scripted, and it
-            will tell you when a lead isn't worth chasing.
-          </p>
         </div>
 
         <form onSubmit={run} className="mt-8 space-y-5">
@@ -134,7 +126,6 @@ export default function LiveDemo() {
                   }
                 >
                   <div className="text-sm font-medium">{v.label}</div>
-                  <div className="mt-0.5 text-[11px] text-[#6F6F75]">{v.hint}</div>
                 </button>
               ))}
             </div>
@@ -289,6 +280,39 @@ function Result({ result }) {
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#C8C8CC]">
           {result.draftReply}
         </p>
+      </Card>
+
+      <div className="flex gap-2 pt-2">
+        <button className="flex-1 rounded-lg bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-400 transition-all hover:bg-emerald-500/30">
+          ✓ Approve & Send
+        </button>
+        <button className="flex-1 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/30">
+          ✕ Reject
+        </button>
+      </div>
+
+      <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+        <Block title="What happens next">
+          <ul className="space-y-2 text-sm text-[#C8C8CC]">
+            <li>✓ Reply sent to {result.leadEmail || "lead@example.com"}</li>
+            <li>✓ Pushed to your HubSpot as {result.qualification}</li>
+            <li>✓ Notification sent to your team Slack</li>
+            <li>✓ Meeting link added if they accept</li>
+          </ul>
+        </Block>
+      </Card>
+
+      <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+        <Block title="In this dashboard, you also get">
+          <ul className="space-y-2 text-sm text-[#C8C8CC]">
+            <li>📊 Score breakdown for every lead (0-100)</li>
+            <li>📧 Customize what email replies come from</li>
+            <li>🎤 Train the agent with your voice/style</li>
+            <li>⚙️ Connect HubSpot, Meta, Slack, Google Calendar</li>
+            <li>👀 See all integrations wired up</li>
+            <li>📈 Daily reports on meetings booked & replies sent</li>
+          </ul>
+        </Block>
       </Card>
     </div>
   );
