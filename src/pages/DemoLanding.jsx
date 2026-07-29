@@ -409,8 +409,12 @@ const features = [
 ];
 
 const integrations = [
+  { name: "Email", note: "Reply from & notification settings" },
   { name: "HubSpot", note: "Pushes qualified leads and status" },
   { name: "Meta Lead Ads", note: "Facebook & Instagram lead forms" },
+  { name: "Slack", note: "Real-time lead notifications" },
+  { name: "Google Calendar", note: "Auto-book meetings" },
+  { name: "Webhooks", note: "Zapier, Make, custom systems" },
 ];
 
 function Features() {
