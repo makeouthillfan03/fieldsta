@@ -49,10 +49,10 @@ export default function SalesChatWidget() {
   }, [messages]);
 
   useEffect(() => {
-    // Auto-open Harper on first page load (fresh session with only greeting)
-    const hasExistingChat = sessionStorage.getItem(HISTORY_KEY);
-    if (!hasExistingChat) {
-      setTimeout(() => setOpen(true), 500);
+    // Auto-open Harper immediately on first page load
+    const hasClosedChat = sessionStorage.getItem("fieldsta_chat_closed");
+    if (!hasClosedChat) {
+      setOpen(true);
     }
   }, []);
 
