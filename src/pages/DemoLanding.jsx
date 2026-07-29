@@ -43,6 +43,7 @@ export default function DemoLanding() {
       <Hero />
       <HowItWorks />
       <Features />
+      <SetupFlow />
       <WhySwitch />
       <FAQ />
       <FinalCTA />
@@ -455,6 +456,62 @@ function Features() {
               </div>
             </div>
           </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function SetupFlow() {
+  return (
+    <section className="border-t border-[#F5F5F5]/10 py-24 bg-[#F5F5F5]/[0.02]">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Set up in 5 minutes
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[#9A9A9E]">
+            Pay → get a setup link → connect your integrations → start receiving qualified leads
+          </p>
+        </Reveal>
+
+        <div className="mx-auto mt-16 max-w-4xl">
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Connect integrations",
+                desc: "Link Meta Lead Ads, HubSpot, or your own webhook in one click",
+              },
+              {
+                step: "2",
+                title: "Configure email",
+                desc: "Choose which email you reply from and where notifications go",
+              },
+              {
+                step: "3",
+                title: "Test & launch",
+                desc: "We send a demo lead to prove it works, then you're live",
+              },
+            ].map((item, i) => (
+              <Reveal key={item.title} delay={i * 100}>
+                <div className="rounded-lg border border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-6">
+                  <div className="text-xs font-bold tracking-[0.2em] text-[#EF4444] uppercase">
+                    Step {item.step}
+                  </div>
+                  <h3 className="mt-3 text-base font-semibold text-[#F5F5F5]">{item.title}</h3>
+                  <p className="mt-2 text-sm text-[#9A9A9E]">{item.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+
+        <Reveal delay={400} className="mt-12 text-center">
+          <div className="text-xs font-semibold tracking-[0.2em] text-[#4ADE80]">
+            FULLY AUTONOMOUS
+          </div>
+          <p className="mt-2 text-[#9A9A9E]">No manual review. No operator handoff. No waiting days for setup.</p>
         </Reveal>
       </div>
     </section>
