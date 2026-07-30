@@ -147,11 +147,14 @@ function Nav() {
             Try It Live
           </a>
         </nav>
-        <a href="#demo">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+        >
           <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
-            Request a Demo
+            See It Live
           </Button>
-        </a>
+        </button>
       </div>
     </header>
   );
@@ -205,23 +208,30 @@ function Hero() {
             </h1>
 
             <p className="animate-fade-up [animation-delay:280ms] mt-8 max-w-md text-[15px] leading-relaxed text-[#9A9A9E]">
-              AI that responds, qualifies, and books meetings automatically for every
-              inbound lead.
+              Get hours of your week back and stop losing deals to slow follow-up —
+              fully automated lead response, qualifying and booking meetings for you
+              around the clock.
             </p>
 
             <p className="animate-fade-up [animation-delay:340ms] mt-5 text-[13px] text-[#6F6F75]">
               <span className="font-semibold text-[#F5F5F5]">Under a minute</span> — median
-              time to a drafted reply, measured on real leads.
+              time to a drafted reply, measured on real leads. That's 15+ hours a week
+              most businesses spend chasing and qualifying leads by hand, back in your
+              pocket.
             </p>
 
-            <a href="#demo" className="animate-fade-up [animation-delay:160ms] mt-9 inline-block">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+              className="animate-fade-up [animation-delay:160ms] mt-9 inline-block"
+            >
               <Button
                 size="lg"
                 className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white sm:w-auto"
               >
-                Request a demo
+                See it live — free
               </Button>
-            </a>
+            </button>
           </div>
 
           <div className="animate-fade-up [animation-delay:220ms]">
@@ -236,7 +246,7 @@ function Hero() {
       </div>
 
       <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
-        <span>Human-reviewed · Any CRM · Always-on</span>
+        <span>Fully Automated · Any CRM · Save 15+ Hours a Week</span>
         <span className="hidden items-center gap-2 sm:flex">
           Scroll
           <ArrowDown className="h-3 w-3" />
@@ -348,7 +358,7 @@ const steps = [
     icon: CalendarCheck,
     n: "03",
     title: "The meeting gets booked",
-    description: "Straight onto your calendar — reviewed by you by default, or sent automatically once you trust the voice it's learned.",
+    description: "Straight onto your calendar, automatically — no chasing, no data entry, no hours lost to admin work.",
   },
 ];
 
@@ -383,23 +393,23 @@ function HowItWorks() {
 const features = [
   {
     icon: Zap,
-    title: "Your leads hear back immediately — even while you sleep",
-    description: "The faster you respond, the more deals you close. Fieldsta makes that automatic, day or night.",
+    title: "Get your evenings and weekends back",
+    description: "Your leads hear back immediately, even while you sleep. No more losing deals because you were busy running the business instead of chasing leads.",
   },
   {
     icon: MessageSquareText,
-    title: "Real qualification",
-    description: "Leads are asked the questions your team would ask, before they hit your calendar.",
+    title: "Zero time spent qualifying",
+    description: "Leads are asked the questions your team would ask, automatically, before they ever land on your calendar — no more sitting through calls that were never going to close.",
   },
   {
     icon: Sparkles,
-    title: "Gets better the more you use it",
-    description: "Every edit you make teaches it — its own dedicated memory per client, so replies sound more like you over time, not less.",
+    title: "Gets sharper the more it runs",
+    description: "Every interaction teaches it — its own dedicated memory per client, so it saves you more time and sounds more like you the longer it runs, not less.",
   },
   {
     icon: ShieldCheck,
-    title: "Your call, always",
-    description: "Every reply waits for your review by default. Once you trust how it sounds, you can let it send on its own for the leads it's confident about — you set the boundary, not us.",
+    title: "Runs itself, so you don't have to",
+    description: "Set your boundaries once and it handles the rest — qualifying, replying, and booking without you lifting a finger. Full automation, built to get you time and revenue back, not add another tool to babysit.",
   },
   {
     icon: Plug,
@@ -512,10 +522,10 @@ function SetupFlow() {
         </div>
 
         <Reveal delay={400} className="mt-12 text-center">
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#4ADE80]">
-            FULLY AUTONOMOUS
+          <div className="text-xs font-semibold tracking-[0.2em] text-[#EF4444]">
+            FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
           </div>
-          <p className="mt-2 text-[#9A9A9E]">No manual review. No operator handoff. No waiting days for setup.</p>
+          <p className="mt-2 text-[#9A9A9E]">No manual review. No operator handoff. No waiting days for setup. Just hours back in your week from day one.</p>
         </Reveal>
       </div>
     </section>
@@ -532,8 +542,8 @@ const WITHOUT_FIELDSTA = [
 const WITH_FIELDSTA = [
   "Replies in under a minute, day or night",
   "Every lead qualified automatically, against your own criteria",
-  "Meeting booked on your calendar, reviewed by you",
-  "Gets better at sounding like you the more you use it",
+  "Meeting booked straight onto your calendar — no admin work",
+  "15+ hours a week back, and it keeps getting better the more it runs",
 ];
 
 function WhySwitch() {
@@ -593,7 +603,7 @@ const faqs = [
   },
   {
     q: "Is a real person involved at all?",
-    a: "By default, yes — every reply waits for you to review it before it sends. As Fieldsta learns your voice and you see it consistently getting things right, you can turn on auto-send for the leads it's confident about, and keep manual review for anything it flags as unsure. That's your setting to change whenever you want, not ours.",
+    a: "Fieldsta runs fully automated by design — that's the whole point, getting your time back instead of trading one manual task for another. If you ever want to talk to an actual person, our founder personally answers those — just ask.",
   },
   {
     q: "Can I control how it talks, or what it's never allowed to say?",
@@ -641,17 +651,20 @@ function FinalCTA() {
             Your next lead is already <span className="text-[#EF4444]">waiting</span>.
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[#9A9A9E]">
-            See Fieldsta on a live call with your own leads and workflow.
+            Talk to Harper right now and see exactly how much time and money this puts back in your week.
           </p>
-          <a href="#demo">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+          >
             <Button
               size="lg"
               className="mt-8 bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
             >
-              Request a Live Demo
+              Start Your Live AI Demo
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </a>
+          </button>
         </Reveal>
       </div>
     </section>
@@ -709,8 +722,11 @@ function DemoForm() {
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Request a Live Demo
+            Prefer email? Tell us about your business
           </h2>
+          <p className="mx-auto mt-3 max-w-md text-center text-sm text-[#9A9A9E]">
+            Or just talk to Harper above — it's faster, and it's the same AI you'd be running.
+          </p>
         </Reveal>
         <Reveal delay={100}>
           <Card className="mx-auto mt-10 max-w-md border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-8">
@@ -775,7 +791,7 @@ function DemoForm() {
                 className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
                 size="lg"
               >
-                {status === "submitting" ? "Submitting..." : "Request a Live Demo"}
+                {status === "submitting" ? "Submitting..." : "Get My Custom Automation Plan"}
               </Button>
               {message && (
                 <div

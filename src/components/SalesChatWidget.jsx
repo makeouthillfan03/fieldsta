@@ -29,7 +29,7 @@ function getSessionId() {
 const GREETING = {
   role: "assistant",
   content:
-    "Hey — I'm Harper, Fieldsta's AI. I can walk you through how this would work for your business right now, or if you'd rather talk to a person, just say so and I'll get someone on your calendar.",
+    "Hey — I'm Harper, Fieldsta's AI. This is your live demo: ask me anything about your business and I'll show you exactly how this saves you time and money. If you ever want to talk to our founder directly, just ask and I'll connect you.",
 };
 
 export default function SalesChatWidget() {
@@ -59,6 +59,18 @@ export default function SalesChatWidget() {
     if (!hasClosedChat) {
       setOpen(true);
     }
+  }, []);
+
+  useEffect(() => {
+    // Lets CTA buttons elsewhere on the page (hero, nav, final CTA) launch
+    // the live AI demo directly instead of scrolling to a form — the demo
+    // IS Harper, not a "submit and wait for a callback" step.
+    function handleOpenRequest() {
+      sessionStorage.removeItem("fieldsta_chat_closed");
+      setOpen(true);
+    }
+    window.addEventListener("fieldsta:open-chat", handleOpenRequest);
+    return () => window.removeEventListener("fieldsta:open-chat", handleOpenRequest);
   }, []);
 
   async function send(e) {
