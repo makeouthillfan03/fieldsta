@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
+import SalesChatWidget from "@/components/SalesChatWidget";
+import ParticleSkyline from "@/components/ParticleSkyline";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -91,8 +93,14 @@ export default function LiveDemo() {
   }
 
   return (
-    <div className="min-h-screen bg-[#060607] font-body text-[#F5F5F5]">
-      <div className="container max-w-3xl py-10">
+    <div className="relative min-h-screen bg-[#060607] font-body text-[#F5F5F5]">
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_0%,rgba(255,241,232,0.1)_0%,rgba(255,235,225,0.04)_28%,transparent_62%)]" />
+        <ParticleSkyline className="absolute inset-0 h-full w-full opacity-60" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,6,7,0.5)_55%,#060607_100%)]" />
+      </div>
+
+      <div className="container relative z-10 max-w-3xl py-10">
         <Link
           to="/"
           className="inline-flex items-center gap-1.5 text-xs text-[#9A9A9E] transition-colors hover:text-[#F5F5F5]"
@@ -188,17 +196,34 @@ export default function LiveDemo() {
 
         {result && <Result result={result} />}
 
-        <div className="mt-12 border-t border-[#F5F5F5]/10 pt-6">
-          <p className="text-sm text-[#9A9A9E]">
-            This is the demo, running live. If you want it pointed at your own leads and your
-            own qualifying criteria,{" "}
-            <Link to="/#demo" className="text-[#F5F5F5] underline underline-offset-2">
-              tell us about your setup
-            </Link>
-            .
-          </p>
+        <div className="mt-12 border-t border-[#F5F5F5]/10 pt-8">
+          <Card className="border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-6 text-center sm:p-8">
+            <h2 className="text-xl font-semibold text-[#F5F5F5] sm:text-2xl">Run this on your own leads</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-[#9A9A9E]">
+              Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
+              anytime.
+            </p>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+              className="mt-6 inline-block"
+            >
+              <Button size="lg" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
+                Start your free pilot
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </button>
+            <p className="mt-3 text-xs text-[#6F6F75]">
+              Or{" "}
+              <Link to="/#demo" className="underline underline-offset-2 hover:text-[#F5F5F5]">
+                tell us about your setup by email
+              </Link>{" "}
+              instead.
+            </p>
+          </Card>
         </div>
       </div>
+      <SalesChatWidget />
     </div>
   );
 }
@@ -305,12 +330,12 @@ function Result({ result }) {
       <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
         <Block title="In this dashboard, you also get">
           <ul className="space-y-2 text-sm text-[#C8C8CC]">
-            <li>📊 Score breakdown for every lead (0-100)</li>
-            <li>📧 Customize what email replies come from</li>
-            <li>🎤 Train the agent with your voice/style</li>
-            <li>⚙️ Connect HubSpot, Meta, Slack, Google Calendar</li>
-            <li>👀 See all integrations wired up</li>
-            <li>📈 Daily reports on meetings booked & replies sent</li>
+            <li>Score breakdown for every lead (0-100)</li>
+            <li>Customize what email replies come from</li>
+            <li>Train the agent with your voice/style</li>
+            <li>Connect HubSpot, Meta, Slack, Google Calendar</li>
+            <li>See all integrations wired up</li>
+            <li>Daily reports on meetings booked & replies sent</li>
           </ul>
         </Block>
       </Card>

@@ -46,7 +46,7 @@ export function ScoreRing({ score, size = 104, stroke = 8 }) {
   const circumference = 2 * Math.PI * radius;
   const targetOffset = circumference * (1 - score / 100);
   const offset = visible ? targetOffset : circumference;
-  const color = score >= 90 ? "#4ADE80" : score >= 70 ? "#FBBF24" : "#FF4438";
+  const color = score >= 85 ? "#4ADE80" : score >= 70 ? "#FBBF24" : "#FF4438";
 
   return (
     <div ref={ref} className="relative flex-shrink-0" style={{ width: size, height: size }}>

@@ -198,10 +198,10 @@ function Hero() {
       <div className="container relative z-10 mt-auto pb-14 pt-40">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div>
-            <h1 className="animate-fade-up max-w-xl text-4xl font-light leading-[1.12] tracking-tight text-[#6F6F75] sm:text-5xl lg:text-6xl">
-              <span className="text-[#F5F5F5]">Answer every lead</span>
+            <h1 className="animate-fade-up max-w-xl text-4xl font-light leading-[1.12] tracking-tight text-[#F5F5F5] sm:text-5xl lg:text-6xl">
+              Answer <span className="font-bold text-[#EF4444]">every lead</span>
               <br />
-              before your competitor
+              <span className="font-bold text-[#EF4444]">before</span> your competitor
               <br />
               picks up the phone
             </h1>
