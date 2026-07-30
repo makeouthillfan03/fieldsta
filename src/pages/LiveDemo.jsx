@@ -201,7 +201,7 @@ export default function LiveDemo() {
             <h2 className="text-xl font-semibold text-[#F5F5F5] sm:text-2xl">Run this on your own leads</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-[#9A9A9E]">
               Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
-              anytime.
+              anytime. Interested? Just ask Harper below to get set up.
             </p>
             <button
               type="button"
