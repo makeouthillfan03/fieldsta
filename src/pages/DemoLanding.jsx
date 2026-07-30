@@ -7,7 +7,6 @@ import {
   MessageSquareText,
   Plug,
   ArrowRight,
-  ArrowDown,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -245,13 +244,6 @@ function Hero() {
         </div>
       </div>
 
-      <div className="container relative z-10 flex items-center justify-between border-t border-[#F5F5F5]/10 py-4 text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
-        <span>Fully Automated · Any CRM · Save 15+ Hours a Week</span>
-        <span className="hidden items-center gap-2 sm:flex">
-          Scroll
-          <ArrowDown className="h-3 w-3" />
-        </span>
-      </div>
     </section>
   );
 }
@@ -345,20 +337,16 @@ const steps = [
     icon: Inbox,
     n: "01",
     title: "A lead comes in",
-    description: "From your website, a call, or wherever leads already reach you.",
   },
   {
     icon: MessageSquareText,
     n: "02",
     title: "Fieldsta responds and qualifies",
-    description:
-      "Right away, every time — asking the right questions before anyone's time is wasted.",
   },
   {
     icon: CalendarCheck,
     n: "03",
-    title: "The meeting gets booked",
-    description: "Straight onto your calendar, automatically — no chasing, no data entry, no hours lost to admin work.",
+    title: "The pilot account activates",
   },
 ];
 
@@ -381,7 +369,6 @@ function HowItWorks() {
                 {step.n}
               </div>
               <h3 className="mt-1 text-lg font-semibold text-[#F5F5F5]">{step.title}</h3>
-              <p className="mt-2 text-sm text-[#9A9A9E]">{step.description}</p>
             </Reveal>
           ))}
         </div>
@@ -525,7 +512,7 @@ function SetupFlow() {
           <div className="text-xs font-semibold tracking-[0.2em] text-[#EF4444]">
             FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
           </div>
-          <p className="mt-2 text-[#9A9A9E]">No manual review. No operator handoff. No waiting days for setup. Just hours back in your week from day one.</p>
+          <p className="mt-2 text-[#9A9A9E]">Just hours back in your week from day one.</p>
         </Reveal>
       </div>
     </section>
