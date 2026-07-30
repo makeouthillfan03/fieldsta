@@ -29,7 +29,7 @@ function getSessionId() {
 const GREETING = {
   role: "assistant",
   content:
-    "Hey — I'm Harper, Fieldsta's AI. This is your live demo: ask me anything about your business and I'll show you exactly how this saves you time and money. If you ever want to talk to our founder directly, just ask and I'll connect you.",
+    "Hey — I'm Harper, Fieldsta's AI. This is your live demo: ask me anything about your business and I'll show you exactly how this saves you time and money.",
 };
 
 export default function SalesChatWidget() {

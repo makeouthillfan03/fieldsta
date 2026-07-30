@@ -214,8 +214,9 @@ function Hero() {
 
             <p className="animate-fade-up [animation-delay:340ms] mt-5 text-[13px] text-[#6F6F75]">
               <span className="font-semibold text-[#F5F5F5]">Under a minute</span> — median
-              time to a drafted reply, measured on real leads. That's 15+ hours a week
-              most businesses spend chasing and qualifying leads by hand, back in your
+              time to a drafted reply, measured on real leads. That's{" "}
+              <span className="font-semibold text-[#EF4444]">15+ hours a week</span> most
+              businesses spend chasing and qualifying leads by hand, back in your
               pocket.
             </p>
 
@@ -590,7 +591,7 @@ const faqs = [
   },
   {
     q: "Is a real person involved at all?",
-    a: "Fieldsta runs fully automated by design — that's the whole point, getting your time back instead of trading one manual task for another. If you ever want to talk to an actual person, our founder personally answers those — just ask.",
+    a: "Fieldsta runs fully automated by design — that's the whole point, getting your time back instead of trading one manual task for another. Harper handles the conversation end to end, including voice.",
   },
   {
     q: "Can I control how it talks, or what it's never allowed to say?",
