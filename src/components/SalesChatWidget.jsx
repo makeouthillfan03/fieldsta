@@ -54,14 +54,6 @@ export default function SalesChatWidget() {
   }, [messages]);
 
   useEffect(() => {
-    // Auto-open Harper immediately on first page load
-    const hasClosedChat = sessionStorage.getItem("fieldsta_chat_closed");
-    if (!hasClosedChat) {
-      setOpen(true);
-    }
-  }, []);
-
-  useEffect(() => {
     // Lets CTA buttons elsewhere on the page (hero, nav, final CTA) launch
     // the live AI demo directly instead of scrolling to a form — the demo
     // IS Harper, not a "submit and wait for a callback" step.
