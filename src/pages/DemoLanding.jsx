@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Zap,
   ShieldCheck,
@@ -146,14 +147,11 @@ function Nav() {
             Try It Live
           </a>
         </nav>
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-        >
+        <Link to="/try">
           <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
-            See It Live
+            Try It Live
           </Button>
-        </button>
+        </Link>
       </div>
     </header>
   );

@@ -15,7 +15,10 @@ import { MessageCircle, X, Send, Loader2, Mic, Square } from "lucide-react";
 // the actual conversation state the agent reasons from.
 const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
 const SESSION_KEY = "fieldsta_chat_session";
-const HISTORY_KEY = "fieldsta_chat_history";
+// _v2: bumped to abandon any cached history saved before the greeting
+// itself stopped being persisted (older caches had it baked into message
+// zero, which would otherwise double up against the fresh GREETING below).
+const HISTORY_KEY = "fieldsta_chat_history_v2";
 
 function getSessionId() {
   let id = sessionStorage.getItem(SESSION_KEY);
@@ -35,8 +38,11 @@ const GREETING = {
 export default function SalesChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState(() => {
+    // Only the actual back-and-forth is cached — the greeting always comes
+    // fresh from the current build, so an old visitor's cached session
+    // never gets stuck showing a greeting a code change has since replaced.
     const saved = sessionStorage.getItem(HISTORY_KEY);
-    return saved ? JSON.parse(saved) : [GREETING];
+    return [GREETING, ...(saved ? JSON.parse(saved) : [])];
   });
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -49,7 +55,7 @@ export default function SalesChatWidget() {
   const audioPlayerRef = useRef(null);
 
   useEffect(() => {
-    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages));
+    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(1)));
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
