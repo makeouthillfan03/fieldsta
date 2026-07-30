@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Mic, Square } from "lucide-react";
 
 // Talks to the real conversational sales agent (fieldsta-agents'
 // src/agents/sales-agent.ts via POST /api/sales-chat) — not a scripted
@@ -41,7 +41,12 @@ export default function SalesChatWidget() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
   const scrollRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioPlayerRef = useRef(null);
 
   useEffect(() => {
     sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages));
@@ -79,6 +84,63 @@ export default function SalesChatWidget() {
       setError(err.message || "Something went wrong. Try again in a moment.");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function startRecording() {
+    if (recording || voiceBusy) return;
+    setError("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        sendVoiceTurn(new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" }));
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch (err) {
+      setError("Couldn't access your microphone — check browser permissions.");
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+  }
+
+  async function sendVoiceTurn(blob) {
+    setVoiceBusy(true);
+    setError("");
+    try {
+      const res = await fetch(`${AGENTS_BASE}/api/voice-chat?sessionId=${getSessionId()}`, {
+        method: "POST",
+        headers: { "Content-Type": blob.type || "audio/webm" },
+        body: blob,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Voice chat failed.");
+
+      setMessages((m) => [...m, { role: "user", content: data.transcript }, { role: "assistant", content: data.reply }]);
+
+      if (data.audioBase64) {
+        const audioSrc = `data:audio/mpeg;base64,${data.audioBase64}`;
+        if (audioPlayerRef.current) {
+          audioPlayerRef.current.src = audioSrc;
+          audioPlayerRef.current.play().catch(() => {});
+        }
+      }
+    } catch (err) {
+      setError(err.message || "Voice chat failed. Try again.");
+    } finally {
+      setVoiceBusy(false);
     }
   }
 
@@ -129,19 +191,38 @@ export default function SalesChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message…"
+              placeholder={recording ? "Listening…" : voiceBusy ? "Harper's responding…" : "Type a message…"}
               maxLength={2000}
-              className="flex-1 rounded-full border border-[#F5F5F5]/15 bg-[#0d0d0f] px-4 py-2 text-[13.5px] text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+              disabled={recording || voiceBusy}
+              className="flex-1 rounded-full border border-[#F5F5F5]/15 bg-[#0d0d0f] px-4 py-2 text-[13.5px] text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none disabled:opacity-60"
             />
             <button
+              type="button"
+              onMouseDown={startRecording}
+              onMouseUp={stopRecording}
+              onMouseLeave={() => recording && stopRecording()}
+              onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
+              onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
+              disabled={voiceBusy}
+              aria-label={recording ? "Release to send" : "Hold to talk to Harper"}
+              title="Hold to talk"
+              className={
+                "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors disabled:opacity-40 " +
+                (recording ? "bg-[#EF4444] text-white animate-pulse" : "bg-[#F5F5F5]/10 text-[#F5F5F5] hover:bg-[#F5F5F5]/20")
+              }
+            >
+              {voiceBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : recording ? <Square className="h-3.5 w-3.5" /> : <Mic className="h-4 w-4" />}
+            </button>
+            <button
               type="submit"
-              disabled={!input.trim() || sending}
+              disabled={!input.trim() || sending || recording || voiceBusy}
               aria-label="Send"
               className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#F5F5F5] text-[#0a0a0a] disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </button>
           </form>
+          <audio ref={audioPlayerRef} className="hidden" />
         </div>
       )}
 
