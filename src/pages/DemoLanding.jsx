@@ -513,7 +513,6 @@ function SetupFlow() {
           <div className="text-xs font-semibold tracking-[0.2em] text-[#EF4444]">
             FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
           </div>
-          <p className="mt-2 text-[#9A9A9E]">Just hours back in your week from day one.</p>
         </Reveal>
       </div>
     </section>
@@ -712,9 +711,6 @@ function DemoForm() {
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             Prefer email? Tell us about your business
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-center text-sm text-[#9A9A9E]">
-            Or just talk to Harper above — it's faster, and it's the same AI you'd be running.
-          </p>
         </Reveal>
         <Reveal delay={100}>
           <Card className="mx-auto mt-10 max-w-md border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-8">
@@ -825,7 +821,7 @@ function Footer() {
             support@fieldsta.com
           </a>
         </div>
-        <span>&copy; 2026 Fieldsta.</span>
+        <span>&copy; 2026 Fieldsta, LLC.</span>
       </div>
     </footer>
   );
