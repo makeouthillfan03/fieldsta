@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Loader2, Mic, Square } from "lucide-react";
+import { track } from "@vercel/analytics/react";
 
 // Talks to the real conversational sales agent (fieldsta-agents'
 // src/agents/sales-agent.ts via POST /api/sales-chat) — not a scripted
@@ -58,6 +59,12 @@ export default function SalesChatWidget() {
     sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(1)));
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    // One place for the event regardless of which of the three ways (button
+    // click, nav/hero CTA, ?chat=1 link) actually opened it.
+    if (open) track("chat_opened");
+  }, [open]);
 
   useEffect(() => {
     // Lets CTA buttons elsewhere on the page (hero, nav, final CTA) launch
