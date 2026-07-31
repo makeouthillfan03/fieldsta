@@ -634,7 +634,7 @@ function Pricing() {
             </ul>
             <Button
               size="lg"
-              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+              onClick={() => { window.location.href = "https://fieldsta.com/try"; }}
               className="mt-8 w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
             >
               Start your free pilot
