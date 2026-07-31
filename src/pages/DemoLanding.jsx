@@ -143,9 +143,6 @@ function Nav() {
           <a href="#faq" className="hover:text-[#F5F5F5]">
             FAQ
           </a>
-          <a href="/try" className="text-[#F5F5F5] hover:text-white">
-            Try It Live
-          </a>
         </nav>
         <Link to="/try">
           <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
@@ -218,9 +215,8 @@ function Hero() {
               pocket.
             </p>
 
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+            <Link
+              to="/try"
               className="animate-fade-up [animation-delay:160ms] mt-9 inline-block"
             >
               <Button
@@ -229,7 +225,7 @@ function Hero() {
               >
                 See it live — free
               </Button>
-            </button>
+            </Link>
           </div>
 
           <div className="animate-fade-up [animation-delay:220ms]">

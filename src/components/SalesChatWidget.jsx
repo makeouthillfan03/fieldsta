@@ -71,6 +71,17 @@ export default function SalesChatWidget() {
     return () => window.removeEventListener("fieldsta:open-chat", handleOpenRequest);
   }, []);
 
+  useEffect(() => {
+    // Lets an external link (e.g. the dashboard's "Upgrade" button) open
+    // straight into a live Harper conversation instead of landing on the
+    // page cold — a query param survives a real navigation, unlike the
+    // fieldsta:open-chat event above which only works for same-page clicks.
+    if (new URLSearchParams(window.location.search).get("chat") === "1") {
+      sessionStorage.removeItem("fieldsta_chat_closed");
+      setOpen(true);
+    }
+  }, []);
+
   async function send(e) {
     e.preventDefault();
     const text = input.trim();
