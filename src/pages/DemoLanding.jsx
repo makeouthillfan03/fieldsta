@@ -621,7 +621,7 @@ function Pricing() {
           <Card className="mx-auto mt-14 max-w-md border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] p-8 text-center">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">Fieldsta</div>
             <div className="mt-4 flex items-baseline justify-center gap-1.5">
-              <span className="text-5xl font-extrabold tracking-tight text-[#34D399]">$500</span>
+              <span className="text-5xl font-extrabold tracking-tight text-[#F5F5F5]">$500</span>
               <span className="text-sm text-[#9A9A9E]">/ month</span>
             </div>
             <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
