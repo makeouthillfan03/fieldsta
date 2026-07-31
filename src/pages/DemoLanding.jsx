@@ -580,20 +580,20 @@ function WhySwitch() {
 
 const faqs = [
   {
-    q: "Do I need to switch CRMs?",
-    a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
-  },
-  {
-    q: "How fast does Fieldsta actually respond?",
-    a: "Fast enough that the lead is still warm — Fieldsta starts responding and qualifying immediately, instead of the hours it can take a busy team to get back to someone.",
-  },
-  {
     q: "Is a real person involved at all?",
     a: "Fieldsta runs fully automated by design — that's the whole point, getting your time back instead of trading one manual task for another. Harper handles the conversation end to end, including voice.",
   },
   {
     q: "Can I control how it talks, or what it's never allowed to say?",
     a: "Yes — you tell us what to never claim on your behalf (pricing, guarantees, anything you haven't approved), and Fieldsta won't say it, ever. Combined with the voice it learns from your edits, this is how replies end up sounding like your business, not a generic bot.",
+  },
+  {
+    q: "How fast does Fieldsta actually respond?",
+    a: "Fast enough that the lead is still warm — Fieldsta starts responding and qualifying immediately, instead of the hours it can take a busy team to get back to someone.",
+  },
+  {
+    q: "Do I need to switch CRMs?",
+    a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
   },
 ];
 
@@ -689,10 +689,7 @@ function FinalCTA() {
           <p className="mx-auto mt-4 max-w-md text-[#9A9A9E]">
             Talk to Harper right now and see exactly how much time and money this puts back in your week.
           </p>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-          >
+          <Link to="/try">
             <Button
               size="lg"
               className="mt-8 bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
@@ -700,7 +697,7 @@ function FinalCTA() {
               Start Your Live AI Demo
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </button>
+          </Link>
         </Reveal>
       </div>
     </section>
