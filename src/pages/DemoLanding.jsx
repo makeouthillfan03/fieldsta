@@ -9,6 +9,7 @@ import {
   Plug,
   ArrowRight,
   Sparkles,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -45,6 +46,7 @@ export default function DemoLanding() {
       <Features />
       <SetupFlow />
       <WhySwitch />
+      <Pricing />
       <FAQ />
       <FinalCTA />
       <DemoForm />
@@ -139,6 +141,9 @@ function Nav() {
           </a>
           <a href="#features" className="hover:text-[#F5F5F5]">
             Features
+          </a>
+          <a href="#pricing" className="hover:text-[#F5F5F5]">
+            Pricing
           </a>
           <a href="#faq" className="hover:text-[#F5F5F5]">
             FAQ
@@ -591,6 +596,56 @@ const faqs = [
     a: "Yes — you tell us what to never claim on your behalf (pricing, guarantees, anything you haven't approved), and Fieldsta won't say it, ever. Combined with the voice it learns from your edits, this is how replies end up sounding like your business, not a generic bot.",
   },
 ];
+
+const PRICING_INCLUDES = [
+  "Responds to every inbound lead in under a minute, day or night",
+  "Qualifies against your own criteria before it ever reaches your calendar",
+  "Learns your voice from your edits — sounds like you, not a generic bot",
+  "Works alongside HubSpot, Meta Lead Ads, Slack, or any CRM",
+  "Free pilot to start — no setup fee, cancel anytime",
+];
+
+function Pricing() {
+  return (
+    <section id="pricing" className="border-t border-[#F5F5F5]/10 py-24">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+            One Plan, No Surprises
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-center text-[#9A9A9E]">
+            Every feature, every integration, one price — nothing gated behind a higher tier.
+          </p>
+        </Reveal>
+        <Reveal delay={100}>
+          <Card className="mx-auto mt-14 max-w-md border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] p-8 text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">Fieldsta</div>
+            <div className="mt-4 flex items-baseline justify-center gap-1.5">
+              <span className="text-5xl font-extrabold tracking-tight">$500</span>
+              <span className="text-sm text-[#9A9A9E]">/ month</span>
+            </div>
+            <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
+              {PRICING_INCLUDES.map((item) => (
+                <li key={item} className="flex items-start gap-2.5">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#EF4444]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Button
+              size="lg"
+              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+              className="mt-8 w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+            >
+              Start your free pilot
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
 function FAQ() {
   return (
