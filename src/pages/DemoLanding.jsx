@@ -21,6 +21,11 @@ import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import { cn } from "@/lib/utils";
 
+// Same backend base SalesChatWidget already uses for its API calls --
+// self-serve signup lives on the agents backend (studio.fieldsta.com/signup),
+// not this app, so this is a plain link, not a react-router route.
+const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
+
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
 // the 2026-07-25 push (replacing an earlier dark-luxury/serif direction that
 // read as too old-school). One consistent sans (Inter) throughout, black/
@@ -149,11 +154,18 @@ function Nav() {
             FAQ
           </a>
         </nav>
-        <Link to="/try">
-          <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
-            Try It Live
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <a href={`${AGENTS_BASE}/signup`}>
+            <Button size="sm" className="bg-[#EF4444] text-white hover:bg-[#DC2626]">
+              Start Free
+            </Button>
+          </a>
+          <Link to="/try">
+            <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
+              Try It Live
+            </Button>
+          </Link>
+        </div>
       </div>
     </header>
   );
