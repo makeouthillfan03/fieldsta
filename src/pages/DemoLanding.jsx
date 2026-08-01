@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   Inbox,
   MessageSquareText,
-  Plug,
   ArrowRight,
   Sparkles,
   Check,
@@ -419,31 +418,10 @@ function HowItWorks() {
 }
 
 const features = [
-  {
-    icon: Zap,
-    title: "Get your evenings and weekends back",
-    description: "Replies instantly, even overnight.",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Zero time spent qualifying",
-    description: "Qualifies before it reaches you.",
-  },
-  {
-    icon: Sparkles,
-    title: "Gets sharper the more it runs",
-    description: "Learns your business over time.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Runs itself, so you don't have to",
-    description: "Fully automated, start to finish.",
-  },
-  {
-    icon: Plug,
-    title: "Works alongside your CRM",
-    description: "Pushes leads straight into HubSpot.",
-  },
+  { icon: Zap, title: "Always replies instantly" },
+  { icon: MessageSquareText, title: "Qualifies before contact" },
+  { icon: Sparkles, title: "Gets smarter automatically" },
+  { icon: ShieldCheck, title: "Fully hands-off automation" },
 ];
 
 const integrations = [
@@ -472,7 +450,6 @@ function Features() {
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-[var(--text)]">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-[var(--text)]">{f.description}</p>
               </Card>
             </Reveal>
           ))}
