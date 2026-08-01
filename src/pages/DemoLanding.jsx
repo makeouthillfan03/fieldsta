@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Zap,
   ShieldCheck,
-  CalendarCheck,
-  Inbox,
   MessageSquareText,
   Plug,
   ArrowRight,
@@ -47,9 +45,8 @@ export default function DemoLanding() {
     <div className="font-body bg-[#060607] text-[#F5F5F5]">
       <Nav />
       <Hero />
-      <HowItWorks />
+      <FlowBanner />
       <Features />
-      <SetupFlow />
       <WhySwitch />
       <Pricing />
       <FAQ />
@@ -344,46 +341,28 @@ function DashboardMockup() {
   );
 }
 
-const steps = [
-  {
-    icon: Inbox,
-    n: "01",
-    title: "A lead comes in",
-  },
-  {
-    icon: MessageSquareText,
-    n: "02",
-    title: "Fieldsta responds and qualifies",
-  },
-  {
-    icon: CalendarCheck,
-    n: "03",
-    title: "The pilot account activates",
-  },
-];
-
-function HowItWorks() {
+function FlowBanner() {
   return (
-    <section id="how-it-works" className="border-t border-[#F5F5F5]/10 py-24">
-      <div className="container">
+    <section id="how-it-works" className="relative overflow-hidden border-t border-[#F5F5F5]/10">
+      <video
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+        src="/nyc-skyline.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-[#060607]/[0.88]" />
+      <div className="container relative flex min-h-[24rem] flex-col items-center justify-center py-20 text-center sm:min-h-[28rem]">
         <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            The Standard
-          </h2>
+          <p className="mx-auto max-w-3xl text-2xl font-extrabold uppercase leading-tight text-white sm:text-3xl md:text-4xl">
+            Lead comes in → Fieldsta qualifies → Qualified appointment booked
+          </p>
+          <p className="mx-auto mt-6 max-w-md text-base uppercase tracking-wide text-white sm:text-lg">
+            Connect your email, set your rules, and you&apos;re live.
+          </p>
         </Reveal>
-        <div className="mx-auto mt-16 grid max-w-4xl gap-12 sm:grid-cols-3">
-          {steps.map((step, i) => (
-            <Reveal key={step.title} delay={i * 100} className="relative text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#F5F5F5]/15 bg-[#F5F5F5]/5 text-[#F5F5F5]">
-                <step.icon className="h-6 w-6" />
-              </div>
-              <div className="mt-4 text-sm font-extrabold tracking-[0.2em] text-[#EF4444]">
-                {step.n}
-              </div>
-              <h3 className="mt-1 text-lg font-semibold text-[#F5F5F5]">{step.title}</h3>
-            </Reveal>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -475,73 +454,20 @@ function Features() {
   );
 }
 
-function SetupFlow() {
-  return (
-    <section className="border-t border-[#F5F5F5]/10 py-24 bg-[#F5F5F5]/[0.02]">
-      <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Set up in 5 minutes
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[#9A9A9E]">
-            Pay → get a setup link → connect your integrations → start receiving qualified leads
-          </p>
-        </Reveal>
-
-        <div className="mx-auto mt-16 max-w-4xl">
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              {
-                step: "1",
-                title: "Connect integrations",
-                desc: "Link Meta Lead Ads, HubSpot, or your own webhook in one click",
-              },
-              {
-                step: "2",
-                title: "Configure email",
-                desc: "Choose which email you reply from and where notifications go",
-              },
-              {
-                step: "3",
-                title: "Test & launch",
-                desc: "We send a demo lead to prove it works, then you're live",
-              },
-            ].map((item, i) => (
-              <Reveal key={item.title} delay={i * 100}>
-                <div className="rounded-lg border border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-6">
-                  <div className="text-xs font-bold tracking-[0.2em] text-[#EF4444] uppercase">
-                    Step {item.step}
-                  </div>
-                  <h3 className="mt-3 text-base font-semibold text-[#F5F5F5]">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[#9A9A9E]">{item.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-
-        <Reveal delay={400} className="mt-12 text-center">
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#EF4444]">
-            FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 const WITHOUT_FIELDSTA = [
-  "Lead waits 3+ hours for a reply",
-  "Qualification happens manually, if at all",
-  "Follow-ups get forgotten",
-  "Slow response means the deal goes to whoever called back first",
+  "A missed call is a missed deal — no follow-up, no second chance",
+  "Qualification happens manually, if it happens at all",
+  "Leads wait hours for a reply, sometimes days",
+  "Nights, weekends, and holidays go completely unanswered",
+  "Your team burns hours a week chasing and qualifying by hand",
 ];
 
 const WITH_FIELDSTA = [
-  "Replies in under a minute, day or night",
-  "Every lead qualified automatically, against your own criteria",
-  "Meeting booked straight onto your calendar — no admin work",
-  "15+ hours a week back, and it keeps getting better the more it runs",
+  "Missed calls still get a reply — nothing turns into lost revenue",
+  "Every lead gets qualified automatically, against your own criteria",
+  "Replies in seconds, not hours",
+  "Answers day or night, weekends and holidays included",
+  "Hours back for your team, every single week",
 ];
 
 function WhySwitch() {
@@ -592,20 +518,24 @@ function WhySwitch() {
 
 const faqs = [
   {
-    q: "Is a real person involved at all?",
-    a: "Fieldsta runs fully automated by design — that's the whole point, getting your time back instead of trading one manual task for another. Harper handles the conversation end to end, including voice.",
+    q: "Does it replace my receptionist?",
+    a: "Not exactly — Fieldsta doesn't answer phones or run your front desk. It handles one specific job: responding to and qualifying inbound leads the moment they come in, day or night, which is usually the part that actually falls through the cracks. Most teams use it to take that off someone's plate, not to replace a person.",
   },
   {
-    q: "Can I control how it talks, or what it's never allowed to say?",
-    a: "Yes — you tell us what to never claim on your behalf (pricing, guarantees, anything you haven't approved), and Fieldsta won't say it, ever. Combined with the voice it learns from your edits, this is how replies end up sounding like your business, not a generic bot.",
+    q: "Can I edit responses?",
+    a: "Yes — every draft can sit for your review before it sends, or go out automatically once you trust it, your call. Either way, every edit you make teaches it, so replies sound more like you the longer it runs, not less.",
   },
   {
-    q: "How fast does Fieldsta actually respond?",
-    a: "Fast enough that the lead is still warm — Fieldsta starts responding and qualifying immediately, instead of the hours it can take a busy team to get back to someone.",
+    q: "Does it work with my CRM?",
+    a: "Yes. It pushes qualified leads straight into HubSpot, or works standalone alongside whatever you're already using — you don't have to switch anything.",
   },
   {
-    q: "Do I need to switch CRMs?",
-    a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
+    q: "How long does setup take?",
+    a: "About 5 minutes, in three steps: connect your integrations (Meta Lead Ads, HubSpot, or your own webhook, in one click), tell us which email you reply from and where notifications go, then we send a real test lead through to prove it works before you're live.",
+  },
+  {
+    q: "What if I don't use HubSpot?",
+    a: "That's fine — HubSpot is supported, not required. Fieldsta runs standalone with no CRM at all, or alongside whatever you're already using.",
   },
 ];
 
@@ -617,43 +547,73 @@ const PRICING_INCLUDES = [
   "Free pilot to start — no setup fee, cancel anytime",
 ];
 
+const PLANS = [
+  {
+    name: "Starter",
+    price: "500",
+    leadCap: "Up to 100 leads / month",
+  },
+  {
+    name: "Growth",
+    price: "1,000",
+    leadCap: "Up to 500 leads / month",
+    highlight: true,
+  },
+];
+
 function Pricing() {
   return (
     <section id="pricing" className="border-t border-[#F5F5F5]/10 py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            One Plan, No Surprises
+            Simple Pricing, No Surprises
           </h2>
           <p className="mx-auto mt-4 max-w-md text-center text-[#9A9A9E]">
-            Every feature, every integration, one price — nothing gated behind a higher tier.
+            Every feature, every integration, on both plans — priced by how many leads you get, nothing gated behind a higher tier.
           </p>
         </Reveal>
-        <Reveal delay={100}>
-          <Card className="mx-auto mt-14 max-w-md border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] p-8 text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">Fieldsta</div>
-            <div className="mt-4 flex items-baseline justify-center gap-1.5">
-              <span className="text-5xl font-extrabold tracking-tight text-[#F5F5F5]">$500</span>
-              <span className="text-sm text-[#9A9A9E]">/ month</span>
-            </div>
-            <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
-              {PRICING_INCLUDES.map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Button
-              size="lg"
-              onClick={() => { window.location.href = "https://fieldsta.com/try"; }}
-              className="mt-8 w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
-            >
-              Start your free pilot
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Card>
-        </Reveal>
+        <div className="mx-auto mt-14 grid max-w-3xl gap-6 sm:grid-cols-2">
+          {PLANS.map((plan, i) => (
+            <Reveal key={plan.name} delay={100 + i * 100}>
+              <Card
+                className={cn(
+                  "h-full p-8 text-center",
+                  plan.highlight
+                    ? "border-[#EF4444]/40 bg-[#EF4444]/[0.05]"
+                    : "border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03]"
+                )}
+              >
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">
+                  {plan.name}
+                </div>
+                <div className="mt-4 flex items-baseline justify-center gap-1.5">
+                  <span className="text-5xl font-extrabold tracking-tight text-[#F5F5F5]">
+                    ${plan.price}
+                  </span>
+                  <span className="text-sm text-[#9A9A9E]">/ month</span>
+                </div>
+                <div className="mt-2 text-sm text-[#9A9A9E]">{plan.leadCap}</div>
+                <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
+                  {PRICING_INCLUDES.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5">
+                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  size="lg"
+                  onClick={() => { window.location.href = "https://fieldsta.com/try"; }}
+                  className="mt-8 w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+                >
+                  Start your free pilot
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Card>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -699,7 +659,7 @@ function FinalCTA() {
             Your next lead is already <span className="text-[#EF4444]">waiting</span>.
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[#9A9A9E]">
-            Talk to Harper right now and see exactly how much time and money this puts back in your week.
+            Talk to Harper and see exactly how much time and revenue Fieldsta puts back into your week.
           </p>
           <Link to="/try">
             <Button
