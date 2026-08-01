@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#060607" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem("theme") === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="description" content="Fieldsta replies to every inbound lead in under 5 minutes, qualifies them, and books the meeting straight onto your calendar — with a human reviewing every booking." />
     <meta property="og:title" content="Fieldsta — Never Lose a Lead to Slow Response Time Again" />
     <meta property="og:description" content="AI responds to every inbound lead in under 5 minutes, qualifies them, and books the meeting — with a human reviewing every booking." />

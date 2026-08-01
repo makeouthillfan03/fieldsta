@@ -2,12 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #ffffff;
+  --bg-rgb: 255, 255, 255;
+  --bg-deep: #f0f0f1;
+  --text: #0a0a0a;
+  --text-rgb: 10, 10, 10;
+  --accent: #ef4444;
+  --accent-hover: #dc2626;
+}
+
+[data-theme="dark"] {
+  --bg: #060607;
+  --bg-rgb: 6, 6, 7;
+  --bg-deep: #0a0a0a;
+  --text: #f5f5f5;
+  --text-rgb: 245, 245, 245;
+  --accent: #ef4444;
+  --accent-hover: #ff5c5c;
+}
+
 html, body, #root {
   height: 100%;
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
+  @apply antialiased;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+*, *::before, *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 /* Smooth transitions on every clickable/interactive element site-wide —

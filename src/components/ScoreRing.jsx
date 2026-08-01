@@ -55,7 +55,7 @@ export function ScoreRing({ score, size = 104, stroke = 8 }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgba(245,245,245,0.1)"
+          stroke="rgba(var(--text-rgb),0.1)"
           strokeWidth={stroke}
           fill="none"
         />
@@ -74,13 +74,13 @@ export function ScoreRing({ score, size = 104, stroke = 8 }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className="font-bold leading-none text-[#F5F5F5]"
+          className="font-bold leading-none text-[var(--text)]"
           style={{ fontSize: Math.max(13, size * 0.23) }}
         >
           {visible ? score : 0}
         </span>
         {size >= 80 && (
-          <span className="mt-0.5 text-[9px] uppercase tracking-[0.14em] text-[#6F6F75]">/ 100</span>
+          <span className="mt-0.5 text-[9px] uppercase tracking-[0.14em] text-[var(--text)]">/ 100</span>
         )}
       </div>
     </div>

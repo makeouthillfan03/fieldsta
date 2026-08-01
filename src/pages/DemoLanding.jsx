@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Zap,
@@ -44,7 +44,7 @@ export default function DemoLanding() {
   }, []);
 
   return (
-    <div className="font-body bg-[#060607] text-[#F5F5F5]">
+    <div className="font-body bg-[var(--bg)] text-[var(--text)]">
       <Nav />
       <Hero />
       <LeadReviewDemo />
@@ -110,12 +110,61 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
+// Shared with Hero, which needs to know light-vs-dark to recolor the canvas
+// skyline (a CSS variable can't reach into a <canvas> fillStyle). Broadcasts
+// on a window event rather than lifting state to DemoLanding so the toggle
+// can live wherever in the tree without prop-drilling.
+function useIsDarkTheme() {
+  const [dark, setDark] = useState(
+    () => typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark"
+  );
+  useEffect(() => {
+    const handler = (e) => setDark(e.detail === "dark");
+    window.addEventListener("fieldsta-theme", handler);
+    return () => window.removeEventListener("fieldsta-theme", handler);
+  }, []);
+  return dark;
+}
+
+function ThemeToggle() {
+  const dark = useIsDarkTheme();
+
+  const toggle = useCallback(() => {
+    const next = !dark;
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+    try {
+      localStorage.setItem("theme", next ? "dark" : "light");
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent("fieldsta-theme", { detail: next ? "dark" : "light" }));
+  }, [dark]);
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(var(--text-rgb),0.15)] text-[var(--text)] hover:border-[rgba(var(--text-rgb),0.4)]"
+    >
+      {dark ? (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+      ) : (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function Nav() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[#F5F5F5]/10 bg-[#060607]/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
         <a href="/" className="flex items-center gap-2">
-          <svg width="24" height="24" viewBox="0 0 200 200" className="text-[#F5F5F5]" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 200 200" className="text-[var(--text)]" aria-hidden="true">
             <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
             <g fill="none" stroke="currentColor" strokeWidth="1.2">
               {/* Left building cluster */}
@@ -137,32 +186,33 @@ function Nav() {
               <rect x="158" y="115" width="20" height="35" />
             </g>
           </svg>
-          <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
+          <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
             Fieldsta
           </span>
         </a>
-        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#F5F5F5] md:flex">
-          <a href="#how-it-works" className="hover:text-[#F5F5F5]">
+        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
+          <a href="#how-it-works" className="hover:text-[var(--text)]">
             How It Works
           </a>
-          <a href="#features" className="hover:text-[#F5F5F5]">
+          <a href="#features" className="hover:text-[var(--text)]">
             Features
           </a>
-          <a href="#pricing" className="hover:text-[#F5F5F5]">
+          <a href="#pricing" className="hover:text-[var(--text)]">
             Pricing
           </a>
-          <a href="#faq" className="hover:text-[#F5F5F5]">
+          <a href="#faq" className="hover:text-[var(--text)]">
             FAQ
           </a>
         </nav>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <a href={`${AGENTS_BASE}/signup`}>
-            <Button size="sm" className="bg-[#EF4444] text-white hover:bg-[#DC2626]">
+            <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
               Start Free
             </Button>
           </a>
           <Link to="/try">
-            <Button size="sm" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
+            <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
               Try It Live
             </Button>
           </Link>
@@ -173,27 +223,19 @@ function Nav() {
 }
 
 function Hero() {
+  const dark = useIsDarkTheme();
   return (
-    <section className="relative flex min-h-[92vh] flex-col overflow-hidden bg-[#060607]">
+    <section className="relative flex min-h-[92vh] flex-col overflow-hidden bg-[var(--bg)]">
       {/* Particle field occupies the upper half and dissolves downward into
           the page, so the headline sits in clean negative space rather than
           fighting the artwork for contrast. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[68%]">
-        {/* Lit air behind the skyline. In the reference photographs the sky
-            is never black — it's luminous at the horizon and falls off
-            upward, and that gradient is what puts the buildings at a
-            distance instead of on the surface of the screen. Kept
-            near-neutral with the faintest warm bias so it reads as city
-            light without introducing a second accent colour. */}
-        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_100%,rgba(255,241,232,0.16)_0%,rgba(255,235,225,0.06)_28%,transparent_62%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(239,68,68,0.05)_0%,transparent_38%)]" />
-
-        <ParticleSkyline className="absolute inset-0 h-full w-full" />
+        <ParticleSkyline className="absolute inset-0 h-full w-full" dark={dark} />
 
         {/* Depth fog across the lower third, so the base of the city
             dissolves rather than terminating on a line. */}
-        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,6,7,0.55)_45%,#060607_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[#060607] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-[linear-gradient(to_bottom,transparent_0%,rgba(var(--bg-rgb),0.55)_45%,var(--bg)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-[var(--bg)] to-transparent" />
       </div>
 
       {/* Film grain over the whole hero, type included — grain that stops at
@@ -210,15 +252,15 @@ function Hero() {
 
       <div className="container relative z-10 mt-auto pb-14 pt-40">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[#F5F5F5] sm:text-5xl lg:text-6xl">
-            Answer <span className="font-bold text-[#EF4444]">every lead</span>
+          <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
+            Answer <span className="font-bold text-[var(--accent)]">every lead</span>
             <br />
-            <span className="font-bold text-[#EF4444]">before</span> your competitor
+            <span className="font-bold text-[var(--accent)]">before</span> your competitor
             <br />
             picks up the phone
           </h1>
 
-          <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[#F5F5F5]">
+          <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[var(--text)]">
             Respond. Qualify. Book.
           </p>
 
@@ -228,7 +270,7 @@ function Hero() {
           >
             <Button
               size="lg"
-              className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white sm:w-auto"
+              className="w-full rounded-none bg-[var(--text)] px-7 text-[var(--bg-deep)] hover:opacity-90 sm:w-auto"
             >
               See it live — free
             </Button>
@@ -242,12 +284,12 @@ function Hero() {
 
 function LeadReviewDemo() {
   return (
-    <section className="border-t border-[#F5F5F5]/10 bg-[#060607] py-20">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
       <div className="container flex flex-col items-center">
-        <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[#F5F5F5]">
+        <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[var(--text)]">
           Know exactly why a lead is worth your time
         </div>
-        <div className="animate-fade-up [animation-delay:100ms] h-[34rem] w-full max-w-5xl overflow-hidden rounded-2xl border border-[#F5F5F5]/15 shadow-2xl sm:h-[40rem]">
+        <div className="animate-fade-up [animation-delay:100ms] w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
           <DashboardMockup />
         </div>
       </div>
@@ -286,31 +328,31 @@ const EXAMPLE_CRITERIA = [
 // everywhere else on this site.
 function DashboardMockup() {
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0a0a0b] text-left">
-      <div className="flex items-center gap-3 border-b border-[#F5F5F5]/10 px-6 py-5 sm:px-10">
-        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-left">
+      <div className="flex items-center gap-3 border-b border-[rgba(var(--text-rgb),0.1)] px-6 py-5 sm:px-10">
+        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
           Fieldsta
         </span>
-        <span className="text-sm text-[#F5F5F5]">·</span>
-        <span className="text-sm uppercase tracking-[0.2em] text-[#F5F5F5]">Lead review</span>
+        <span className="text-sm text-[var(--text)]">·</span>
+        <span className="text-sm uppercase tracking-[0.2em] text-[var(--text)]">Lead review</span>
         <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.1em] text-amber-400">
           Example
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col items-center gap-8 overflow-hidden p-8 sm:flex-row sm:items-start sm:gap-14 sm:p-12">
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 p-8 sm:flex-row sm:gap-14 sm:p-10">
         <div className="flex flex-shrink-0 flex-col items-center gap-4">
-          <ScoreRing score={88} size={176} stroke={12} />
+          <ScoreRing score={88} size={150} stroke={10} />
           <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-amber-400">
             Needs one more detail
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="text-xs uppercase tracking-[0.18em] text-[#F5F5F5]">
+        <div>
+          <div className="text-sm uppercase tracking-[0.18em] text-[var(--text)]">
             Why this lead scored 88, not 100
           </div>
-          <ul className="mt-4 space-y-4">
+          <ul className="mt-4 space-y-3">
             {EXAMPLE_CRITERIA.map((c) => (
               <li key={c.criterion} className="flex items-center gap-3">
                 <span
@@ -321,7 +363,7 @@ function DashboardMockup() {
                 >
                   {c.met ? "✓" : "?"}
                 </span>
-                <div className="text-base font-medium text-[#F5F5F5]">{c.criterion}</div>
+                <div className="text-base font-medium text-[var(--text)]">{c.criterion}</div>
               </li>
             ))}
           </ul>
@@ -351,7 +393,7 @@ const steps = [
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="border-t border-[#F5F5F5]/10 py-24">
+    <section id="how-it-works" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -361,13 +403,13 @@ function HowItWorks() {
         <div className="mx-auto mt-16 grid max-w-4xl gap-12 sm:grid-cols-3">
           {steps.map((step, i) => (
             <Reveal key={step.title} delay={i * 100} className="relative text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#F5F5F5]/15 bg-[#F5F5F5]/5 text-[#F5F5F5]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
                 <step.icon className="h-6 w-6" />
               </div>
-              <div className="mt-4 text-sm font-extrabold tracking-[0.2em] text-[#EF4444]">
+              <div className="mt-4 text-sm font-extrabold tracking-[0.2em] text-[var(--accent)]">
                 {step.n}
               </div>
-              <h3 className="mt-1 text-lg font-semibold text-[#F5F5F5]">{step.title}</h3>
+              <h3 className="mt-1 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
             </Reveal>
           ))}
         </div>
@@ -380,27 +422,27 @@ const features = [
   {
     icon: Zap,
     title: "Get your evenings and weekends back",
-    description: "Your leads hear back immediately, even while you sleep. No more losing deals because you were busy running the business instead of chasing leads.",
+    description: "Replies instantly, even overnight.",
   },
   {
     icon: MessageSquareText,
     title: "Zero time spent qualifying",
-    description: "Leads are asked the questions your team would ask, automatically, before they ever land on your calendar — no more sitting through calls that were never going to close.",
+    description: "Qualifies before it reaches you.",
   },
   {
     icon: Sparkles,
     title: "Gets sharper the more it runs",
-    description: "Every interaction teaches it — its own dedicated memory per client, so it saves you more time and sounds more like you the longer it runs, not less.",
+    description: "Learns your business over time.",
   },
   {
     icon: ShieldCheck,
     title: "Runs itself, so you don't have to",
-    description: "Set your boundaries once and it handles the rest — qualifying, replying, and booking without you lifting a finger. Full automation, built to get you time and revenue back, not add another tool to babysit.",
+    description: "Fully automated, start to finish.",
   },
   {
     icon: Plug,
     title: "Works alongside your CRM",
-    description: "Pushes qualified leads straight into HubSpot, or works standalone with any CRM or none.",
+    description: "Pushes leads straight into HubSpot.",
   },
 ];
 
@@ -415,7 +457,7 @@ const integrations = [
 
 function Features() {
   return (
-    <section id="features" className="border-t border-[#F5F5F5]/10 py-24">
+    <section id="features" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -425,12 +467,12 @@ function Features() {
         <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 80}>
-              <Card className="h-full border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-6 transition-colors hover:border-[#F5F5F5]/25 hover:bg-[#F5F5F5]/[0.05]">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#F5F5F5]/15 bg-[#F5F5F5]/5 text-[#F5F5F5]">
+              <Card className="h-full border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.03] p-6 transition-colors hover:border-[rgba(var(--text-rgb),0.25)] hover:bg-[var(--text)]/[0.05]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
                   <f.icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-[#F5F5F5]">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-[#F5F5F5]">{f.description}</p>
+                <h3 className="mt-4 text-base font-semibold text-[var(--text)]">{f.title}</h3>
+                <p className="mt-1.5 text-sm text-[var(--text)]">{f.description}</p>
               </Card>
             </Reveal>
           ))}
@@ -438,7 +480,7 @@ function Features() {
 
         <Reveal delay={features.length * 80}>
           <div className="mx-auto mt-14 max-w-5xl">
-            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[#F5F5F5]">
+            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[var(--text)]">
               Actually wired up today
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
@@ -446,12 +488,12 @@ function Features() {
                 <div
                   key={i.name}
                   title={i.note}
-                  className="rounded-full border border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] px-5 py-2 text-sm font-semibold text-[#F5F5F5]"
+                  className="rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] px-5 py-2 text-sm font-semibold text-[var(--text)]"
                 >
                   {i.name}
                 </div>
               ))}
-              <div className="rounded-full border border-dashed border-[#F5F5F5]/15 px-5 py-2 text-sm text-[#F5F5F5]">
+              <div className="rounded-full border border-dashed border-[rgba(var(--text-rgb),0.15)] px-5 py-2 text-sm text-[var(--text)]">
                 + tell us what else you use
               </div>
             </div>
@@ -464,13 +506,13 @@ function Features() {
 
 function SetupFlow() {
   return (
-    <section className="border-t border-[#F5F5F5]/10 py-24 bg-[#F5F5F5]/[0.02]">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24 bg-[var(--text)]/[0.02]">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             Set up in 5 minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[#F5F5F5]">
+          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[var(--text)]">
             Pay → get a setup link → connect your integrations → start receiving qualified leads
           </p>
         </Reveal>
@@ -495,12 +537,12 @@ function SetupFlow() {
               },
             ].map((item, i) => (
               <Reveal key={item.title} delay={i * 100}>
-                <div className="rounded-lg border border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-6">
-                  <div className="text-xs font-bold tracking-[0.2em] text-[#EF4444] uppercase">
+                <div className="rounded-lg border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-6">
+                  <div className="text-xs font-bold tracking-[0.2em] text-[var(--accent)] uppercase">
                     Step {item.step}
                   </div>
-                  <h3 className="mt-3 text-base font-semibold text-[#F5F5F5]">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[#F5F5F5]">{item.desc}</p>
+                  <h3 className="mt-3 text-base font-semibold text-[var(--text)]">{item.title}</h3>
+                  <p className="mt-2 text-sm text-[var(--text)]">{item.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -508,7 +550,7 @@ function SetupFlow() {
         </div>
 
         <Reveal delay={400} className="mt-12 text-center">
-          <div className="text-xs font-semibold tracking-[0.2em] text-[#EF4444]">
+          <div className="text-xs font-semibold tracking-[0.2em] text-[var(--accent)]">
             FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
           </div>
         </Reveal>
@@ -533,7 +575,7 @@ const WITH_FIELDSTA = [
 
 function WhySwitch() {
   return (
-    <section className="border-t border-[#F5F5F5]/10 py-24">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -542,14 +584,14 @@ function WhySwitch() {
         </Reveal>
         <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
           <Reveal delay={80}>
-            <Card className="h-full border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-7">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-[#F5F5F5]">
+            <Card className="h-full border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-7">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-[var(--text)]">
                 Without Fieldsta
               </div>
               <ul className="mt-4 space-y-3">
                 {WITHOUT_FIELDSTA.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#F5F5F5]">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-[#6F6F75]" />
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
+                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-[var(--text)]" />
                     {item}
                   </li>
                 ))}
@@ -563,7 +605,7 @@ function WhySwitch() {
               </div>
               <ul className="mt-4 space-y-3">
                 {WITH_FIELDSTA.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#F5F5F5]">
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
                     <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-emerald-400" />
                     {item}
                   </li>
@@ -606,24 +648,24 @@ const PRICING_INCLUDES = [
 
 function Pricing() {
   return (
-    <section id="pricing" className="border-t border-[#F5F5F5]/10 py-24">
+    <section id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             One Plan, No Surprises
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-center text-[#F5F5F5]">
+          <p className="mx-auto mt-4 max-w-md text-center text-[var(--text)]">
             Every feature, every integration, one price — nothing gated behind a higher tier.
           </p>
         </Reveal>
         <Reveal delay={100}>
-          <Card className="mx-auto mt-14 max-w-md border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.03] p-8 text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">Fieldsta</div>
+          <Card className="mx-auto mt-14 max-w-md border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] p-8 text-center">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Fieldsta</div>
             <div className="mt-4 flex items-baseline justify-center gap-1.5">
-              <span className="text-5xl font-extrabold tracking-tight text-[#F5F5F5]">$500</span>
-              <span className="text-sm text-[#F5F5F5]">/ month</span>
+              <span className="text-5xl font-extrabold tracking-tight text-[var(--text)]">$500</span>
+              <span className="text-sm text-[var(--text)]">/ month</span>
             </div>
-            <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
+            <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[var(--text)]">
               {PRICING_INCLUDES.map((item) => (
                 <li key={item} className="flex items-start gap-2.5">
                   <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
@@ -634,7 +676,7 @@ function Pricing() {
             <Button
               size="lg"
               onClick={() => { window.location.href = "https://fieldsta.com/try"; }}
-              className="mt-8 w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+              className="mt-8 w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
             >
               Start your free pilot
               <ArrowRight className="h-4 w-4" />
@@ -648,23 +690,23 @@ function Pricing() {
 
 function FAQ() {
   return (
-    <section id="faq" className="border-t border-[#F5F5F5]/10 py-24">
+    <section id="faq" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container max-w-2xl">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             Questions Worth Asking
           </h2>
         </Reveal>
-        <Reveal delay={100} className="mt-12 divide-y divide-[#F5F5F5]/10">
+        <Reveal delay={100} className="mt-12 divide-y divide-[rgba(var(--text-rgb),0.1)]">
           {faqs.map((item) => (
             <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold text-[#F5F5F5]">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold text-[var(--text)]">
                 {item.q}
-                <span className="ml-4 shrink-0 text-[#F5F5F5] transition-transform group-open:rotate-45">
+                <span className="ml-4 shrink-0 text-[var(--text)] transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>
-              <p className="mt-3 text-sm text-[#F5F5F5]">{item.a}</p>
+              <p className="mt-3 text-sm text-[var(--text)]">{item.a}</p>
             </details>
           ))}
         </Reveal>
@@ -675,23 +717,23 @@ function FAQ() {
 
 function FinalCTA() {
   return (
-    <section className="relative overflow-hidden border-t border-[#F5F5F5]/10 py-20 text-center">
+    <section className="relative overflow-hidden border-t border-[rgba(var(--text-rgb),0.1)] py-20 text-center">
       <div
         aria-hidden="true"
-        className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] rounded-full bg-[#F5F5F5]/10 blur-[120px]"
+        className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] rounded-full bg-[rgba(var(--text-rgb),0.1)] blur-[120px]"
       />
       <div className="container relative">
         <Reveal>
           <h2 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
-            Your next lead is already <span className="text-[#EF4444]">waiting</span>.
+            Your next lead is already <span className="text-[var(--accent)]">waiting</span>.
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-[#F5F5F5]">
+          <p className="mx-auto mt-4 max-w-md text-[var(--text)]">
             Talk to Harper right now and see exactly how much time and money this puts back in your week.
           </p>
           <Link to="/try">
             <Button
               size="lg"
-              className="mt-8 bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+              className="mt-8 bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
             >
               Start Your Live AI Demo
               <ArrowRight className="h-4 w-4" />
@@ -747,10 +789,10 @@ function DemoForm() {
   }
 
   const fieldClass =
-    "mt-1.5 border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.04] text-[#F5F5F5] placeholder:text-[#F5F5F5]/70 focus-visible:ring-[#F5F5F5]/40";
+    "mt-1.5 border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.04] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.7)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
 
   return (
-    <section id="demo" className="border-t border-[#F5F5F5]/10 py-24">
+    <section id="demo" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -758,28 +800,28 @@ function DemoForm() {
           </h2>
         </Reveal>
         <Reveal delay={100}>
-          <Card className="mx-auto mt-10 max-w-md border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-8">
+          <Card className="mx-auto mt-10 max-w-md border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.03] p-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="firstName" className="text-[#F5F5F5]">
+                <Label htmlFor="firstName" className="text-[var(--text)]">
                   First Name
                 </Label>
                 <Input id="firstName" ref={firstNameRef} required className={fieldClass} />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-[#F5F5F5]">
+                <Label htmlFor="lastName" className="text-[var(--text)]">
                   Last Name
                 </Label>
                 <Input id="lastName" ref={lastNameRef} className={fieldClass} />
               </div>
               <div>
-                <Label htmlFor="email" className="text-[#F5F5F5]">
+                <Label htmlFor="email" className="text-[var(--text)]">
                   Business Email
                 </Label>
                 <Input id="email" type="email" ref={emailRef} required className={fieldClass} />
               </div>
               <div>
-                <Label htmlFor="crm" className="text-[#F5F5F5]">
+                <Label htmlFor="crm" className="text-[var(--text)]">
                   What CRM do you use?
                 </Label>
                 <Input
@@ -790,26 +832,26 @@ function DemoForm() {
                 />
               </div>
               <div>
-                <Label htmlFor="source" className="text-[#F5F5F5]">
+                <Label htmlFor="source" className="text-[var(--text)]">
                   How did you hear about us?
                 </Label>
                 <Select id="source" ref={sourceRef} defaultValue="" className={fieldClass}>
-                  <option value="" className="bg-[#0a0a0a]">
+                  <option value="" className="bg-[var(--bg-deep)]">
                     Select one
                   </option>
-                  <option value="Referral" className="bg-[#0a0a0a]">
+                  <option value="Referral" className="bg-[var(--bg-deep)]">
                     Referral
                   </option>
-                  <option value="Google Search" className="bg-[#0a0a0a]">
+                  <option value="Google Search" className="bg-[var(--bg-deep)]">
                     Google Search
                   </option>
-                  <option value="LinkedIn" className="bg-[#0a0a0a]">
+                  <option value="LinkedIn" className="bg-[var(--bg-deep)]">
                     LinkedIn
                   </option>
-                  <option value="Email/Cold Outreach" className="bg-[#0a0a0a]">
+                  <option value="Email/Cold Outreach" className="bg-[var(--bg-deep)]">
                     Email / Cold Outreach
                   </option>
-                  <option value="Other" className="bg-[#0a0a0a]">
+                  <option value="Other" className="bg-[var(--bg-deep)]">
                     Other
                   </option>
                 </Select>
@@ -817,7 +859,7 @@ function DemoForm() {
               <Button
                 type="submit"
                 disabled={status === "submitting"}
-                className="w-full bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+                className="w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
                 size="lg"
               >
                 {status === "submitting" ? "Submitting..." : "Get My Custom Automation Plan"}
@@ -830,7 +872,7 @@ function DemoForm() {
                       ? "bg-emerald-400/10 text-emerald-400"
                       : status === "error"
                       ? "bg-red-400/10 text-red-400"
-                      : "text-[#F5F5F5]")
+                      : "text-[var(--text)]")
                   }
                   role="status"
                 >
@@ -847,22 +889,22 @@ function DemoForm() {
 
 function Footer() {
   return (
-    <footer className="border-t border-[#F5F5F5]/10 py-12 text-center text-sm text-[#F5F5F5]">
+    <footer className="border-t border-[rgba(var(--text-rgb),0.1)] py-12 text-center text-sm text-[var(--text)]">
       <div className="container flex flex-col items-center gap-3">
-        <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
+        <span className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--text)]">
           Fieldsta
         </span>
         <div className="flex items-center gap-4">
-          <a href="/try" className="hover:text-[#F5F5F5]">
+          <a href="/try" className="hover:text-[var(--text)]">
             Try It Live
           </a>
-          <a href="/terms" className="hover:text-[#F5F5F5]">
+          <a href="/terms" className="hover:text-[var(--text)]">
             Terms
           </a>
-          <a href="/privacy" className="hover:text-[#F5F5F5]">
+          <a href="/privacy" className="hover:text-[var(--text)]">
             Privacy
           </a>
-          <a href="mailto:support@fieldsta.com" className="hover:text-[#F5F5F5]">
+          <a href="mailto:support@fieldsta.com" className="hover:text-[var(--text)]">
             support@fieldsta.com
           </a>
         </div>
