@@ -47,6 +47,7 @@ export default function DemoLanding() {
     <div className="font-body bg-[#060607] text-[#F5F5F5]">
       <Nav />
       <Hero />
+      <LeadReviewDemo />
       <HowItWorks />
       <Features />
       <SetupFlow />
@@ -140,7 +141,7 @@ function Nav() {
             Fieldsta
           </span>
         </a>
-        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#9A9A9E] md:flex">
+        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[#F5F5F5] md:flex">
           <a href="#how-it-works" className="hover:text-[#F5F5F5]">
             How It Works
           </a>
@@ -208,54 +209,48 @@ function Hero() {
       />
 
       <div className="container relative z-10 mt-auto pb-14 pt-40">
-        <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div>
-            <h1 className="animate-fade-up max-w-xl text-4xl font-light leading-[1.12] tracking-tight text-[#F5F5F5] sm:text-5xl lg:text-6xl">
-              Answer <span className="font-bold text-[#EF4444]">every lead</span>
-              <br />
-              <span className="font-bold text-[#EF4444]">before</span> your competitor
-              <br />
-              picks up the phone
-            </h1>
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[#F5F5F5] sm:text-5xl lg:text-6xl">
+            Answer <span className="font-bold text-[#EF4444]">every lead</span>
+            <br />
+            <span className="font-bold text-[#EF4444]">before</span> your competitor
+            <br />
+            picks up the phone
+          </h1>
 
-            <p className="animate-fade-up [animation-delay:280ms] mt-8 max-w-md text-[15px] leading-relaxed text-[#9A9A9E]">
-              Get hours of your week back and stop losing deals to slow follow-up —
-              fully automated lead response, qualifying and booking meetings for you
-              around the clock.
-            </p>
+          <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[#F5F5F5]">
+            Respond. Qualify. Book.
+          </p>
 
-            <p className="animate-fade-up [animation-delay:340ms] mt-5 text-[13px] text-[#6F6F75]">
-              <span className="font-semibold text-[#F5F5F5]">Under a minute</span> — median
-              time to a drafted reply, measured on real leads. That's{" "}
-              <span className="font-semibold text-[#EF4444]">15+ hours a week</span> most
-              businesses spend chasing and qualifying leads by hand, back in your
-              pocket.
-            </p>
-
-            <Link
-              to="/try"
-              className="animate-fade-up [animation-delay:160ms] mt-9 inline-block"
+          <Link
+            to="/try"
+            className="animate-fade-up [animation-delay:160ms] mt-9 inline-block"
+          >
+            <Button
+              size="lg"
+              className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white sm:w-auto"
             >
-              <Button
-                size="lg"
-                className="w-full rounded-none bg-[#F5F5F5] px-7 text-[#0a0a0a] hover:bg-white sm:w-auto"
-              >
-                See it live — free
-              </Button>
-            </Link>
-          </div>
-
-          <div className="animate-fade-up [animation-delay:220ms]">
-            <div className="mb-3 text-xs uppercase tracking-[0.18em] text-[#6F6F75]">
-              Know exactly why a lead is worth your time
-            </div>
-            <div className="h-[22rem] overflow-hidden rounded-2xl border border-[#F5F5F5]/15 shadow-2xl sm:h-[26rem]">
-              <DashboardMockup />
-            </div>
-          </div>
+              See it live — free
+            </Button>
+          </Link>
         </div>
       </div>
 
+    </section>
+  );
+}
+
+function LeadReviewDemo() {
+  return (
+    <section className="border-t border-[#F5F5F5]/10 bg-[#060607] py-20">
+      <div className="container flex flex-col items-center">
+        <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[#F5F5F5]">
+          Know exactly why a lead is worth your time
+        </div>
+        <div className="animate-fade-up [animation-delay:100ms] h-[34rem] w-full max-w-5xl overflow-hidden rounded-2xl border border-[#F5F5F5]/15 shadow-2xl sm:h-[40rem]">
+          <DashboardMockup />
+        </div>
+      </div>
     </section>
   );
 }
@@ -292,49 +287,41 @@ const EXAMPLE_CRITERIA = [
 function DashboardMockup() {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-[#0a0a0b] text-left">
-      <div className="flex items-center gap-2 border-b border-[#F5F5F5]/10 px-4 py-3 sm:px-6">
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#6F6F75]">
+      <div className="flex items-center gap-3 border-b border-[#F5F5F5]/10 px-6 py-5 sm:px-10">
+        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
           Fieldsta
         </span>
-        <span className="text-[10px] text-[#4A4A50]">·</span>
-        <span className="text-[10px] uppercase tracking-[0.2em] text-[#4A4A50]">Lead review</span>
-        <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.1em] text-amber-400">
+        <span className="text-sm text-[#F5F5F5]">·</span>
+        <span className="text-sm uppercase tracking-[0.2em] text-[#F5F5F5]">Lead review</span>
+        <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.1em] text-amber-400">
           Example
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-5 overflow-hidden p-4 sm:flex-row sm:gap-8 sm:p-6">
-        <div className="flex flex-shrink-0 flex-row items-center gap-4 sm:flex-col sm:items-start sm:gap-3">
-          <ScoreRing score={88} />
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-amber-400">
-              Needs one more detail
-            </div>
-            <p className="mt-2 text-xs leading-relaxed text-[#9A9A9E] sm:max-w-[11rem]">
-              Strong lead — one thing unconfirmed below is the only gap between this and a perfect score.
-            </p>
+      <div className="flex flex-1 flex-col items-center gap-8 overflow-hidden p-8 sm:flex-row sm:items-start sm:gap-14 sm:p-12">
+        <div className="flex flex-shrink-0 flex-col items-center gap-4">
+          <ScoreRing score={88} size={176} stroke={12} />
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-amber-400">
+            Needs one more detail
           </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">
+          <div className="text-xs uppercase tracking-[0.18em] text-[#F5F5F5]">
             Why this lead scored 88, not 100
           </div>
-          <ul className="mt-2.5 space-y-2.5">
+          <ul className="mt-4 space-y-4">
             {EXAMPLE_CRITERIA.map((c) => (
-              <li key={c.criterion} className="flex items-start gap-2.5">
+              <li key={c.criterion} className="flex items-center gap-3">
                 <span
                   className={
-                    "mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border text-[10px] font-bold " +
+                    "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border text-sm font-bold " +
                     (c.met ? "border-emerald-400/40 text-emerald-400" : "border-amber-400/40 text-amber-400")
                   }
                 >
                   {c.met ? "✓" : "?"}
                 </span>
-                <div>
-                  <div className="text-[13px] font-medium text-[#F5F5F5]">{c.criterion}</div>
-                  <div className="mt-0.5 text-[12px] text-[#9A9A9E]">{c.evidence}</div>
-                </div>
+                <div className="text-base font-medium text-[#F5F5F5]">{c.criterion}</div>
               </li>
             ))}
           </ul>
@@ -443,7 +430,7 @@ function Features() {
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-[#F5F5F5]">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-[#9A9A9E]">{f.description}</p>
+                <p className="mt-1.5 text-sm text-[#F5F5F5]">{f.description}</p>
               </Card>
             </Reveal>
           ))}
@@ -451,7 +438,7 @@ function Features() {
 
         <Reveal delay={features.length * 80}>
           <div className="mx-auto mt-14 max-w-5xl">
-            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[#6F6F75]">
+            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[#F5F5F5]">
               Actually wired up today
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
@@ -464,7 +451,7 @@ function Features() {
                   {i.name}
                 </div>
               ))}
-              <div className="rounded-full border border-dashed border-[#F5F5F5]/15 px-5 py-2 text-sm text-[#6F6F75]">
+              <div className="rounded-full border border-dashed border-[#F5F5F5]/15 px-5 py-2 text-sm text-[#F5F5F5]">
                 + tell us what else you use
               </div>
             </div>
@@ -483,7 +470,7 @@ function SetupFlow() {
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             Set up in 5 minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[#9A9A9E]">
+          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[#F5F5F5]">
             Pay → get a setup link → connect your integrations → start receiving qualified leads
           </p>
         </Reveal>
@@ -513,7 +500,7 @@ function SetupFlow() {
                     Step {item.step}
                   </div>
                   <h3 className="mt-3 text-base font-semibold text-[#F5F5F5]">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[#9A9A9E]">{item.desc}</p>
+                  <p className="mt-2 text-sm text-[#F5F5F5]">{item.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -556,12 +543,12 @@ function WhySwitch() {
         <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
           <Reveal delay={80}>
             <Card className="h-full border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.02] p-7">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-[#6F6F75]">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-[#F5F5F5]">
                 Without Fieldsta
               </div>
               <ul className="mt-4 space-y-3">
                 {WITHOUT_FIELDSTA.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#9A9A9E]">
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[#F5F5F5]">
                     <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-[#6F6F75]" />
                     {item}
                   </li>
@@ -625,7 +612,7 @@ function Pricing() {
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             One Plan, No Surprises
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-center text-[#9A9A9E]">
+          <p className="mx-auto mt-4 max-w-md text-center text-[#F5F5F5]">
             Every feature, every integration, one price — nothing gated behind a higher tier.
           </p>
         </Reveal>
@@ -634,7 +621,7 @@ function Pricing() {
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EF4444]">Fieldsta</div>
             <div className="mt-4 flex items-baseline justify-center gap-1.5">
               <span className="text-5xl font-extrabold tracking-tight text-[#F5F5F5]">$500</span>
-              <span className="text-sm text-[#9A9A9E]">/ month</span>
+              <span className="text-sm text-[#F5F5F5]">/ month</span>
             </div>
             <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[#D9D9DE]">
               {PRICING_INCLUDES.map((item) => (
@@ -673,11 +660,11 @@ function FAQ() {
             <details key={item.q} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold text-[#F5F5F5]">
                 {item.q}
-                <span className="ml-4 shrink-0 text-[#9A9A9E] transition-transform group-open:rotate-45">
+                <span className="ml-4 shrink-0 text-[#F5F5F5] transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>
-              <p className="mt-3 text-sm text-[#9A9A9E]">{item.a}</p>
+              <p className="mt-3 text-sm text-[#F5F5F5]">{item.a}</p>
             </details>
           ))}
         </Reveal>
@@ -698,7 +685,7 @@ function FinalCTA() {
           <h2 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
             Your next lead is already <span className="text-[#EF4444]">waiting</span>.
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-[#9A9A9E]">
+          <p className="mx-auto mt-4 max-w-md text-[#F5F5F5]">
             Talk to Harper right now and see exactly how much time and money this puts back in your week.
           </p>
           <Link to="/try">
@@ -760,7 +747,7 @@ function DemoForm() {
   }
 
   const fieldClass =
-    "mt-1.5 border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.04] text-[#F5F5F5] placeholder:text-[#9A9A9E]/70 focus-visible:ring-[#F5F5F5]/40";
+    "mt-1.5 border-[#F5F5F5]/15 bg-[#F5F5F5]/[0.04] text-[#F5F5F5] placeholder:text-[#F5F5F5]/70 focus-visible:ring-[#F5F5F5]/40";
 
   return (
     <section id="demo" className="border-t border-[#F5F5F5]/10 py-24">
@@ -843,7 +830,7 @@ function DemoForm() {
                       ? "bg-emerald-400/10 text-emerald-400"
                       : status === "error"
                       ? "bg-red-400/10 text-red-400"
-                      : "text-[#9A9A9E]")
+                      : "text-[#F5F5F5]")
                   }
                   role="status"
                 >
@@ -860,7 +847,7 @@ function DemoForm() {
 
 function Footer() {
   return (
-    <footer className="border-t border-[#F5F5F5]/10 py-12 text-center text-sm text-[#9A9A9E]">
+    <footer className="border-t border-[#F5F5F5]/10 py-12 text-center text-sm text-[#F5F5F5]">
       <div className="container flex flex-col items-center gap-3">
         <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#F5F5F5]">
           Fieldsta
