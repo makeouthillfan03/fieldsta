@@ -265,24 +265,17 @@ export default function ParticleSkyline({ className = "", dark = true }) {
       // inverted — a dark silhouette on a light sky.
       const particleColor = isDark ? "#F5F5F5" : "#0a0a0a";
 
-      // Light mode reads thinner than dark by default — dark marks on a
-      // light ground don't pop the way bright dots on black do — so points
-      // render bigger, denser (lower cutoff), and bolder here to make the
-      // silhouette feel like a connected mass rather than scattered dust.
-      const sizeMult = isDark ? 1 : 1.7;
-      const alphaCutoff = isDark ? 0.015 : 0.006;
-
       for (const p of points) {
         const twinkle = reduced ? 1 : 0.62 + 0.38 * Math.sin(time * p.speed + p.phase);
         const alpha = p.base * twinkle;
-        if (alpha <= alphaCutoff) continue;
+        if (alpha <= 0.015) continue;
 
         const x = (p.x + (reduced ? 0 : Math.sin(time * 0.22 + p.phase) * p.drift * 6)) * scaleX;
         const y = p.y * scaleY;
 
-        ctx.globalAlpha = isDark ? alpha : Math.min(1, alpha * 1.9);
+        ctx.globalAlpha = isDark ? alpha : Math.min(1, alpha * 1.4);
         ctx.fillStyle = particleColor;
-        ctx.fillRect(x, y, p.size * sizeMult, p.size * sizeMult);
+        ctx.fillRect(x, y, p.size, p.size);
       }
 
       // One warm beacon at the tip of the tallest mast — the single point of
