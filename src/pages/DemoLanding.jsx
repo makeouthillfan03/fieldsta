@@ -18,6 +18,7 @@ import { Select } from "@/components/ui/select";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import { track } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
 
 // Same backend base SalesChatWidget already uses for its API calls --
@@ -40,6 +41,21 @@ export default function DemoLanding() {
     if (!window.location.hash) return;
     const el = document.getElementById(window.location.hash.slice(1));
     el?.scrollIntoView();
+  }, []);
+
+  // collect_payment (sales-agent.ts) redirects here on a real completed
+  // Stripe checkout -- the one genuine "paid" signal in the whole funnel,
+  // as opposed to pilot_created (free, no payment) or checkout_sent (a
+  // link was generated, not that anyone actually paid). Strips the param
+  // right after firing so a refresh doesn't double-count it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      track("payment_completed");
+      params.delete("checkout");
+      const next = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (next ? `?${next}` : ""));
+    }
   }, []);
 
   return (

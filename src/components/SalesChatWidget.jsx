@@ -108,6 +108,10 @@ export default function SalesChatWidget() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong.");
       setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      // Server only includes `outcome` the turn a pilot account or checkout
+      // link actually gets created -- real conversion signal, not a page
+      // view, so it fires exactly once per session per outcome.
+      if (data.outcome) track(data.outcome);
     } catch (err) {
       setError(err.message || "Something went wrong. Try again in a moment.");
     } finally {
