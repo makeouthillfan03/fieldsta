@@ -1,12 +1,23 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import Login from "@/pages/Login";
-import GrowthDashboard from "@/pages/GrowthDashboard";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
+
+// Login and /growth are the only two routes that touch Firebase (auth,
+// the growth stats page) -- every other route here is the live product,
+// which has nothing to do with it. Lazy-loading these three means
+// AuthContext (and therefore the whole firebase package) is only ever
+// fetched and executed for someone actually navigating to /login or
+// /growth, not bundled into and run for every visitor of the live site.
+const AuthProvider = lazy(() =>
+  import("@/context/AuthContext").then((m) => ({ default: m.AuthProvider }))
+);
+const Login = lazy(() => import("@/pages/Login"));
+const GrowthDashboard = lazy(() => import("@/pages/GrowthDashboard"));
+const RequireAuthOnly = lazy(() => import("@/components/RequireAuthOnly"));
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -41,16 +52,6 @@ import Agreement from "@/pages/Agreement";
 // to api/lead.js, which pushes qualified leads into Apollo.
 // ---------------------------------------------------------------------
 
-// The owner-only growth stats page only needs "is this a signed-in Google
-// account," full stop — the real access control happens server-side in the
-// Cloud Functions themselves (locked to one email, see functions/index.js).
-function RequireAuthOnly({ children }) {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-}
-
 export default function App() {
   return (
     <Routes>
@@ -59,14 +60,27 @@ export default function App() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/agreement" element={<Agreement />} />
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={
+          <Suspense fallback={null}>
+            <AuthProvider>
+              <Login />
+            </AuthProvider>
+          </Suspense>
+        }
+      />
 
       <Route
         path="/growth"
         element={
-          <RequireAuthOnly>
-            <GrowthDashboard />
-          </RequireAuthOnly>
+          <Suspense fallback={null}>
+            <AuthProvider>
+              <RequireAuthOnly>
+                <GrowthDashboard />
+              </RequireAuthOnly>
+            </AuthProvider>
+          </Suspense>
         }
       />
 
