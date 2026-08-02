@@ -9,6 +9,10 @@ import {
   ArrowRight,
   Sparkles,
   Check,
+  Mail,
+  Database,
+  Megaphone,
+  Plug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -441,12 +445,12 @@ const features = [
 ];
 
 const integrations = [
-  { name: "Email", note: "Reply from & notification settings" },
-  { name: "HubSpot", note: "Pushes qualified leads and status" },
-  { name: "Meta Lead Ads", note: "Facebook & Instagram lead forms" },
-  { name: "Slack", note: "Real-time lead notifications" },
-  { name: "Google Calendar", note: "Auto-book meetings" },
-  { name: "Webhooks", note: "Zapier, Make, custom systems" },
+  { name: "Email", note: "Reply from & notification settings", icon: Mail },
+  { name: "HubSpot", note: "Pushes qualified leads and status", icon: Database },
+  { name: "Meta Lead Ads", note: "Facebook & Instagram lead forms", icon: Megaphone },
+  { name: "Slack", note: "Real-time lead notifications", icon: MessageSquareText },
+  { name: "Google Calendar", note: "Auto-book meetings", icon: CalendarCheck },
+  { name: "Webhooks", note: "Zapier, Make, custom systems", icon: Plug },
 ];
 
 function Features() {
@@ -481,12 +485,13 @@ function Features() {
                 <div
                   key={i.name}
                   title={i.note}
-                  className="rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] px-5 py-2 text-sm font-semibold text-[var(--text)]"
+                  className="flex h-10 items-center gap-2 rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] pl-3 pr-5 text-sm font-semibold text-[var(--text)]"
                 >
+                  <i.icon className="h-4 w-4 flex-shrink-0" />
                   {i.name}
                 </div>
               ))}
-              <div className="rounded-full border border-dashed border-[rgba(var(--text-rgb),0.15)] px-5 py-2 text-sm text-[var(--text)]">
+              <div className="flex h-10 items-center rounded-full border border-dashed border-[rgba(var(--text-rgb),0.15)] px-5 text-sm text-[var(--text)]">
                 + tell us what else you use
               </div>
             </div>
