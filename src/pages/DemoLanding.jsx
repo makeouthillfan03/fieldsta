@@ -72,6 +72,7 @@ export default function DemoLanding() {
       <SetupFlow />
       <WhySwitch />
       <Pricing />
+      <DataTrust />
       <FAQ />
       <FinalCTA />
       <DemoForm />
@@ -282,6 +283,9 @@ function Hero() {
           <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[var(--text)]">
             Respond. Qualify. Book.
           </p>
+          <p className="animate-fade-up [animation-delay:320ms] mt-2 text-sm text-[var(--text)] opacity-70">
+            Built for small and mid-size teams — live in minutes, not a platform rollout.
+          </p>
 
           <Link
             to="/try"
@@ -438,10 +442,26 @@ function HowItWorks() {
 }
 
 const features = [
-  { icon: Zap, title: "Always replies instantly" },
-  { icon: MessageSquareText, title: "Qualifies before contact" },
-  { icon: Sparkles, title: "Gets smarter automatically" },
-  { icon: ShieldCheck, title: "Fully hands-off automation" },
+  {
+    icon: Sparkles,
+    title: "Learns from your corrections, not a training run",
+    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Configured to your business, not a canned script",
+    desc: "You set the criteria that decide what makes a lead worth a meeting, the tone it writes in, and a hard list of anything it should never claim on your behalf — pricing, guarantees, promises you haven't approved. No documents to upload — you tell it directly, and it picks up the rest from your edits.",
+  },
+  {
+    icon: Plug,
+    title: "Works with what you already run",
+    desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook into Zapier/Make/your own system — it plugs into your stack instead of asking you to replace it.",
+  },
+  {
+    icon: Zap,
+    title: "One system, not one templated reply",
+    desc: "Respond, qualify against your own criteria, and book straight onto your calendar — the whole handoff handled end to end, not a bot that fires a single message and stops.",
+  },
 ];
 
 const integrations = [
@@ -459,8 +479,11 @@ function Features() {
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            What separates a missed call from a closed deal
+            More than an email bot
           </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-[var(--text)]">
+            Respond-and-qualify is the floor, not the whole pitch — here&apos;s what actually makes it get better over time and fit your business specifically.
+          </p>
         </Reveal>
         <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
           {features.map((f, i) => (
@@ -470,6 +493,7 @@ function Features() {
                   <f.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-[var(--text)]">{f.title}</h3>
+                <p className="mt-2 text-sm text-[var(--text)] opacity-80">{f.desc}</p>
               </Card>
             </Reveal>
           ))}
@@ -495,6 +519,19 @@ function Features() {
                 + tell us what else you use
               </div>
             </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={features.length * 80 + 100}>
+          <div className="mx-auto mt-16 max-w-3xl rounded-2xl border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-7">
+            <h3 className="text-base font-semibold text-[var(--text)]">Why not just use my CRM&apos;s built-in AI?</h3>
+            <p className="mt-2 text-sm text-[var(--text)] opacity-80">
+              Fair question — a lot of CRMs ship some version of an AI reply assistant now. Fieldsta isn&apos;t trying to
+              replace your CRM&apos;s dashboard; it sits in front of it. It works whether you run HubSpot, something else,
+              or nothing at all, and it&apos;s built around one job — responding to and qualifying inbound leads — instead
+              of being a general assistant bolted onto a much bigger platform. That focus is also why setup takes
+              minutes instead of a CRM configuration project.
+            </p>
           </div>
         </Reveal>
       </div>
@@ -568,7 +605,7 @@ const WITH_FIELDSTA = [
   "Replies in under a minute, day or night",
   "Every lead qualified automatically, against your own criteria",
   "Meeting booked straight onto your calendar — no admin work",
-  "15+ hours a week back, and it keeps getting better the more it runs",
+  "Hours back every week that used to go to manual replies — and it sounds more like you the more you correct it",
 ];
 
 function WhySwitch() {
@@ -680,6 +717,40 @@ function Pricing() {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Card>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+const DATA_TRUST_POINTS = [
+  "Your leads' data is never sold — to anyone, for any reason.",
+  "Encrypted in transit, access-controlled at rest.",
+  "Delete everything tied to your account on request — just email us, no retention runaround.",
+];
+
+function DataTrust() {
+  return (
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-20">
+      <div className="container">
+        <Reveal>
+          <div className="mx-auto max-w-2xl rounded-2xl border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-8 text-center">
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-[var(--text)]">What happens to your leads&apos; data</h3>
+            <ul className="mx-auto mt-5 max-w-md space-y-2.5 text-left text-sm text-[var(--text)] opacity-80">
+              {DATA_TRUST_POINTS.map((point) => (
+                <li key={point} className="flex items-start gap-2.5">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <a href="/privacy" className="mt-5 inline-block text-sm font-semibold text-[var(--accent)] hover:underline">
+              Full privacy policy →
+            </a>
+          </div>
         </Reveal>
       </div>
     </section>
