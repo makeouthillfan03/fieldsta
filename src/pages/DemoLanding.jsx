@@ -226,7 +226,27 @@ function Nav() {
         </nav>
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <a href={`${AGENTS_BASE}/signup`}>
+          <div className="hidden flex-col items-end sm:flex">
+            <a href={`${AGENTS_BASE}/signup`}>
+              <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
+                Start Free
+              </Button>
+            </a>
+            <div className="mt-1 flex items-center gap-2 text-[11px] text-[var(--text)] opacity-60">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("fieldsta:open-chat"))}
+                className="hover:opacity-100 hover:underline"
+              >
+                chat with Harper
+              </button>
+              <span>·</span>
+              <a href="mailto:support@fieldsta.com?subject=A%20quick%20call%20about%20Fieldsta" className="hover:opacity-100 hover:underline">
+                talk to a real person
+              </a>
+            </div>
+          </div>
+          <a href={`${AGENTS_BASE}/signup`} className="sm:hidden">
             <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
               Start Free
             </Button>
