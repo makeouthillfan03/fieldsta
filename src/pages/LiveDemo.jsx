@@ -368,6 +368,12 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           </Block>
         )}
 
+        {result.researchNotes && (
+          <Block title="Research Harper did">
+            <p>{result.researchNotes}</p>
+          </Block>
+        )}
+
         {result.reviewReason && (
           <Block title="What a reviewer should check">
             <p>{result.reviewReason}</p>
