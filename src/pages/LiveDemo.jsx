@@ -317,13 +317,16 @@ function Result({ result }) {
       </div>
 
       <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
-        <Block title="What happens next">
+        <Block title="On a live account, this is what would happen next">
           <ul className="space-y-2 text-sm text-[#C8C8CC]">
-            <li>✓ Reply sent to {result.leadEmail || "lead@example.com"}</li>
-            <li>✓ Pushed to your HubSpot as {result.qualification}</li>
-            <li>✓ Notification sent to your team Slack</li>
-            <li>✓ Meeting link added if they accept</li>
+            <li>→ Reply goes to {result.leadEmail || "lead@example.com"} once approved</li>
+            <li>→ Pushed to HubSpot as {result.qualification}</li>
+            <li>→ Notification posted to your team Slack</li>
+            <li>→ Meeting link added if they accept</li>
           </ul>
+          <p className="pt-1 text-xs text-[#C8C8CC]/70">
+            Nothing was actually sent, pushed, or notified — this is a demo, and no account is connected.
+          </p>
         </Block>
       </Card>
 
