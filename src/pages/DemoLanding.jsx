@@ -691,6 +691,10 @@ const faqs = [
     q: "Do I need to switch CRMs?",
     a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
   },
+  {
+    q: "Can I feed it my own data?",
+    a: "Not documents or a knowledge base to upload — you tell it directly: your qualifying criteria, your tone, and anything it should never claim. From there it learns your voice from your own edits over time. That's a deliberate tradeoff for keeping setup to minutes instead of a data-ingestion project — if you need document/knowledge-base training specifically, tell us and we'll talk it through.",
+  },
 ];
 
 const PRICING_INCLUDES = [
