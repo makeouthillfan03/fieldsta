@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import ParticleSkyline from "@/components/ParticleSkyline";
+import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -67,6 +68,7 @@ const VERDICT = {
 };
 
 export default function LiveDemo() {
+  const dark = useIsDarkTheme();
   const [vertical, setVertical] = useState("home-services");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle"); // idle | running | done | error
@@ -78,8 +80,28 @@ export default function LiveDemo() {
   const [editedDraft, setEditedDraft] = useState("");
   const [appliedEdit, setAppliedEdit] = useState(null); // {draft, edited} once used
   const [round, setRound] = useState(1);
+  // A real agent run takes 20-40s with no intermediate progress events to
+  // report -- a bare spinner over that long a wait reads as "probably
+  // broken" to a visitor. This is a paced, honest-in-spirit fake: it eases
+  // toward ~92% and never claims to be an exact measurement, then snaps to
+  // 100% the moment the real response actually lands.
+  const [progress, setProgress] = useState(0);
+  const progressTimer = useRef(null);
 
   const active = VERTICALS.find((v) => v.value === vertical);
+
+  useEffect(() => {
+    if (status === "running") {
+      setProgress(4);
+      progressTimer.current = setInterval(() => {
+        setProgress((p) => (p >= 92 ? p : p + (92 - p) * 0.06));
+      }, 300);
+    } else {
+      clearInterval(progressTimer.current);
+      if (status === "done") setProgress(100);
+    }
+    return () => clearInterval(progressTimer.current);
+  }, [status]);
 
   async function run(e, overrides = {}) {
     e?.preventDefault?.();
@@ -129,21 +151,24 @@ export default function LiveDemo() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#060607] font-body text-[#F5F5F5]">
+    <div className="relative min-h-screen bg-[var(--bg)] font-body text-[var(--text)]">
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_0%,rgba(255,241,232,0.1)_0%,rgba(255,235,225,0.04)_28%,transparent_62%)]" />
-        <ParticleSkyline className="absolute inset-0 h-full w-full opacity-60" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(6,6,7,0.5)_55%,#060607_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_0%,rgba(var(--text-rgb),0.06)_0%,rgba(var(--text-rgb),0.02)_28%,transparent_62%)]" />
+        <ParticleSkyline className="absolute inset-0 h-full w-full opacity-60" dark={dark} />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(var(--bg-rgb),0.5)_55%,var(--bg)_100%)]" />
       </div>
 
       <div className="container relative z-10 max-w-3xl py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs text-[#9A9A9E] transition-colors hover:text-[#F5F5F5]"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Fieldsta
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs text-[var(--text)] opacity-70 transition-colors hover:opacity-100"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Fieldsta
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div className="mt-8 space-y-3">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -153,7 +178,7 @@ export default function LiveDemo() {
 
         <form onSubmit={run} className="mt-8 space-y-5">
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-[0.18em] text-[#6F6F75]">
+            <Label className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
               What kind of business
             </Label>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -165,11 +190,11 @@ export default function LiveDemo() {
                   className={
                     "rounded-lg border px-3 py-2.5 text-left transition-all duration-200 " +
                     (vertical === v.value
-                      ? "border-[#F5F5F5]/40 bg-[#F5F5F5]/[0.06] scale-[1.02]"
-                      : "border-[#F5F5F5]/10 hover:border-[#F5F5F5]/25 hover:bg-[#F5F5F5]/[0.02]")
+                      ? "border-[rgba(var(--text-rgb),0.4)] bg-[rgba(var(--text-rgb),0.06)] scale-[1.02]"
+                      : "border-[rgba(var(--text-rgb),0.1)] hover:border-[rgba(var(--text-rgb),0.25)] hover:bg-[rgba(var(--text-rgb),0.02)]")
                   }
                 >
-                  <div className="text-sm font-medium">{v.label}</div>
+                  <div className="text-sm font-medium text-[var(--text)]">{v.label}</div>
                 </button>
               ))}
             </div>
@@ -179,14 +204,14 @@ export default function LiveDemo() {
             <div className="flex items-center justify-between">
               <Label
                 htmlFor="leadMessage"
-                className="text-xs uppercase tracking-[0.18em] text-[#6F6F75]"
+                className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60"
               >
                 What the lead said
               </Label>
               <button
                 type="button"
                 onClick={() => setMessage(active.sample)}
-                className="text-[11px] text-[#9A9A9E] underline underline-offset-2 hover:text-[#F5F5F5]"
+                className="text-[11px] text-[var(--text)] opacity-70 underline underline-offset-2 hover:opacity-100"
               >
                 Use an example
               </button>
@@ -198,19 +223,19 @@ export default function LiveDemo() {
               rows={5}
               maxLength={4000}
               placeholder="Paste or type what a lead sent you…"
-              className="w-full rounded-lg border border-[#F5F5F5]/15 bg-[#0d0d0f] px-3.5 py-3 text-[15px] leading-relaxed text-[#F5F5F5] placeholder:text-[#4A4A50] transition-colors duration-200 focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+              className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.35)] focus-visible:outline-none"
             />
           </div>
 
           <Button
             type="submit"
             disabled={!message.trim() || status === "running"}
-            className="w-full bg-[#F5F5F5] text-[#0a0a0a] transition-all duration-200 hover:bg-white sm:w-auto"
+            className="w-full bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
           >
             {status === "running" ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Qualifying…
+                Qualifying… {Math.round(progress)}%
               </>
             ) : (
               "Run it"
@@ -218,13 +243,21 @@ export default function LiveDemo() {
           </Button>
 
           {status === "running" && (
-            <p className="text-xs text-[#6F6F75]">
-              This takes 20–40 seconds — it's a real agent reading the lead, not a lookup.
-            </p>
+            <div className="space-y-1.5">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[rgba(var(--text-rgb),0.1)]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-[var(--text)] opacity-60">
+                This takes 20–40 seconds — it's a real agent reading the lead, not a lookup.
+              </p>
+            </div>
           )}
 
           {status === "error" && (
-            <div className="rounded-lg border border-[#FF4438]/30 bg-[#FF4438]/10 px-3.5 py-3 text-sm text-[#FF9A93]">
+            <div className="rounded-lg border border-[#FF4438]/30 bg-[#FF4438]/10 px-3.5 py-3 text-sm text-[#FF4438]">
               {error}
             </div>
           )}
@@ -243,10 +276,10 @@ export default function LiveDemo() {
           />
         )}
 
-        <div className="mt-12 border-t border-[#F5F5F5]/10 pt-8">
-          <Card className="border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-6 text-center sm:p-8">
-            <h2 className="text-xl font-semibold text-[#F5F5F5] sm:text-2xl">Run this on your own leads</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-[#9A9A9E]">
+        <div className="mt-12 border-t border-[rgba(var(--text-rgb),0.1)] pt-8">
+          <Card className="border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-6 text-center sm:p-8">
+            <h2 className="text-xl font-semibold text-[var(--text)] sm:text-2xl">Run this on your own leads</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text)] opacity-70">
               Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
               anytime. Interested? Just ask Harper below to get set up.
             </p>
@@ -255,14 +288,14 @@ export default function LiveDemo() {
               onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
               className="mt-6 inline-block"
             >
-              <Button size="lg" className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white">
+              <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
                 Start your free pilot
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </button>
-            <p className="mt-3 text-xs text-[#6F6F75]">
+            <p className="mt-3 text-xs text-[var(--text)] opacity-60">
               Or{" "}
-              <Link to="/#demo" className="underline underline-offset-2 hover:text-[#F5F5F5]">
+              <Link to="/#demo" className="underline underline-offset-2 hover:opacity-100">
                 tell us about your setup by email
               </Link>{" "}
               instead.
@@ -285,7 +318,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         {result.score && (
           <div className="flex items-center gap-3">
             <ScoreRing score={result.score.score} size={64} stroke={5} />
-            <span className="max-w-[9rem] text-xs leading-snug text-[#9A9A9E]">
+            <span className="max-w-[9rem] text-xs leading-snug text-[var(--text)] opacity-70">
               {result.score.tierLabel}
             </span>
           </div>
@@ -300,11 +333,11 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           {verdict.label}
         </span>
         {result.needsHumanReview && (
-          <span className="text-[11px] text-[#6F6F75]">Flagged for human review</span>
+          <span className="text-[11px] text-[var(--text)] opacity-60">Flagged for human review</span>
         )}
       </div>
 
-      <Card className="space-y-4 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+      <Card className="space-y-4 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
         <Block title="Why">
           <p>{result.reasoning}</p>
         </Block>
@@ -316,8 +349,8 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
                 <li key={i} className="flex items-start gap-2.5">
                   <CritMark met={c.met} />
                   <div>
-                    <div className="font-medium text-[#F5F5F5]">{c.criterion}</div>
-                    <div className="mt-0.5 text-[13px] text-[#9A9A9E]">{c.evidence}</div>
+                    <div className="font-medium text-[var(--text)]">{c.criterion}</div>
+                    <div className="mt-0.5 text-[13px] text-[var(--text)] opacity-70">{c.evidence}</div>
                   </div>
                 </li>
               ))}
@@ -342,9 +375,9 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         )}
       </Card>
 
-      <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
             Drafted reply — nothing sends until a human approves it
           </div>
           {round === 2 && appliedEdit && (
@@ -354,9 +387,9 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           )}
         </div>
         {result.subject && (
-          <div className="text-sm font-medium text-[#F5F5F5]">{result.subject}</div>
+          <div className="text-sm font-medium text-[var(--text)]">{result.subject}</div>
         )}
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#C8C8CC]">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-80">
           {result.draftReply}
         </p>
       </Card>
@@ -371,9 +404,9 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       </div>
 
       {round === 1 ? (
-        <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+        <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
           <Block title="See it actually learn">
-            <p className="text-[13px] text-[#9A9A9E]">
+            <p className="text-[13px] text-[var(--text)] opacity-70">
               Edit the reply below like a reviewer would, then run a new, different lead — watch the correction
               apply automatically, without retraining anything.
             </p>
@@ -383,13 +416,13 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
             onChange={(e) => setEditedDraft(e.target.value)}
             placeholder={result.draftReply}
             rows={4}
-            className="w-full rounded-lg border border-[#F5F5F5]/15 bg-[#0d0d0f] px-3.5 py-3 text-sm leading-relaxed text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+            className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-sm leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] focus-visible:border-[rgba(var(--text-rgb),0.35)] focus-visible:outline-none"
           />
           <Button
             type="button"
             disabled={!editedDraft.trim() || running}
             onClick={onRunWithEdit}
-            className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+            className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90"
           >
             {running ? (
               <>
@@ -406,30 +439,30 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           <button
             type="button"
             onClick={onReset}
-            className="text-xs text-[#9A9A9E] underline underline-offset-2 hover:text-[#F5F5F5]"
+            className="text-xs text-[var(--text)] opacity-70 underline underline-offset-2 hover:text-[var(--text)]"
           >
             Start over with a fresh lead
           </button>
         </div>
       )}
 
-      <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
         <Block title="On a live account, this is what would happen next">
-          <ul className="space-y-2 text-sm text-[#C8C8CC]">
+          <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
             <li>→ Reply goes to {result.leadEmail || "lead@example.com"} once approved</li>
             <li>→ Pushed to HubSpot as {result.qualification}</li>
             <li>→ Notification posted to your team Slack</li>
             <li>→ Meeting link added if they accept</li>
           </ul>
-          <p className="pt-1 text-xs text-[#C8C8CC]/70">
+          <p className="pt-1 text-xs text-[var(--text)] opacity-60">
             Nothing was actually sent, pushed, or notified — this is a demo, and no account is connected.
           </p>
         </Block>
       </Card>
 
-      <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
         <Block title="In this dashboard, you also get">
-          <ul className="space-y-2 text-sm text-[#C8C8CC]">
+          <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
             <li>Score breakdown for every lead (0-100)</li>
             <li>Customize what email replies come from</li>
             <li>Train the agent with your voice/style</li>
@@ -466,8 +499,8 @@ function CritMark({ met }) {
 function Block({ title, children }) {
   return (
     <div className="space-y-1.5">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">{title}</div>
-      <div className="text-sm leading-relaxed text-[#C8C8CC]">{children}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">{title}</div>
+      <div className="text-sm leading-relaxed text-[var(--text)] opacity-80">{children}</div>
     </div>
   );
 }
