@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Zap,
@@ -22,6 +22,7 @@ import { Select } from "@/components/ui/select";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
 
@@ -130,60 +131,12 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
-// Shared with Hero, which needs to know light-vs-dark to recolor the canvas
-// skyline (a CSS variable can't reach into a <canvas> fillStyle). Broadcasts
-// on a window event rather than lifting state to DemoLanding so the toggle
-// can live wherever in the tree without prop-drilling.
-function useIsDarkTheme() {
-  const [dark, setDark] = useState(
-    () => typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark"
-  );
-  useEffect(() => {
-    const handler = (e) => setDark(e.detail === "dark");
-    window.addEventListener("fieldsta-theme", handler);
-    return () => window.removeEventListener("fieldsta-theme", handler);
-  }, []);
-  return dark;
-}
-
-function ThemeToggle() {
-  const dark = useIsDarkTheme();
-
-  const toggle = useCallback(() => {
-    const next = !dark;
-    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
-    try {
-      localStorage.setItem("theme", next ? "dark" : "light");
-    } catch (e) {}
-    window.dispatchEvent(new CustomEvent("fieldsta-theme", { detail: next ? "dark" : "light" }));
-  }, [dark]);
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(var(--text-rgb),0.15)] text-[var(--text)] hover:border-[rgba(var(--text-rgb),0.4)]"
-    >
-      {dark ? (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-        </svg>
-      ) : (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
-      )}
-    </button>
-  );
-}
 
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
-      <div className="container flex h-16 items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
+      <div className="container grid h-16 grid-cols-[1fr_auto_1fr] items-center">
+        <a href="/" className="flex items-center gap-2 justify-self-start">
           <svg width="24" height="24" viewBox="0 0 200 200" className="text-[var(--text)]" aria-hidden="true">
             <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
             <g fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -224,29 +177,9 @@ function Nav() {
             FAQ
           </a>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-self-end">
           <ThemeToggle />
-          <div className="hidden flex-col items-end sm:flex">
-            <a href={`${AGENTS_BASE}/signup`}>
-              <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
-                Start Free
-              </Button>
-            </a>
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-[var(--text)] opacity-60">
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event("fieldsta:open-chat"))}
-                className="hover:opacity-100 hover:underline"
-              >
-                chat with Harper
-              </button>
-              <span>·</span>
-              <a href="mailto:support@fieldsta.com?subject=A%20quick%20call%20about%20Fieldsta" className="hover:opacity-100 hover:underline">
-                talk to a real person
-              </a>
-            </div>
-          </div>
-          <a href={`${AGENTS_BASE}/signup`} className="sm:hidden">
+          <a href={`${AGENTS_BASE}/signup`}>
             <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
               Start Free
             </Button>
@@ -302,9 +235,6 @@ function Hero() {
 
           <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[var(--text)]">
             Respond. Qualify. Book.
-          </p>
-          <p className="animate-fade-up [animation-delay:320ms] mt-2 text-sm text-[var(--text)] opacity-70">
-            Built for small and mid-size teams — live in minutes, not a platform rollout.
           </p>
 
           <Link
@@ -718,7 +648,39 @@ const PRICING_INCLUDES = [
   "Qualifies against your own criteria before it ever reaches your calendar",
   "Learns your voice from your edits — sounds like you, not a generic bot",
   "Works alongside HubSpot, Meta Lead Ads, Slack, or any CRM",
-  "Free pilot to start — no setup fee, cancel anytime",
+];
+
+// Real prices, matching what the backend actually enforces (see
+// DEFAULT_MONTHLY_LEAD_LIMIT_BY_PRICE) -- every tier gets every feature,
+// they scale by lead volume, not functionality. Only Starter has a real
+// self-serve checkout; Growth/Scale are real prices but require an actual
+// conversation first since usage-based cost varies enough at that volume
+// that it isn't a click-and-go purchase.
+const PLANS = [
+  {
+    name: "Starter",
+    price: "$500",
+    volume: "Up to ~150 qualified leads/mo",
+    cta: "Start your free pilot",
+    action: "signup",
+    highlight: false,
+  },
+  {
+    name: "Growth",
+    price: "$1,500",
+    volume: "Up to ~500 qualified leads/mo",
+    cta: "Book a setup call",
+    action: "call",
+    highlight: true,
+  },
+  {
+    name: "Scale",
+    price: "$3,000",
+    volume: "Up to ~1,500 qualified leads/mo",
+    cta: "Book a setup call",
+    action: "call",
+    highlight: false,
+  },
 ];
 
 function Pricing() {
@@ -727,36 +689,59 @@ function Pricing() {
       <div className="container">
         <Reveal>
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            One Plan, No Surprises
+            Straightforward Pricing, No Surprises
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-center text-[var(--text)]">
-            Every feature, every integration, one price — nothing gated behind a higher tier.
+          <p className="mx-auto mt-4 max-w-lg text-center text-[var(--text)]">
+            Every plan includes every feature — plans only differ by lead volume, since that's what actually drives cost at scale.
           </p>
         </Reveal>
-        <Reveal delay={100}>
-          <Card className="mx-auto mt-14 max-w-md border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] p-8 text-center">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">Fieldsta</div>
-            <div className="mt-4 flex items-baseline justify-center gap-1.5">
-              <span className="text-5xl font-extrabold tracking-tight text-[var(--text)]">$500</span>
-              <span className="text-sm text-[var(--text)]">/ month</span>
-            </div>
-            <ul className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm text-[var(--text)]">
-              {PRICING_INCLUDES.map((item) => (
-                <li key={item} className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Button
-              size="lg"
-              onClick={() => { window.location.href = "https://fieldsta.com/try"; }}
-              className="mt-8 w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
-            >
-              Start your free pilot
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Card>
+
+        <Reveal delay={80}>
+          <ul className="mx-auto mt-10 flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[var(--text)]">
+            {PRICING_INCLUDES.map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <Check className="h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+
+        <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-3">
+          {PLANS.map((plan, i) => (
+            <Reveal key={plan.name} delay={120 + i * 80}>
+              <Card
+                className={`h-full p-7 text-center ${
+                  plan.highlight
+                    ? "border-2 border-[var(--accent)]/50 bg-[var(--accent)]/[0.05]"
+                    : "border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03]"
+                }`}
+              >
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">{plan.name}</div>
+                <div className="mt-4 flex items-baseline justify-center gap-1.5">
+                  <span className="text-4xl font-extrabold tracking-tight text-[var(--text)]">{plan.price}</span>
+                  <span className="text-sm text-[var(--text)]">/ month</span>
+                </div>
+                <div className="mt-3 text-sm text-[var(--text)] opacity-70">{plan.volume}</div>
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    if (plan.action === "signup") window.location.href = "https://fieldsta.com/try";
+                    else window.location.href = "mailto:support@fieldsta.com?subject=Setting%20up%20the%20" + plan.name + "%20plan";
+                  }}
+                  className="mt-7 w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
+                >
+                  {plan.cta}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Card>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={120 + PLANS.length * 80}>
+          <p className="mx-auto mt-8 max-w-md text-center text-xs text-[var(--text)] opacity-60">
+            Starter checks out instantly. Growth and Scale are real prices, set up over a quick call since usage-based cost varies enough at that volume to talk through first.
+          </p>
         </Reveal>
       </div>
     </section>
