@@ -27,18 +27,24 @@ const VERTICALS = [
     label: "Home services",
     sample:
       "We had that big hailstorm come through last week and I'm seeing dented gutters and shingles in the yard. Insurance adjuster is coming Friday but I want a roofer's opinion before then. Can someone come take a look this week?",
+    sample2:
+      "Noticed a soft spot on the roof near the chimney after all that rain last week. Nothing's leaking yet but I'd rather get ahead of it. Could someone swing by sometime this week to take a look?",
   },
   {
     value: "legal",
     label: "Legal intake",
     sample:
       "I was rear ended on the highway last Tuesday. Other driver admitted fault to the officer but their insurance is already lowballing me. I have a police report and went to urgent care same day, still getting neck pain. Do you handle cases like this?",
+    sample2:
+      "Slipped on a wet floor at a grocery store two weeks ago, no warning sign was out. Hurt my wrist pretty bad, went to the ER same day and got an X-ray. Store manager took a report. Is this something you'd take on?",
   },
   {
     value: "saas",
     label: "B2B / SaaS",
     sample:
       "We run paid ads for about a dozen contractor clients and generate maybe 400 leads a month between them. Honestly our follow-up is inconsistent — leads sit for hours before anyone calls. What does something like this cost?",
+    sample2:
+      "We're a smaller agency, maybe 150 leads a month across 4 clients. Our issue isn't volume, it's that whoever's free just wings the reply and it's inconsistent. Curious if this could plug into what we already use.",
   },
 ];
 
@@ -66,12 +72,19 @@ export default function LiveDemo() {
   const [status, setStatus] = useState("idle"); // idle | running | done | error
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  // Edit-learning demo state: after the first result, the visitor can edit
+  // the draft and run a second, different lead to see that correction
+  // actually applied -- not just described in copy.
+  const [editedDraft, setEditedDraft] = useState("");
+  const [appliedEdit, setAppliedEdit] = useState(null); // {draft, edited} once used
+  const [round, setRound] = useState(1);
 
   const active = VERTICALS.find((v) => v.value === vertical);
 
-  async function run(e) {
-    e.preventDefault();
-    if (!message.trim() || status === "running") return;
+  async function run(e, overrides = {}) {
+    e?.preventDefault?.();
+    const msg = overrides.message ?? message;
+    if (!msg.trim() || status === "running") return;
     setStatus("running");
     setError("");
     setResult(null);
@@ -80,16 +93,39 @@ export default function LiveDemo() {
       const res = await fetch(`${AGENTS_BASE}/api/demo-qualify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vertical, message }),
+        body: JSON.stringify({
+          vertical,
+          message: msg,
+          ...(overrides.priorEdit ? { priorEdit: overrides.priorEdit } : {}),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong.");
       setResult(data);
       setStatus("done");
+      if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
     } catch (err) {
       setError(err.message || "Something went wrong.");
       setStatus("error");
     }
+  }
+
+  function runWithEdit() {
+    if (!editedDraft.trim() || !result?.draftReply) return;
+    const priorEdit = { draft: result.draftReply, edited: editedDraft.trim() };
+    const nextMessage = active.sample2 || active.sample;
+    setMessage(nextMessage);
+    setRound(2);
+    run(null, { message: nextMessage, priorEdit });
+  }
+
+  function resetDemo() {
+    setResult(null);
+    setMessage("");
+    setEditedDraft("");
+    setAppliedEdit(null);
+    setRound(1);
+    setStatus("idle");
   }
 
   return (
@@ -194,7 +230,18 @@ export default function LiveDemo() {
           )}
         </form>
 
-        {result && <Result result={result} />}
+        {result && (
+          <Result
+            result={result}
+            round={round}
+            appliedEdit={appliedEdit}
+            editedDraft={editedDraft}
+            setEditedDraft={setEditedDraft}
+            onRunWithEdit={runWithEdit}
+            onReset={resetDemo}
+            running={status === "running"}
+          />
+        )}
 
         <div className="mt-12 border-t border-[#F5F5F5]/10 pt-8">
           <Card className="border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-6 text-center sm:p-8">
@@ -228,7 +275,7 @@ export default function LiveDemo() {
   );
 }
 
-function Result({ result }) {
+function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running }) {
   const verdict = VERDICT[result.qualification] ?? VERDICT.needs_more_info;
   const { Icon } = verdict;
 
@@ -296,8 +343,15 @@ function Result({ result }) {
       </Card>
 
       <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">
-          Drafted reply — nothing sends until a human approves it
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[#6F6F75]">
+            Drafted reply — nothing sends until a human approves it
+          </div>
+          {round === 2 && appliedEdit && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-400">
+              ✨ Reflects your edit below
+            </span>
+          )}
         </div>
         {result.subject && (
           <div className="text-sm font-medium text-[#F5F5F5]">{result.subject}</div>
@@ -315,6 +369,49 @@ function Result({ result }) {
           ✕ Reject
         </button>
       </div>
+
+      {round === 1 ? (
+        <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
+          <Block title="See it actually learn">
+            <p className="text-[13px] text-[#9A9A9E]">
+              Edit the reply below like a reviewer would, then run a new, different lead — watch the correction
+              apply automatically, without retraining anything.
+            </p>
+          </Block>
+          <textarea
+            value={editedDraft}
+            onChange={(e) => setEditedDraft(e.target.value)}
+            placeholder={result.draftReply}
+            rows={4}
+            className="w-full rounded-lg border border-[#F5F5F5]/15 bg-[#0d0d0f] px-3.5 py-3 text-sm leading-relaxed text-[#F5F5F5] placeholder:text-[#4A4A50] focus-visible:border-[#F5F5F5]/35 focus-visible:outline-none"
+          />
+          <Button
+            type="button"
+            disabled={!editedDraft.trim() || running}
+            onClick={onRunWithEdit}
+            className="bg-[#F5F5F5] text-[#0a0a0a] hover:bg-white"
+          >
+            {running ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Running a new lead with your edit…
+              </>
+            ) : (
+              "Run a new lead with this edit"
+            )}
+          </Button>
+        </Card>
+      ) : (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-xs text-[#9A9A9E] underline underline-offset-2 hover:text-[#F5F5F5]"
+          >
+            Start over with a fresh lead
+          </button>
+        </div>
+      )}
 
       <Card className="space-y-3 border-[#F5F5F5]/10 bg-[#F5F5F5]/[0.03] p-5">
         <Block title="On a live account, this is what would happen next">
