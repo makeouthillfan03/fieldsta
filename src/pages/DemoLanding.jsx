@@ -461,27 +461,27 @@ function HowItWorks() {
   );
 }
 
-const features = [
+// The two that actually differentiate this from "yet another auto-reply
+// bot" -- given full visual weight below, not equal billing with the
+// integrations/CRM talk every competitor already claims.
+const heroFeatures = [
   {
     icon: Sparkles,
-    title: "Learns from your corrections, not a training run",
-    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it.",
+    title: "It grows with every correction",
+    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it, permanently.",
   },
   {
     icon: ShieldCheck,
-    title: "Configured to your business, not a canned script",
-    desc: "You set the criteria that decide what makes a lead worth a meeting, the tone it writes in, and a hard list of anything it should never claim on your behalf — pricing, guarantees, promises you haven't approved. No documents to upload — you tell it directly, and it picks up the rest from your edits.",
+    title: "Built and fed around your business, not a script",
+    desc: "You feed it your own qualifying criteria, your tone, and a hard list of anything it can never claim on your behalf. It's not a generic template with your logo on it — it's shaped by your rules and grows sharper from your own edits over time.",
   },
-  {
-    icon: Plug,
-    title: "Works with what you already run",
-    desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook into Zapier/Make/your own system — it plugs into your stack instead of asking you to replace it.",
-  },
-  {
-    icon: Zap,
-    title: "One system, not one templated reply",
-    desc: "Respond, qualify against your own criteria, and book straight onto your calendar — the whole handoff handled end to end, not a bot that fires a single message and stops.",
-  },
+];
+
+// Real, but table stakes -- every CRM-bundled AI agent claims this too.
+// Kept, just not competing for attention with the two above.
+const secondaryFeatures = [
+  { icon: Plug, title: "Works with what you already run", desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — plugs into your stack instead of replacing it." },
+  { icon: Zap, title: "One system, not one templated reply", desc: "Respond, qualify, and book straight onto your calendar — the whole handoff, not a bot that fires one message and stops." },
 ];
 
 const integrations = [
@@ -501,28 +501,44 @@ function Features() {
           <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
             More than an email bot
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-[var(--text)]">
-            Respond-and-qualify is the floor, not the whole pitch — here&apos;s what actually makes it get better over time and fit your business specifically.
+          <p className="mx-auto mt-5 max-w-3xl text-center text-2xl font-bold leading-snug tracking-tight text-[var(--text)] sm:text-3xl">
+            It doesn&apos;t just send auto-replies —{" "}
+            <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
           </p>
         </Reveal>
-        <div className="mx-auto mt-16 grid max-w-5xl gap-6 sm:grid-cols-2">
-          {features.map((f, i) => (
-            <Reveal key={f.title} delay={i * 80}>
-              <Card className="h-full border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.03] p-6 transition-colors hover:border-[rgba(var(--text-rgb),0.25)] hover:bg-[var(--text)]/[0.05]">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
-                  <f.icon className="h-5 w-5" />
+
+        <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
+          {heroFeatures.map((f, i) => (
+            <Reveal key={f.title} delay={i * 100}>
+              <Card className="h-full border-2 border-[var(--accent)]/30 bg-[var(--accent)]/[0.05] p-8 transition-colors hover:border-[var(--accent)]/60">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 text-[var(--accent)]">
+                  <f.icon className="h-7 w-7" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-[var(--text)]">{f.title}</h3>
-                <p className="mt-2 text-sm text-[var(--text)] opacity-80">{f.desc}</p>
+                <h3 className="mt-5 text-xl font-extrabold tracking-tight text-[var(--text)]">{f.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--text)] opacity-90">{f.desc}</p>
               </Card>
             </Reveal>
           ))}
         </div>
 
-        <Reveal delay={features.length * 80}>
+        <Reveal delay={200}>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
+            {secondaryFeatures.map((f) => (
+              <div key={f.title} className="flex items-start gap-3 rounded-lg border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-4">
+                <f.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text)] opacity-60" />
+                <div>
+                  <div className="text-sm font-semibold text-[var(--text)]">{f.title}</div>
+                  <div className="mt-0.5 text-xs text-[var(--text)] opacity-70">{f.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={300}>
           <div className="mx-auto mt-14 max-w-5xl">
-            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[var(--text)]">
-              Actually wired up today
+            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[var(--text)] opacity-70">
+              Also wired up today
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
               {integrations.map((i) => (
@@ -542,7 +558,7 @@ function Features() {
           </div>
         </Reveal>
 
-        <Reveal delay={features.length * 80 + 100}>
+        <Reveal delay={350}>
           <div className="mx-auto mt-16 max-w-3xl rounded-2xl border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-7">
             <h3 className="text-base font-semibold text-[var(--text)]">Why not just use my CRM&apos;s built-in AI?</h3>
             <p className="mt-2 text-sm text-[var(--text)] opacity-80">
