@@ -782,6 +782,53 @@ function DataTrust() {
   );
 }
 
+// Native <details> snaps its content open/closed instantly with no way to
+// transition height via CSS alone (height:auto isn't animatable) -- this
+// swaps in a plain open/closed boolean and animates the answer's height
+// with the Web Animations API instead, so expanding a question reads as a
+// smooth action rather than a jump cut.
+function AccordionItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  const bodyRef = useRef(null);
+
+  const toggle = () => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const opening = !open;
+    const startHeight = body.getBoundingClientRect().height;
+    setOpen(opening);
+    requestAnimationFrame(() => {
+      const endHeight = opening ? body.scrollHeight : 0;
+      body.animate([{ height: startHeight + "px" }, { height: endHeight + "px" }], {
+        duration: 220,
+        easing: "ease",
+      });
+    });
+  };
+
+  return (
+    <div className="py-5">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between text-left text-base font-semibold text-[var(--text)]"
+      >
+        {q}
+        <span
+          className="ml-4 shrink-0 text-[var(--text)] transition-transform duration-200"
+          style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
+        >
+          +
+        </span>
+      </button>
+      <div ref={bodyRef} className="overflow-hidden" style={{ height: open ? "auto" : 0 }}>
+        <p className="mt-3 text-sm text-[var(--text)]">{a}</p>
+      </div>
+    </div>
+  );
+}
+
 function FAQ() {
   return (
     <section id="faq" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
@@ -793,15 +840,7 @@ function FAQ() {
         </Reveal>
         <Reveal delay={100} className="mt-12 divide-y divide-[rgba(var(--text-rgb),0.1)]">
           {faqs.map((item) => (
-            <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between text-left text-base font-semibold text-[var(--text)]">
-                {item.q}
-                <span className="ml-4 shrink-0 text-[var(--text)] transition-transform group-open:rotate-45">
-                  +
-                </span>
-              </summary>
-              <p className="mt-3 text-sm text-[var(--text)]">{item.a}</p>
-            </details>
+            <AccordionItem key={item.q} q={item.q} a={item.a} />
           ))}
         </Reveal>
       </div>
