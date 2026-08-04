@@ -198,7 +198,7 @@ function Nav() {
 function Hero() {
   const dark = useIsDarkTheme();
   return (
-    <section className="relative flex min-h-[92vh] flex-col overflow-hidden bg-[var(--bg)]">
+    <section className="relative flex min-h-[92vh] flex-col justify-center overflow-hidden bg-[var(--bg)]">
       {/* Particle field occupies the upper half and dissolves downward into
           the page, so the headline sits in clean negative space rather than
           fighting the artwork for contrast. */}
@@ -223,7 +223,7 @@ function Hero() {
         }}
       />
 
-      <div className="container relative z-10 mt-auto pb-14 pt-28">
+      <div className="container relative z-10 py-14">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
             Answer <span className="font-bold text-[var(--accent)]">every lead</span>
