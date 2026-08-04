@@ -223,7 +223,7 @@ function Hero() {
         }}
       />
 
-      <div className="container relative z-10 mt-auto pb-14 pt-40">
+      <div className="container relative z-10 mt-auto pb-14 pt-28">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
             Answer <span className="font-bold text-[var(--accent)]">every lead</span>

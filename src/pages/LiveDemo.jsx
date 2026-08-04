@@ -24,6 +24,14 @@ const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fiel
 
 const VERTICALS = [
   {
+    value: "saas",
+    label: "B2B / SaaS",
+    sample:
+      "We run paid ads for about a dozen contractor clients and generate maybe 400 leads a month between them. Honestly our follow-up is inconsistent — leads sit for hours before anyone calls. What does something like this cost?",
+    sample2:
+      "We're a smaller agency, maybe 150 leads a month across 4 clients. Our issue isn't volume, it's that whoever's free just wings the reply and it's inconsistent. Curious if this could plug into what we already use.",
+  },
+  {
     value: "home-services",
     label: "Home services",
     sample:
@@ -38,14 +46,6 @@ const VERTICALS = [
       "I was rear ended on the highway last Tuesday. Other driver admitted fault to the officer but their insurance is already lowballing me. I have a police report and went to urgent care same day, still getting neck pain. Do you handle cases like this?",
     sample2:
       "Slipped on a wet floor at a grocery store two weeks ago, no warning sign was out. Hurt my wrist pretty bad, went to the ER same day and got an X-ray. Store manager took a report. Is this something you'd take on?",
-  },
-  {
-    value: "saas",
-    label: "B2B / SaaS",
-    sample:
-      "We run paid ads for about a dozen contractor clients and generate maybe 400 leads a month between them. Honestly our follow-up is inconsistent — leads sit for hours before anyone calls. What does something like this cost?",
-    sample2:
-      "We're a smaller agency, maybe 150 leads a month across 4 clients. Our issue isn't volume, it's that whoever's free just wings the reply and it's inconsistent. Curious if this could plug into what we already use.",
   },
 ];
 
@@ -69,7 +69,7 @@ const VERDICT = {
 
 export default function LiveDemo() {
   const dark = useIsDarkTheme();
-  const [vertical, setVertical] = useState("home-services");
+  const [vertical, setVertical] = useState("saas");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle"); // idle | running | done | error
   const [result, setResult] = useState(null);
