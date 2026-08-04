@@ -311,6 +311,11 @@ export default function LiveDemo() {
 function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running }) {
   const verdict = VERDICT[result.qualification] ?? VERDICT.needs_more_info;
   const { Icon } = verdict;
+  // Approve/Reject is per-result: this component stays mounted across a
+  // round-2 run, so without the reset the previous lead's decision would
+  // still be showing under a brand new draft.
+  const [decision, setDecision] = useState(null);
+  useEffect(() => setDecision(null), [result]);
 
   return (
     <div className="mt-10 space-y-4">
@@ -400,14 +405,72 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         </p>
       </Card>
 
+      {/* These are the highest-intent clicks on the page -- the visitor is
+          reaching for the product, not reading about it. They used to do
+          nothing at all (no handler), which reads as broken software at
+          exactly the wrong moment. They can't really send anything from a
+          demo, so they resolve into the honest version of what each choice
+          means on a live account. */}
       <div className="flex gap-2 pt-2">
-        <button className="flex-1 rounded-lg bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-400 transition-all hover:bg-emerald-500/30">
-          ✓ Approve & Send
+        <button
+          type="button"
+          onClick={() => setDecision("approved")}
+          aria-pressed={decision === "approved"}
+          className={
+            "flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-emerald-400 transition-all " +
+            (decision === "approved"
+              ? "bg-emerald-500/30 ring-1 ring-emerald-400/50"
+              : "bg-emerald-500/20 hover:bg-emerald-500/30")
+          }
+        >
+          ✓ Approve &amp; Send
         </button>
-        <button className="flex-1 rounded-lg bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/30">
+        <button
+          type="button"
+          onClick={() => setDecision("rejected")}
+          aria-pressed={decision === "rejected"}
+          className={
+            "flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-red-400 transition-all " +
+            (decision === "rejected"
+              ? "bg-red-500/30 ring-1 ring-red-400/50"
+              : "bg-red-500/20 hover:bg-red-500/30")
+          }
+        >
           ✕ Reject
         </button>
       </div>
+
+      {decision && (
+        <div
+          role="status"
+          className={
+            "rounded-lg border px-4 py-3 text-sm leading-relaxed " +
+            (decision === "approved"
+              ? "border-emerald-400/30 bg-emerald-400/10 text-[var(--text)]"
+              : "border-red-400/30 bg-red-400/10 text-[var(--text)]")
+          }
+        >
+          {decision === "approved" ? (
+            <>
+              <span className="font-medium text-emerald-400">That's the whole loop.</span>{" "}
+              On a live account this reply would be on its way to the lead within seconds of them
+              writing in — no one waiting on a free moment to get to it.{" "}
+              <span className="opacity-70">Nothing was sent from this demo.</span>
+            </>
+          ) : (
+            <>
+              <span className="font-medium text-red-400">Rejected — and that's the useful part.</span>{" "}
+              On a live account nothing goes out, and if you fix the draft instead of binning it, that
+              correction becomes the example it follows next time.{" "}
+              {round === 1 ? (
+                <span className="opacity-70">Try it in the box below.</span>
+              ) : (
+                <span className="opacity-70">Nothing was sent from this demo.</span>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {round === 1 ? (
         <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
@@ -456,7 +519,10 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         <Block title="On a live account, this is what would happen next">
           <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
             <li>→ Reply goes to {result.leadEmail || "lead@example.com"} once approved</li>
-            <li>→ Pushed to HubSpot as {result.qualification}</li>
+            {/* verdict.label, not result.qualification -- the raw value is a
+                snake_case enum, so this line read "Pushed to HubSpot as
+                needs_more_info" on two of the three possible outcomes. */}
+            <li>→ Pushed to HubSpot as {verdict.label}</li>
             <li>→ Notification posted to your team Slack</li>
             <li>→ Meeting link added if they accept</li>
           </ul>
