@@ -6,6 +6,23 @@ import App from "./App.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import "./index.css";
 
+// Cleanup for visitors who loaded this site while vite-plugin-pwa was still
+// active (the old "Find a Pro" marketplace manifest -- see git history).
+// Removing the plugin from the build stops NEW service workers from being
+// generated, but does nothing for one already registered in a returning
+// visitor's browser -- that keeps running, keeps serving its stale
+// precache, and keeps offering the install prompt until it's explicitly
+// unregistered. Safe to delete this block a few weeks after the plugin
+// removal shipped, once returning visitors have had a chance to pick it up.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    for (const reg of regs) reg.unregister();
+  });
+  if ("caches" in window) {
+    caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
+  }
+}
+
 // AuthProvider (and therefore Firebase) used to wrap every route here
 // unconditionally -- meaning it loaded and ran (a live onAuthStateChanged
 // listener) for every visitor of the live product, which has nothing to
