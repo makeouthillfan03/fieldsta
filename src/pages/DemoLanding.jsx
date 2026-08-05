@@ -67,6 +67,7 @@ export default function DemoLanding() {
     <div className="font-body bg-[var(--bg)] text-[var(--text)]">
       <Nav />
       <Hero />
+      <DemoVideo />
       <LeadReviewDemo />
       <HowItWorks />
       <Features />
@@ -251,6 +252,27 @@ function Hero() {
         </div>
       </div>
 
+    </section>
+  );
+}
+
+function DemoVideo() {
+  return (
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
+      <div className="container flex flex-col items-center">
+        <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[var(--text)]">
+          Watch it qualify a real lead — start to finish
+        </div>
+        <div className="animate-fade-up [animation-delay:100ms] w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
+          <video
+            src="/demo-video.mp4"
+            controls
+            preload="metadata"
+            playsInline
+            className="block w-full bg-black"
+          />
+        </div>
+      </div>
     </section>
   );
 }
