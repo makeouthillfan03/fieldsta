@@ -174,12 +174,12 @@ function Nav() {
           <ThemeToggle />
           <Link to="/get-started">
             <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
-              Start Free
+              Start Free Trial
             </Button>
           </Link>
           <Link to="/try">
             <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
-              Live Demo
+              Try Demo
             </Button>
           </Link>
         </div>
@@ -238,7 +238,7 @@ function Hero() {
               size="lg"
               className="w-full rounded-none bg-[var(--text)] px-7 text-[var(--bg-deep)] hover:opacity-90 sm:w-auto"
             >
-              Live Demo
+              Try Demo
             </Button>
           </Link>
         </div>
@@ -890,7 +890,7 @@ function Footer() {
         </span>
         <div className="flex items-center gap-4">
           <a href="/try" className="hover:text-[var(--text)]">
-            Live Demo
+            Try Demo
           </a>
           <a href="/terms" className="hover:text-[var(--text)]">
             Terms
