@@ -54,6 +54,7 @@ export default function SalesChatWidget() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioPlayerRef = useRef(null);
+  const autoSentRef = useRef(false);
 
   useEffect(() => {
     sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(1)));
@@ -69,10 +70,20 @@ export default function SalesChatWidget() {
   useEffect(() => {
     // Lets CTA buttons elsewhere on the page (hero, nav, final CTA) launch
     // the live AI demo directly instead of scrolling to a form — the demo
-    // IS Harper, not a "submit and wait for a callback" step.
-    function handleOpenRequest() {
+    // IS Harper, not a "submit and wait for a callback" step. An optional
+    // detail.autoMessage (e.g. from the /get-started "checkout now" card)
+    // is sent on the visitor's behalf so they land straight in a live
+    // Harper reply instead of a blank chat they have to prime themselves —
+    // guarded by a ref so a re-dispatch mid-session (or StrictMode) can't
+    // fire it twice.
+    function handleOpenRequest(e) {
       sessionStorage.removeItem("fieldsta_chat_closed");
       setOpen(true);
+      const autoMessage = e?.detail?.autoMessage;
+      if (autoMessage && !autoSentRef.current) {
+        autoSentRef.current = true;
+        send(null, autoMessage);
+      }
     }
     window.addEventListener("fieldsta:open-chat", handleOpenRequest);
     return () => window.removeEventListener("fieldsta:open-chat", handleOpenRequest);
@@ -89,9 +100,9 @@ export default function SalesChatWidget() {
     }
   }, []);
 
-  async function send(e) {
-    e.preventDefault();
-    const text = input.trim();
+  async function send(e, overrideText) {
+    e?.preventDefault();
+    const text = (overrideText ?? input).trim();
     if (!text || sending) return;
 
     setInput("");

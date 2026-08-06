@@ -748,7 +748,7 @@ function Pricing() {
                 <Button
                   size="lg"
                   onClick={() => {
-                    if (plan.action === "signup") window.location.href = "https://fieldsta.com/try";
+                    if (plan.action === "signup") window.location.href = "/get-started";
                     else window.location.href = "mailto:support@fieldsta.com?subject=Setting%20up%20the%20" + plan.name + "%20plan";
                   }}
                   className="mt-7 w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"

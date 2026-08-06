@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
+import GetStarted from "@/pages/GetStarted";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
@@ -57,6 +58,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<DemoLanding />} />
       <Route path="/try" element={<LiveDemo />} />
+      <Route path="/get-started" element={<GetStarted />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/agreement" element={<Agreement />} />
