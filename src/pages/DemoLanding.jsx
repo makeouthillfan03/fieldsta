@@ -16,20 +16,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import LeadCaptureForm from "@/components/LeadCaptureForm";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
-
-// Same backend base SalesChatWidget already uses for its API calls --
-// self-serve signup lives on the agents backend (studio.fieldsta.com/signup),
-// not this app, so this is a plain link, not a react-router route.
-const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
 
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
 // the 2026-07-25 push (replacing an earlier dark-luxury/serif direction that
@@ -76,7 +69,6 @@ export default function DemoLanding() {
       <Pricing />
       <DataTrust />
       <FAQ />
-      <FinalCTA />
       <DemoForm />
       <Footer />
       <SalesChatWidget />
@@ -180,14 +172,14 @@ function Nav() {
         </nav>
         <div className="flex items-center gap-3 justify-self-end">
           <ThemeToggle />
-          <a href={`${AGENTS_BASE}/signup`}>
+          <Link to="/get-started">
             <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
               Start Free
             </Button>
-          </a>
+          </Link>
           <Link to="/try">
             <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
-              Try It Live
+              Live Demo
             </Button>
           </Link>
         </div>
@@ -246,7 +238,7 @@ function Hero() {
               size="lg"
               className="w-full rounded-none bg-[var(--text)] px-7 text-[var(--bg-deep)] hover:opacity-90 sm:w-auto"
             >
-              See it live — free
+              Live Demo
             </Button>
           </Link>
         </div>
@@ -870,82 +862,7 @@ function FAQ() {
   );
 }
 
-function FinalCTA() {
-  return (
-    <section className="relative overflow-hidden border-t border-[rgba(var(--text-rgb),0.1)] py-20 text-center">
-      <div
-        aria-hidden="true"
-        className="animate-drift pointer-events-none absolute left-1/2 top-1/2 h-[24rem] w-[24rem] rounded-full bg-[rgba(var(--text-rgb),0.1)] blur-[120px]"
-      />
-      <div className="container relative">
-        <Reveal>
-          <h2 className="text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">
-            Your next lead is already <span className="text-[var(--accent)]">waiting</span>.
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-[var(--text)]">
-            Talk to Harper right now and see exactly how much time and money this puts back in your week.
-          </p>
-          <Link to="/try">
-            <Button
-              size="lg"
-              className="mt-8 bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
-            >
-              Start Your Live AI Demo
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 function DemoForm() {
-  const firstNameRef = useRef(null);
-  const lastNameRef = useRef(null);
-  const emailRef = useRef(null);
-  const crmRef = useRef(null);
-  const sourceRef = useRef(null);
-  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
-  const [message, setMessage] = useState("");
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setStatus("submitting");
-    setMessage("Submitting...");
-
-    const payload = {
-      firstName: firstNameRef.current.value,
-      lastName: lastNameRef.current.value,
-      email: emailRef.current.value,
-      crm: crmRef.current.value,
-      source: sourceRef.current.value,
-    };
-
-    try {
-      const res = await fetch("/api/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setStatus("error");
-        setMessage(data.message || "Something went wrong. Try again.");
-        return;
-      }
-      setStatus("success");
-      setMessage(data.message || "Demo request received!");
-      e.target.reset();
-    } catch (err) {
-      setStatus("error");
-      setMessage("Something went wrong. Try again.");
-    }
-  }
-
-  const fieldClass =
-    "mt-1.5 border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.04] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.7)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
-
   return (
     <section id="demo" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
@@ -956,85 +873,7 @@ function DemoForm() {
         </Reveal>
         <Reveal delay={100}>
           <Card className="mx-auto mt-10 max-w-md border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.03] p-8">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="firstName" className="text-[var(--text)]">
-                  First Name
-                </Label>
-                <Input id="firstName" ref={firstNameRef} required className={fieldClass} />
-              </div>
-              <div>
-                <Label htmlFor="lastName" className="text-[var(--text)]">
-                  Last Name
-                </Label>
-                <Input id="lastName" ref={lastNameRef} className={fieldClass} />
-              </div>
-              <div>
-                <Label htmlFor="email" className="text-[var(--text)]">
-                  Business Email
-                </Label>
-                <Input id="email" type="email" ref={emailRef} required className={fieldClass} />
-              </div>
-              <div>
-                <Label htmlFor="crm" className="text-[var(--text)]">
-                  What CRM do you use?
-                </Label>
-                <Input
-                  id="crm"
-                  ref={crmRef}
-                  placeholder="e.g. HubSpot, Salesforce, none"
-                  className={fieldClass}
-                />
-              </div>
-              <div>
-                <Label htmlFor="source" className="text-[var(--text)]">
-                  How did you hear about us?
-                </Label>
-                <Select id="source" ref={sourceRef} defaultValue="" className={fieldClass}>
-                  <option value="" className="bg-[var(--bg-deep)]">
-                    Select one
-                  </option>
-                  <option value="Referral" className="bg-[var(--bg-deep)]">
-                    Referral
-                  </option>
-                  <option value="Google Search" className="bg-[var(--bg-deep)]">
-                    Google Search
-                  </option>
-                  <option value="LinkedIn" className="bg-[var(--bg-deep)]">
-                    LinkedIn
-                  </option>
-                  <option value="Email/Cold Outreach" className="bg-[var(--bg-deep)]">
-                    Email / Cold Outreach
-                  </option>
-                  <option value="Other" className="bg-[var(--bg-deep)]">
-                    Other
-                  </option>
-                </Select>
-              </div>
-              <Button
-                type="submit"
-                disabled={status === "submitting"}
-                className="w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
-                size="lg"
-              >
-                {status === "submitting" ? "Submitting..." : "Get My Custom Automation Plan"}
-              </Button>
-              {message && (
-                <div
-                  className={
-                    "rounded-lg p-4 text-center font-medium " +
-                    (status === "success"
-                      ? "bg-emerald-400/10 text-emerald-400"
-                      : status === "error"
-                      ? "bg-red-400/10 text-red-400"
-                      : "text-[var(--text)]")
-                  }
-                  role="status"
-                >
-                  {message}
-                </div>
-              )}
-            </form>
+            <LeadCaptureForm ctaLabel="Get My Custom Automation Plan" />
           </Card>
         </Reveal>
       </div>
@@ -1051,7 +890,7 @@ function Footer() {
         </span>
         <div className="flex items-center gap-4">
           <a href="/try" className="hover:text-[var(--text)]">
-            Try It Live
+            Live Demo
           </a>
           <a href="/terms" className="hover:text-[var(--text)]">
             Terms

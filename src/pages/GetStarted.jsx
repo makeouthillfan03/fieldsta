@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CreditCard, MessageCircle, Mail, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CreditCard, MessageCircle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import LeadCaptureForm from "@/components/LeadCaptureForm";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
@@ -129,94 +127,18 @@ function TalkToHarperCard() {
 }
 
 function ReachOutCard() {
-  const [status, setStatus] = useState("idle"); // idle | submitting | success | error
-  const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setStatus("submitting");
-    setMessage("");
-
-    try {
-      const res = await fetch("/api/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          lastName: "",
-          email,
-          crm: "",
-          source: "get-started",
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setStatus("error");
-        setMessage(data.message || "Something went wrong. Try again.");
-        return;
-      }
-      track("get_started_reach_out");
-      setStatus("success");
-      setMessage("Got it -- we'll reach out shortly.");
-    } catch {
-      setStatus("error");
-      setMessage("Something went wrong. Try again.");
-    }
-  }
-
-  if (status === "success") {
-    return (
-      <OptionShell icon={Mail} title="Have us reach out" blurb="">
-        <p className="text-sm font-medium text-emerald-400">{message}</p>
-      </OptionShell>
-    );
-  }
-
   return (
     <OptionShell
       icon={Mail}
       title="Have us reach out"
       blurb="Leave your name and email -- a person on the team will follow up to set everything up with you directly."
     >
-      <form onSubmit={handleSubmit} className="space-y-2.5">
-        <div>
-          <Label htmlFor="gs-firstName" className="sr-only">
-            First name
-          </Label>
-          <Input
-            id="gs-firstName"
-            placeholder="First name"
-            required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.04] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.7)]"
-          />
-        </div>
-        <div>
-          <Label htmlFor="gs-email" className="sr-only">
-            Business email
-          </Label>
-          <Input
-            id="gs-email"
-            type="email"
-            placeholder="Business email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.04] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.7)]"
-          />
-        </div>
-        <Button
-          type="submit"
-          disabled={status === "submitting"}
-          className="w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
-        >
-          {status === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Request a call"}
-        </Button>
-        {status === "error" && <p className="text-xs text-[#FF4438]">{message}</p>}
-      </form>
+      <LeadCaptureForm
+        compact
+        source="get-started"
+        ctaLabel="Request a call"
+        onSuccess={() => track("get_started_reach_out")}
+      />
     </OptionShell>
   );
 }
