@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ShieldCheck,
   CalendarCheck,
   MessageSquareText,
   ArrowRight,
@@ -12,7 +11,6 @@ import {
   Plug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
@@ -490,32 +488,30 @@ function Features() {
         </div>
 
         <Reveal delay={300}>
-          <div className="mx-auto mt-14 max-w-5xl">
-            <div className="text-center text-[10px] uppercase tracking-[0.28em] text-[var(--text)] opacity-70">
+          <div className="mx-auto mt-16 max-w-3xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
+            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text)] opacity-60">
               Also wired up today
             </div>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
               {integrations.map((i) => (
                 <div
                   key={i.name}
                   title={i.note}
-                  className="flex h-10 items-center gap-2 rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] pl-3 pr-5 text-sm font-semibold text-[var(--text)]"
+                  className="flex items-center gap-2 text-sm font-semibold text-[var(--text)] opacity-80"
                 >
                   <i.icon className="h-4 w-4 flex-shrink-0" />
                   {i.name}
                 </div>
               ))}
-              <div className="flex h-10 items-center rounded-full border border-dashed border-[rgba(var(--text-rgb),0.15)] px-5 text-sm text-[var(--text)]">
-                + tell us what else you use
-              </div>
+              <div className="text-sm text-[var(--text)] opacity-50">+ tell us what else you use</div>
             </div>
           </div>
         </Reveal>
 
         <Reveal delay={350}>
-          <div className="mx-auto mt-16 max-w-3xl rounded-2xl border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-7">
+          <div className="mx-auto mt-14 max-w-3xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
             <h3 className="text-base font-semibold text-[var(--text)]">Why not just use my CRM&apos;s built-in AI?</h3>
-            <p className="mt-2 text-sm text-[var(--text)] opacity-80">
+            <p className="mx-auto mt-2 max-w-xl text-sm text-[var(--text)] opacity-70">
               Fair question — a lot of CRMs ship some version of an AI reply assistant now. Fieldsta isn&apos;t trying to
               replace your CRM&apos;s dashboard; it sits in front of it. It works whether you run HubSpot, something else,
               or nothing at all, and it&apos;s built around one job — responding to and qualifying inbound leads — instead
@@ -529,53 +525,60 @@ function Features() {
   );
 }
 
+const SETUP_STEPS = [
+  {
+    step: "1",
+    title: "Connect integrations",
+    desc: "Link Meta Lead Ads, HubSpot, or your own webhook in one click",
+  },
+  {
+    step: "2",
+    title: "Configure email",
+    desc: "Choose which email you reply from and where notifications go",
+  },
+  {
+    step: "3",
+    title: "Test & launch",
+    desc: "We send a demo lead to prove it works, then you're live",
+  },
+];
+
 function SetupFlow() {
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24 bg-[var(--text)]/[0.02]">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Getting started
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Set up in 5 minutes
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-[var(--text)]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--text)] opacity-70">
             Pay → get a setup link → connect your integrations → start receiving qualified leads
           </p>
         </Reveal>
 
-        <div className="mx-auto mt-16 max-w-4xl">
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              {
-                step: "1",
-                title: "Connect integrations",
-                desc: "Link Meta Lead Ads, HubSpot, or your own webhook in one click",
-              },
-              {
-                step: "2",
-                title: "Configure email",
-                desc: "Choose which email you reply from and where notifications go",
-              },
-              {
-                step: "3",
-                title: "Test & launch",
-                desc: "We send a demo lead to prove it works, then you're live",
-              },
-            ].map((item, i) => (
-              <Reveal key={item.title} delay={i * 100}>
-                <div className="rounded-lg border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-6">
-                  <div className="text-xs font-bold tracking-[0.2em] text-[var(--accent)] uppercase">
-                    Step {item.step}
-                  </div>
-                  <h3 className="mt-3 text-base font-semibold text-[var(--text)]">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--text)]">{item.desc}</p>
+        <div className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-10 sm:grid-cols-3">
+          {SETUP_STEPS.map((item, i) => (
+            <Reveal key={item.title} delay={i * 100}>
+              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6 text-center">
+                <div className="flex justify-center">
+                  <Triangle className="mb-3" />
                 </div>
-              </Reveal>
-            ))}
-          </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--accent)]">
+                  Step {item.step}
+                </div>
+                <h3 className="mt-2 text-lg font-semibold text-[var(--text)]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{item.desc}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
 
-        <Reveal delay={400} className="mt-12 text-center">
-          <div className="text-xs font-semibold tracking-[0.2em] text-[var(--accent)]">
+        <Reveal delay={400} className="mt-14 text-center">
+          <div className="font-mono text-xs font-semibold tracking-[0.2em] text-[var(--accent)]">
             FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
           </div>
         </Reveal>
@@ -602,41 +605,45 @@ function WhySwitch() {
   return (
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            The difference
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Why businesses switch
           </h2>
         </Reveal>
-        <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-14 grid max-w-4xl divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <Reveal delay={80}>
-            <Card className="h-full border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-7">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-[var(--text)]">
+            <div className="pb-8 pr-0 sm:pb-0 sm:pr-10">
+              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
                 Without Fieldsta
               </div>
               <ul className="mt-4 space-y-3">
                 {WITHOUT_FIELDSTA.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-[var(--text)]" />
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--text)] opacity-80">
+                    <Triangle className="mt-1.5 opacity-60" />
                     {item}
                   </li>
                 ))}
               </ul>
-            </Card>
+            </div>
           </Reveal>
           <Reveal delay={160}>
-            <Card className="h-full border-emerald-400/20 bg-emerald-400/[0.04] p-7">
-              <div className="text-[10px] uppercase tracking-[0.24em] text-emerald-400">
+            <div className="pt-8 pl-0 sm:pt-0 sm:pl-10">
+              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-500">
                 With Fieldsta
               </div>
               <ul className="mt-4 space-y-3">
                 {WITH_FIELDSTA.map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-[var(--text)]">
-                    <span className="mt-1 h-1 w-1 flex-shrink-0 rounded-full bg-emerald-400" />
+                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
                     {item}
                   </li>
                 ))}
               </ul>
-            </Card>
+            </div>
           </Reveal>
         </div>
       </div>
@@ -711,11 +718,15 @@ function Pricing() {
   return (
     <section id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Pricing
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Straightforward Pricing, No Surprises
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-center text-[var(--text)]">
+          <p className="mx-auto mt-4 max-w-lg text-[var(--text)] opacity-70">
             Every plan includes every feature — plans only differ by lead volume, since that's what actually drives cost at scale.
           </p>
         </Reveal>
@@ -731,20 +742,19 @@ function Pricing() {
           </ul>
         </Reveal>
 
-        <div className="mx-auto mt-10 grid max-w-4xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto mt-14 grid max-w-4xl divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {PLANS.map((plan, i) => (
             <Reveal key={plan.name} delay={120 + i * 80}>
-              <Card
-                className={`h-full p-7 text-center ${
-                  plan.highlight
-                    ? "border-2 border-[var(--accent)]/50 bg-[var(--accent)]/[0.05]"
-                    : "border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03]"
-                }`}
-              >
-                <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">{plan.name}</div>
+              <div className="px-0 py-8 text-center sm:px-8 sm:py-0">
+                {plan.highlight && (
+                  <div className="flex justify-center">
+                    <Triangle className="mb-2" />
+                  </div>
+                )}
+                <div className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">{plan.name}</div>
                 <div className="mt-4 flex items-baseline justify-center gap-1.5">
                   <span className="text-4xl font-extrabold tracking-tight text-[var(--text)]">{plan.price}</span>
-                  <span className="text-sm text-[var(--text)]">/ month</span>
+                  <span className="text-sm text-[var(--text)] opacity-70">/ month</span>
                 </div>
                 <div className="mt-3 text-sm text-[var(--text)] opacity-70">{plan.volume}</div>
                 <Button
@@ -758,12 +768,12 @@ function Pricing() {
                   {plan.cta}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </Card>
+              </div>
             </Reveal>
           ))}
         </div>
         <Reveal delay={120 + PLANS.length * 80}>
-          <p className="mx-auto mt-8 max-w-md text-center text-xs text-[var(--text)] opacity-60">
+          <p className="mx-auto mt-10 max-w-md text-center text-xs text-[var(--text)] opacity-60">
             Starter checks out instantly. Growth and Scale are real prices, set up over a quick call since usage-based cost varies enough at that volume to talk through first.
           </p>
         </Reveal>
@@ -782,24 +792,23 @@ function DataTrust() {
   return (
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-20">
       <div className="container">
-        <Reveal>
-          <div className="mx-auto max-w-2xl rounded-2xl border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-8 text-center">
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-[var(--text)]">What happens to your leads&apos; data</h3>
-            <ul className="mx-auto mt-5 max-w-md space-y-2.5 text-left text-sm text-[var(--text)] opacity-80">
-              {DATA_TRUST_POINTS.map((point) => (
-                <li key={point} className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
-                  {point}
-                </li>
-              ))}
-            </ul>
-            <a href="/privacy" className="mt-5 inline-block text-sm font-semibold text-[var(--accent)] hover:underline">
-              Full privacy policy →
-            </a>
+        <Reveal className="mx-auto max-w-lg text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Data &amp; privacy
           </div>
+          <h3 className="mt-4 font-editorial text-2xl font-medium text-[var(--text)]">What happens to your leads&apos; data</h3>
+          <ul className="mx-auto mt-5 max-w-md space-y-2.5 text-left text-sm text-[var(--text)] opacity-80">
+            {DATA_TRUST_POINTS.map((point) => (
+              <li key={point} className="flex items-start gap-2.5">
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                {point}
+              </li>
+            ))}
+          </ul>
+          <a href="/privacy" className="mt-5 inline-block text-sm font-semibold text-[var(--accent)] hover:underline">
+            Full privacy policy →
+          </a>
         </Reveal>
       </div>
     </section>
@@ -857,8 +866,12 @@ function FAQ() {
   return (
     <section id="faq" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container max-w-2xl">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            FAQ
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Questions Worth Asking
           </h2>
         </Reveal>
@@ -876,15 +889,19 @@ function DemoForm() {
   return (
     <section id="demo" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Get in touch
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Prefer email? Tell us about your business
           </h2>
         </Reveal>
         <Reveal delay={100}>
-          <Card className="mx-auto mt-10 max-w-md border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.03] p-8">
+          <div className="mx-auto mt-10 max-w-md border-t border-[rgba(var(--text-rgb),0.1)] pt-10">
             <LeadCaptureForm ctaLabel="Get My Custom Automation Plan" />
-          </Card>
+          </div>
         </Reveal>
       </div>
     </section>
