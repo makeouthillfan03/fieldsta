@@ -133,10 +133,6 @@ export default function Agreement() {
           published at those links as of {TODAY}, which are incorporated into this Agreement by
           reference, together with the plan and pricing selected below.
         </p>
-        <p className="text-xs text-muted-foreground">
-          This page has not been reviewed by a licensed attorney and is provided as-is while
-          Fieldsta is in early operation.
-        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

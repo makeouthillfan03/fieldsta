@@ -119,12 +119,6 @@ export default function Privacy() {
       <Section title="9. Contact">
         <p>Questions about this policy, or to exercise a privacy right: support@fieldsta.com</p>
       </Section>
-
-      <p className="text-xs text-muted-foreground">
-        This page is a general template and has not been reviewed by a licensed attorney. It is
-        provided for informational purposes as part of setting up Fieldsta and should not be
-        relied on as legal advice.
-      </p>
     </div>
   );
 }

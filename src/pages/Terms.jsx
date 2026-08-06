@@ -156,12 +156,6 @@ export default function Terms() {
       <Section title="12. Contact">
         <p>Questions about these Terms: support@fieldsta.com</p>
       </Section>
-
-      <p className="text-xs text-muted-foreground">
-        This page is a general template and has not been reviewed by a licensed attorney. It is
-        provided for informational purposes as part of setting up Fieldsta and should not be
-        relied on as legal advice.
-      </p>
     </div>
   );
 }
