@@ -46,6 +46,7 @@ export default {
       },
       fontFamily: {
         body: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        editorial: ["\"Source Serif 4\"", "Georgia", "serif"],
       },
       keyframes: {
         "fade-up": {

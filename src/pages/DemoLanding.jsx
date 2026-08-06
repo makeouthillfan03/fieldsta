@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Zap,
   ShieldCheck,
   CalendarCheck,
-  Inbox,
   MessageSquareText,
   ArrowRight,
-  Sparkles,
   Check,
   Mail,
   Database,
@@ -362,19 +359,19 @@ function DashboardMockup() {
 
 const steps = [
   {
-    icon: Inbox,
     n: "01",
     title: "A lead comes in",
+    desc: "Webhook, form, HubSpot, Meta Lead Ads — however it already reaches you.",
   },
   {
-    icon: MessageSquareText,
     n: "02",
     title: "Fieldsta responds and qualifies",
+    desc: "Drafted against your own criteria in under a minute, day or night.",
   },
   {
-    icon: CalendarCheck,
     n: "03",
     title: "The pilot account activates",
+    desc: "Live immediately — no deploy, no waiting on a developer.",
   },
 ];
 
@@ -383,20 +380,22 @@ function HowItWorks() {
     <section id="how-it-works" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <span className="h-1.5 w-1.5 bg-[var(--accent)]" />
+            How it works
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             The Standard
           </h2>
         </Reveal>
-        <div className="mx-auto mt-16 grid max-w-4xl gap-12 sm:grid-cols-3">
+        <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-3">
           {steps.map((step, i) => (
-            <Reveal key={step.title} delay={i * 100} className="relative text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
-                <step.icon className="h-6 w-6" />
+            <Reveal key={step.title} delay={i * 100}>
+              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6">
+                <div className="font-editorial text-3xl text-[var(--accent)]">{step.n}</div>
+                <h3 className="mt-3 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{step.desc}</p>
               </div>
-              <div className="mt-4 text-sm font-extrabold tracking-[0.2em] text-[var(--accent)]">
-                {step.n}
-              </div>
-              <h3 className="mt-1 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
             </Reveal>
           ))}
         </div>
@@ -405,27 +404,27 @@ function HowItWorks() {
   );
 }
 
-// The two that actually differentiate this from "yet another auto-reply
-// bot" -- given full visual weight below, not equal billing with the
-// integrations/CRM talk every competitor already claims.
-const heroFeatures = [
+// First two actually differentiate this from "yet another auto-reply bot";
+// last two are real but table stakes -- every CRM-bundled AI agent claims
+// them too. Order carries the emphasis now instead of a separate card
+// treatment, since a flat list ranks by position, not by border weight.
+const features = [
   {
-    icon: Sparkles,
     title: "It grows with every correction",
     desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it, permanently.",
   },
   {
-    icon: ShieldCheck,
     title: "Built and fed around your business, not a script",
     desc: "You feed it your own qualifying criteria, your tone, and a hard list of anything it can never claim on your behalf. It's not a generic template with your logo on it — it's shaped by your rules and grows sharper from your own edits over time.",
   },
-];
-
-// Real, but table stakes -- every CRM-bundled AI agent claims this too.
-// Kept, just not competing for attention with the two above.
-const secondaryFeatures = [
-  { icon: Plug, title: "Works with what you already run", desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — plugs into your stack instead of replacing it." },
-  { icon: Zap, title: "One system, not one templated reply", desc: "Respond, qualify, and book straight onto your calendar — the whole handoff, not a bot that fires one message and stops." },
+  {
+    title: "Works with what you already run",
+    desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — plugs into your stack instead of replacing it.",
+  },
+  {
+    title: "One system, not one templated reply",
+    desc: "Respond, qualify, and book straight onto your calendar — the whole handoff, not a bot that fires one message and stops.",
+  },
 ];
 
 const integrations = [
@@ -441,43 +440,39 @@ function Features() {
   return (
     <section id="features" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <h2 className="text-center text-3xl font-extrabold tracking-tight sm:text-4xl">
-            More than an email bot
-          </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-center text-2xl font-bold leading-snug tracking-tight text-[var(--text)] sm:text-3xl">
-            It doesn&apos;t just send auto-replies —{" "}
-            <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
-          </p>
-        </Reveal>
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
+          <Reveal>
+            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+              <span className="h-1.5 w-1.5 bg-[var(--accent)]" />
+              More than an email bot
+            </div>
+            <p className="mt-5 font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
+              It doesn&apos;t just send auto-replies —{" "}
+              <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
+            </p>
+          </Reveal>
 
-        <div className="mx-auto mt-14 grid max-w-4xl gap-6 sm:grid-cols-2">
-          {heroFeatures.map((f, i) => (
-            <Reveal key={f.title} delay={i * 100}>
-              <Card className="h-full border-2 border-[var(--accent)]/30 bg-[var(--accent)]/[0.05] p-8 transition-colors hover:border-[var(--accent)]/60">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 text-[var(--accent)]">
-                  <f.icon className="h-7 w-7" />
+          <div>
+            {features.map((f, i) => (
+              <Reveal key={f.title} delay={i * 100}>
+                <div
+                  className={cn(
+                    "py-6",
+                    i > 0 && "border-t border-[rgba(var(--text-rgb),0.1)]"
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 bg-[var(--accent)]" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--text)]">{f.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{f.desc}</p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="mt-5 text-xl font-extrabold tracking-tight text-[var(--text)]">{f.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--text)] opacity-90">{f.desc}</p>
-              </Card>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal delay={200}>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
-            {secondaryFeatures.map((f) => (
-              <div key={f.title} className="flex items-start gap-3 rounded-lg border border-[rgba(var(--text-rgb),0.1)] bg-[var(--text)]/[0.02] p-4">
-                <f.icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--text)] opacity-60" />
-                <div>
-                  <div className="text-sm font-semibold text-[var(--text)]">{f.title}</div>
-                  <div className="mt-0.5 text-xs text-[var(--text)] opacity-70">{f.desc}</div>
-                </div>
-              </div>
+              </Reveal>
             ))}
           </div>
-        </Reveal>
+        </div>
 
         <Reveal delay={300}>
           <div className="mx-auto mt-14 max-w-5xl">
