@@ -122,6 +122,22 @@ function Reveal({ children, delay = 0, className = "" }) {
 }
 
 
+// Small accent marker used in front of eyebrow labels and list items in
+// the redesigned Features/HowItWorks sections -- a CSS border-triangle
+// rather than an image/icon so it stays crisp at any size and themes with
+// the accent color automatically.
+function Triangle({ className = "" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-block h-0 w-0 border-y-[5px] border-l-[7px] border-y-transparent border-l-[var(--accent)]",
+        className
+      )}
+    />
+  );
+}
+
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
@@ -379,20 +395,23 @@ function HowItWorks() {
   return (
     <section id="how-it-works" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal>
-          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <span className="h-1.5 w-1.5 bg-[var(--accent)]" />
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
             How it works
           </div>
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             The Standard
           </h2>
         </Reveal>
-        <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-3">
+        <div className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-12 sm:grid-cols-3">
           {steps.map((step, i) => (
             <Reveal key={step.title} delay={i * 100}>
-              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6">
-                <div className="font-editorial text-3xl text-[var(--accent)]">{step.n}</div>
+              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6 text-center">
+                <div className="mx-auto flex justify-center">
+                  <Triangle />
+                </div>
+                <div className="mt-2 font-editorial text-3xl text-[var(--accent)]">{step.n}</div>
                 <h3 className="mt-3 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{step.desc}</p>
               </div>
@@ -440,38 +459,34 @@ function Features() {
   return (
     <section id="features" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-20">
-          <Reveal>
-            <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-              <span className="h-1.5 w-1.5 bg-[var(--accent)]" />
-              More than an email bot
-            </div>
-            <p className="mt-5 font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
-              It doesn&apos;t just send auto-replies —{" "}
-              <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
-            </p>
-          </Reveal>
-
-          <div>
-            {features.map((f, i) => (
-              <Reveal key={f.title} delay={i * 100}>
-                <div
-                  className={cn(
-                    "py-6",
-                    i > 0 && "border-t border-[rgba(var(--text-rgb),0.1)]"
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 bg-[var(--accent)]" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-[var(--text)]">{f.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{f.desc}</p>
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            More than an email bot
           </div>
+          <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
+            It doesn&apos;t just send auto-replies —{" "}
+            <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
+          </p>
+        </Reveal>
+
+        <div className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={i * 100}>
+              <div
+                className={cn(
+                  "h-full pt-6 text-center",
+                  "border-t border-[rgba(var(--text-rgb),0.12)]"
+                )}
+              >
+                <div className="flex justify-center">
+                  <Triangle className="mb-3" />
+                </div>
+                <h3 className="text-base font-semibold text-[var(--text)]">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{f.desc}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
 
         <Reveal delay={300}>
