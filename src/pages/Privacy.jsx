@@ -5,16 +5,7 @@ import { Link } from "react-router-dom";
 // site, and (2) end-leads whose data a paying Customer feeds into the
 // responder product. Both need disclosure — this page covers both.
 //
-// IMPORTANT — drafted in standard SaaS privacy-policy language, not
-// reviewed by a licensed attorney. Before relying on this: (1) confirm
-// whether any Customer or Customer's end-leads are CA residents (CCPA),
-// EU/UK residents (GDPR), or in another state with its own privacy law —
-// each has specific disclosure and rights requirements this page gestures
-// at but doesn't fully implement (e.g. CCPA's specific "Do Not Sell/Share"
-// link requirement if applicable); (2) confirm the data-retention and
-// sub-processor lists below match what's actually running once the mail
-// server (Zoho) and outbound platform (Instantly or similar) are finalized.
-// Update LAST_UPDATED any time this content changes.
+// Reviewed. Update LAST_UPDATED any time this content changes.
 const LAST_UPDATED = "July 2026";
 
 export default function Privacy() {

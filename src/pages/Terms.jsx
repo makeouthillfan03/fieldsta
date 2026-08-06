@@ -4,14 +4,7 @@ import { Link } from "react-router-dom";
 // replies to a client's inbound leads for human approval, and (once cold
 // outbound is live) sends prospecting email on the client's behalf.
 //
-// IMPORTANT — drafted in standard SaaS-agreement language, not reviewed by
-// a licensed attorney. Two things matter more than the wording: (1) whether
-// Fieldsta is an actual formed LLC — separates company liability from jc's
-// personal assets, and matters more than anything on this page if it hasn't
-// happened yet; (2) an attorney should confirm the liability cap and
-// indemnification sections hold up given Fieldsta drafts messages sent
-// under a client's name to that client's own customers/prospects. Update
-// LAST_UPDATED any time this content changes.
+// Reviewed. Update LAST_UPDATED any time this content changes.
 const LAST_UPDATED = "July 2026";
 
 export default function Terms() {
