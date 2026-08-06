@@ -414,7 +414,7 @@ function HowItWorks() {
 const features = [
   {
     title: "It grows with every correction",
-    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it, permanently.",
+    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. For anything it should never say, full stop, put it on your permanent do-not-say list — that one's enforced on every single reply, forever, not just learned from example.",
   },
   {
     title: "Built and fed around your business, not a script",
