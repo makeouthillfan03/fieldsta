@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
 const fieldClass =
-  "mt-1.5 border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.04] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.7)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
+  "mt-1.5 border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.5)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
 
 // One /api/lead form, two amounts of upfront detail depending on where the
 // visitor already is in the funnel: `compact` (the /get-started "have us

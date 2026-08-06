@@ -704,16 +704,12 @@ function Pricing() {
     <section id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
+          <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
             Pricing
           </div>
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Straightforward Pricing, No Surprises
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-[var(--text)] opacity-70">
-            Every plan includes every feature — plans only differ by lead volume, since that's what actually drives cost at scale.
-          </p>
         </Reveal>
 
         <Reveal delay={80}>
@@ -731,9 +727,6 @@ function Pricing() {
           {PLANS.map((plan, i) => (
             <Reveal key={plan.name} delay={120 + i * 80}>
               <div className="flex h-full flex-col px-0 py-8 text-center sm:px-8 sm:py-0">
-                <div className="flex justify-center">
-                  <Triangle className={cn("mb-2", !plan.highlight && "invisible")} />
-                </div>
                 <div className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">{plan.name}</div>
                 <div className="mt-4 flex items-baseline justify-center gap-1.5">
                   <span className="text-4xl font-extrabold tracking-tight text-[var(--text)]">{plan.price}</span>

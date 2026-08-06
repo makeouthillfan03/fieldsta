@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 
@@ -171,7 +172,11 @@ export default function LiveDemo() {
         </div>
 
         <div className="mt-8 space-y-3">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Live demo
+          </div>
+          <h1 className="font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
             Watch it qualify a real lead
           </h1>
         </div>
@@ -276,31 +281,35 @@ export default function LiveDemo() {
           />
         )}
 
-        <div className="mt-12 border-t border-[rgba(var(--text-rgb),0.1)] pt-8">
-          <Card className="border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-6 text-center sm:p-8">
-            <h2 className="text-xl font-semibold text-[var(--text)] sm:text-2xl">Run this on your own leads</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text)] opacity-70">
-              Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
-              anytime. Interested? Just ask Harper below to get set up.
-            </p>
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-              className="mt-6 inline-block"
-            >
-              <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
-                Start your free pilot
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </button>
-            <p className="mt-3 text-xs text-[var(--text)] opacity-60">
-              Or{" "}
-              <Link to="/#demo" className="underline underline-offset-2 hover:opacity-100">
-                tell us about your setup by email
-              </Link>{" "}
-              instead.
-            </p>
-          </Card>
+        <div className="mt-16 border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Get started
+          </div>
+          <h2 className="mt-4 font-editorial text-2xl font-medium text-[var(--text)] sm:text-3xl">
+            Run this on your own leads
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text)] opacity-70">
+            Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
+            anytime. Interested? Just ask Harper below to get set up.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+            className="mt-6 inline-block"
+          >
+            <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
+              Start your free pilot
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </button>
+          <p className="mt-3 text-xs text-[var(--text)] opacity-60">
+            Or{" "}
+            <Link to="/#demo" className="underline underline-offset-2 hover:opacity-100">
+              tell us about your setup by email
+            </Link>{" "}
+            instead.
+          </p>
         </div>
       </div>
       <SalesChatWidget />
