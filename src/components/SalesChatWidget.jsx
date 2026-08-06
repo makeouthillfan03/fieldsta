@@ -30,6 +30,27 @@ function getSessionId() {
   return id;
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The backend (resilience.ts's tryRun) already waits up to
+// INTERACTIVE_MAX_WAIT_MS (8s) server-side before returning a 503, so most
+// momentary overlap between two visitors' chats is already absorbed inside
+// a SINGLE request -- a 503 reaching this code means it was still busy
+// after that whole wait. This retry is a thin safety net for genuinely
+// sustained load, not a second full wait layer: keep attempts/delay small,
+// since each attempt can itself take up to 8s. Multiply that out — 3
+// attempts x 1.2s of extra delay used to mean a visitor could stare at a
+// spinner for ~26s before ever seeing an error, which is worse than the
+// plain instant-503 this replaced. Two attempts x 500ms keeps the worst
+// case to roughly 16s while still catching sustained-but-brief spikes.
+async function fetchWithBusyRetry(url, options, attempts = 2, delayMs = 500) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const res = await fetch(url, options);
+    if (res.status !== 503 || attempt === attempts) return res;
+    await sleep(delayMs);
+  }
+}
+
 const GREETING = {
   role: "assistant",
   content:
@@ -111,7 +132,7 @@ export default function SalesChatWidget() {
     setSending(true);
 
     try {
-      const res = await fetch(`${AGENTS_BASE}/api/sales-chat`, {
+      const res = await fetchWithBusyRetry(`${AGENTS_BASE}/api/sales-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: getSessionId(), message: text }),
@@ -163,7 +184,7 @@ export default function SalesChatWidget() {
     setVoiceBusy(true);
     setError("");
     try {
-      const res = await fetch(`${AGENTS_BASE}/api/voice-chat?sessionId=${getSessionId()}`, {
+      const res = await fetchWithBusyRetry(`${AGENTS_BASE}/api/voice-chat?sessionId=${getSessionId()}`, {
         method: "POST",
         headers: { "Content-Type": blob.type || "audio/webm" },
         body: blob,

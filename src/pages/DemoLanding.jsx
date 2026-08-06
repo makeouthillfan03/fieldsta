@@ -60,6 +60,7 @@ export default function DemoLanding() {
       <LeadReviewDemo />
       <HowItWorks />
       <Features />
+      <AlwaysImproving />
       <SetupFlow />
       <WhySwitch />
       <Pricing />
@@ -504,6 +505,116 @@ function Features() {
               minutes instead of a CRM configuration project.
             </p>
           </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// Fictional correction example, same treatment as DashboardMockup's honesty
+// rule -- labeled "Example" throughout rather than shown as a captured
+// exchange, since no real before/after has been recorded yet.
+const CORRECTION_EXAMPLE = {
+  before:
+    "“Hi there! Thanks for reaching out, we’d love to help with your gutters. We can schedule an appointment whenever works for you!”",
+  note: "“Too casual — drop the exclamation points, lead with availability.”",
+  after:
+    "“Thanks for reaching out. We have openings Thursday and Friday this week — which works better for you?”",
+};
+
+const ALWAYS_IMPROVING_POINTS = [
+  {
+    title: "Continuously improving",
+    desc: "Every account runs on the latest version automatically — no update to install, no plan to upgrade to.",
+  },
+  {
+    title: "Gets smarter over time",
+    desc: "Sharpens from your own corrections, not a slow, generic update cycle.",
+  },
+  {
+    title: "Customizable to your business",
+    desc: "Your qualifying criteria, your tone, and a hard list of what it can never say — not a one-size-fits-all script.",
+  },
+  {
+    title: "Adapts instantly",
+    desc: "A correction applies to the very next reply — not the next release.",
+  },
+];
+
+function CorrectionMockup() {
+  return (
+    <div className="flex h-full w-full flex-col bg-[var(--bg-deep)] text-left">
+      <div className="flex items-center gap-3 border-b border-[rgba(var(--text-rgb),0.1)] px-6 py-5 sm:px-8">
+        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
+          Fieldsta
+        </span>
+        <span className="text-sm text-[var(--text)]">·</span>
+        <span className="text-sm uppercase tracking-[0.2em] text-[var(--text)]">Correction loop</span>
+        <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.1em] text-amber-400">
+          Example
+        </span>
+      </div>
+
+      <div className="space-y-6 p-6 sm:p-8">
+        <div>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60">First draft</div>
+          <p className="mt-2 text-sm text-[var(--text)] opacity-80">{CORRECTION_EXAMPLE.before}</p>
+        </div>
+
+        <div className="flex items-start gap-2.5 border-y border-dashed border-[rgba(var(--text-rgb),0.15)] py-4">
+          <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[var(--accent)]/40 text-sm font-bold text-[var(--accent)]">
+            &#9998;
+          </span>
+          <div className="text-sm text-[var(--text)]">
+            <span className="font-semibold">You correct it once:</span> {CORRECTION_EXAMPLE.note}
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs uppercase tracking-[0.18em] text-emerald-500">Every reply after</div>
+          <p className="mt-2 text-sm font-medium text-[var(--text)]">{CORRECTION_EXAMPLE.after}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AlwaysImproving() {
+  return (
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+      <div className="container">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Always learning
+          </div>
+          <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
+            The more you use it, the more{" "}
+            <span className="text-[var(--accent)]">it sounds like you</span> — not a generic bot.
+          </p>
+        </Reveal>
+
+        <Reveal delay={100}>
+          <div className="mx-auto mt-14 w-full max-w-2xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
+            <CorrectionMockup />
+          </div>
+        </Reveal>
+
+        <Reveal delay={200}>
+          <ul className="mx-auto mt-14 grid max-w-4xl gap-x-8 gap-y-6 text-sm sm:grid-cols-2">
+            {ALWAYS_IMPROVING_POINTS.map((point) => (
+              <li
+                key={point.title}
+                className="flex items-start gap-3 border-t border-[rgba(var(--text-rgb),0.12)] pt-4"
+              >
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                <div>
+                  <div className="font-semibold text-[var(--text)]">{point.title}</div>
+                  <div className="mt-1 text-[var(--text)] opacity-70">{point.desc}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </Reveal>
       </div>
     </section>
