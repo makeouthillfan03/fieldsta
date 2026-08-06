@@ -15,6 +15,7 @@ import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import Triangle from "@/components/Triangle";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
@@ -120,22 +121,6 @@ function Reveal({ children, delay = 0, className = "" }) {
 }
 
 
-// Small accent marker used in front of eyebrow labels and list items in
-// the redesigned Features/HowItWorks sections -- a CSS border-triangle
-// rather than an image/icon so it stays crisp at any size and themes with
-// the accent color automatically.
-function Triangle({ className = "" }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "inline-block h-0 w-0 border-y-[5px] border-l-[7px] border-y-transparent border-l-[var(--accent)]",
-        className
-      )}
-    />
-  );
-}
-
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
@@ -229,10 +214,10 @@ function Hero() {
 
       <div className="container relative z-10 py-14">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h1 className="animate-fade-up text-4xl font-light leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
-            Answer <span className="font-bold text-[var(--accent)]">every lead</span>
+          <h1 className="animate-fade-up font-editorial text-4xl font-medium leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
+            Answer <span className="font-semibold text-[var(--accent)]">every lead</span>
             <br />
-            <span className="font-bold text-[var(--accent)]">before</span> your competitor
+            <span className="font-semibold text-[var(--accent)]">before</span> your competitor
             <br />
             picks up the phone
           </h1>
@@ -745,18 +730,17 @@ function Pricing() {
         <div className="mx-auto mt-14 grid max-w-4xl divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {PLANS.map((plan, i) => (
             <Reveal key={plan.name} delay={120 + i * 80}>
-              <div className="px-0 py-8 text-center sm:px-8 sm:py-0">
-                {plan.highlight && (
-                  <div className="flex justify-center">
-                    <Triangle className="mb-2" />
-                  </div>
-                )}
+              <div className="flex h-full flex-col px-0 py-8 text-center sm:px-8 sm:py-0">
+                <div className="flex justify-center">
+                  <Triangle className={cn("mb-2", !plan.highlight && "invisible")} />
+                </div>
                 <div className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">{plan.name}</div>
                 <div className="mt-4 flex items-baseline justify-center gap-1.5">
                   <span className="text-4xl font-extrabold tracking-tight text-[var(--text)]">{plan.price}</span>
                   <span className="text-sm text-[var(--text)] opacity-70">/ month</span>
                 </div>
                 <div className="mt-3 text-sm text-[var(--text)] opacity-70">{plan.volume}</div>
+                <div className="flex-1" />
                 <Button
                   size="lg"
                   onClick={() => {
@@ -772,11 +756,6 @@ function Pricing() {
             </Reveal>
           ))}
         </div>
-        <Reveal delay={120 + PLANS.length * 80}>
-          <p className="mx-auto mt-10 max-w-md text-center text-xs text-[var(--text)] opacity-60">
-            Starter checks out instantly. Growth and Scale are real prices, set up over a quick call since usage-based cost varies enough at that volume to talk through first.
-          </p>
-        </Reveal>
       </div>
     </section>
   );

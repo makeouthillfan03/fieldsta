@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CreditCard, MessageCircle, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
@@ -41,14 +41,16 @@ export default function GetStarted() {
         </div>
 
         <div className="mt-10 text-center">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Start your free pilot</h1>
-          <p className="mx-auto mt-3 max-w-lg text-[var(--text)] opacity-70">
-            Starter is $500/month. Pick however you'd rather get moving — all three land on
-            the same real account, not a lead-gen form.
-          </p>
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Get started
+          </div>
+          <h1 className="mt-4 font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
+            Start your free pilot
+          </h1>
         </div>
 
-        <div className="mx-auto mt-10 grid gap-5 sm:grid-cols-3">
+        <div className="mx-auto mt-14 grid divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <CheckoutCard />
           <TalkToHarperCard />
           <ReachOutCard />
@@ -60,16 +62,16 @@ export default function GetStarted() {
   );
 }
 
-function OptionShell({ icon: Icon, title, blurb, children }) {
+function OptionShell({ title, blurb, children }) {
   return (
-    <Card className="flex h-full flex-col border-[rgba(var(--text-rgb),0.15)] bg-[var(--text)]/[0.03] p-6">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.05)] text-[var(--text)]">
-        <Icon className="h-4.5 w-4.5" />
+    <div className="flex h-full flex-col py-8 text-center sm:px-8 sm:py-0">
+      <div className="flex justify-center">
+        <Triangle className="mb-3" />
       </div>
-      <h2 className="mt-4 text-base font-semibold text-[var(--text)]">{title}</h2>
-      <p className="mt-1.5 flex-1 text-sm text-[var(--text)] opacity-70">{blurb}</p>
-      <div className="mt-5">{children}</div>
-    </Card>
+      <h2 className="text-base font-semibold text-[var(--text)]">{title}</h2>
+      <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--text)] opacity-70">{blurb}</p>
+      <div className="mt-6">{children}</div>
+    </div>
   );
 }
 
@@ -85,7 +87,6 @@ const CHECKOUT_AUTO_MESSAGE =
 function CheckoutCard() {
   return (
     <OptionShell
-      icon={CreditCard}
       title="Check out now"
       blurb="Give Harper the bare minimum, get a real Stripe checkout link back in the same chat, fill in the rest of your setup after you've paid."
     >
@@ -108,7 +109,6 @@ function CheckoutCard() {
 function TalkToHarperCard() {
   return (
     <OptionShell
-      icon={MessageCircle}
       title="Talk to Harper"
       blurb="Ask questions, describe your business, and let the conversation decide whether that's a free pilot, a checkout link, or a call with a human."
     >
@@ -129,7 +129,6 @@ function TalkToHarperCard() {
 function ReachOutCard() {
   return (
     <OptionShell
-      icon={Mail}
       title="Have us reach out"
       blurb="Leave your name and email -- a person on the team will follow up to set everything up with you directly."
     >
