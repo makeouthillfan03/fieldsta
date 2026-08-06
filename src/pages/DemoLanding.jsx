@@ -765,12 +765,17 @@ const faqs = [
     a: "No. Tell us what you're already using on the form below and Fieldsta works alongside it.",
   },
   {
+    q: "How does the free trial work?",
+    a: "It's live the moment you sign up — 14 days, capped at 3 leads/day so you can see real replies against your own leads before paying anything. Upgrade to Starter whenever you're ready and the cap lifts.",
+  },
+  {
     q: "Can I feed it my own data?",
     a: "Not documents or a knowledge base to upload — you tell it directly: your qualifying criteria, your tone, and anything it should never claim. From there it learns your voice from your own edits over time. That's a deliberate tradeoff for keeping setup to minutes instead of a data-ingestion project — if you need document/knowledge-base training specifically, tell us and we'll talk it through.",
   },
 ];
 
 const PRICING_INCLUDES = [
+  "14-day free trial, capped at 3 leads/day, before you pay anything",
   "Responds to every inbound lead in under a minute, day or night",
   "Qualifies against your own criteria before it ever reaches your calendar",
   "Learns your voice from your edits — sounds like you, not a generic bot",
@@ -821,6 +826,9 @@ function Pricing() {
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Straightforward Pricing, No Surprises
           </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-[var(--text)] opacity-70">
+            Every plan starts with a 14-day free trial — capped at 3 leads/day until you upgrade.
+          </p>
         </Reveal>
 
         <Reveal delay={80}>

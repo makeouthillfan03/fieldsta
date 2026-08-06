@@ -1,6 +1,8 @@
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import Triangle from "@/components/Triangle";
@@ -9,14 +11,17 @@ import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 
 // Landing spot for the pricing section's "Start your free pilot" CTA.
-// There's no standalone Stripe-checkout endpoint to link straight to --
-// the only thing that can actually mint a real checkout link is Harper's
-// sales-chat agent (collect_payment in sales-agent.ts, which requires a
-// pilot account from create_pilot_account first). So all three paths here
-// route into real, existing infrastructure rather than new backend work:
-// the "checkout now" card opens the same chat pre-primed to skip straight
-// to the link, "have someone reach out" reuses the existing /api/lead
-// form, and "talk to Harper" just opens the chat cold.
+// "Check out now" used to open Harper pre-primed with an auto-message and
+// let the conversation produce a Stripe link -- replaced with a direct
+// form against fieldsta-agents' POST /api/quick-checkout, which creates
+// the pilot (14-day trial, capped at 3 leads/day -- see server.ts) and
+// mints the checkout session server-side with no LLM turn in the loop at
+// all. That's deliberate: someone clicking "bare minimum, just get me a
+// link" has already decided to buy, so this is the one step in the funnel
+// that should be the most boring and reliable, not routed through
+// whatever the conversational agent happens to do that turn. "Talk to
+// Harper" and "have someone reach out" are unchanged -- chat is still the
+// right tool for anyone who actually wants to ask something first.
 export default function GetStarted() {
   const dark = useIsDarkTheme();
 
@@ -75,33 +80,99 @@ function OptionShell({ title, blurb, children }) {
   );
 }
 
-// Opens Harper primed to go straight for the Stripe link -- create_pilot_
-// account only needs a business name, email, and what they sell, and
-// everything else (qualifying criteria, voice, CRM) can be filled in
-// afterward from the dashboard. This message says so explicitly so Harper
-// doesn't spend the conversation gathering detail the visitor already
-// said they'd rather skip.
-const CHECKOUT_AUTO_MESSAGE =
-  "I want to start the $500/month Starter plan and check out with Stripe right now. Just get me the essentials to set up the account and send the checkout link -- I'll fill in the rest of the details afterward.";
+const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
+
+const fieldClass =
+  "border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.5)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
 
 function CheckoutCard() {
+  const businessNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const [status, setStatus] = useState("idle"); // idle | submitting | error
+  const [message, setMessage] = useState("");
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("submitting");
+    setMessage("");
+
+    try {
+      const res = await fetch(`${AGENTS_BASE}/api/quick-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: businessNameRef.current.value,
+          contactEmail: emailRef.current.value,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.message || "Something went wrong. Try again.");
+        return;
+      }
+
+      track("get_started_checkout_now");
+      if (data.checkoutUrl) {
+        // Redirect rather than open in a new tab -- this is a real Stripe
+        // Checkout session tied to the pilot account just created, not a
+        // reference link; leaving this tab on a dead form after the
+        // account already exists would be confusing.
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      // Pilot account is live either way (see server.ts's /api/quick-
+      // checkout) even if Stripe itself wasn't reachable -- only the
+      // redirect failed, not the signup.
+      setStatus("idle");
+      setMessage(data.message || "Your pilot is live — check your email to set your password.");
+      e.target.reset();
+    } catch {
+      setStatus("error");
+      setMessage("Something went wrong. Try again.");
+    }
+  }
+
   return (
     <OptionShell
       title="Check out now"
-      blurb="Give Harper the bare minimum, get a real Stripe checkout link back in the same chat, fill in the rest of your setup after you've paid."
+      blurb="14-day free trial, capped at 3 leads/day. Enter your business and we'll take you straight to Stripe checkout — fill in the rest of your setup after."
     >
-      <Button
-        onClick={() => {
-          track("get_started_checkout_now");
-          window.dispatchEvent(
-            new CustomEvent("fieldsta:open-chat", { detail: { autoMessage: CHECKOUT_AUTO_MESSAGE } })
-          );
-        }}
-        className="w-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
-      >
-        Go to checkout
-        <ArrowRight className="h-4 w-4" />
-      </Button>
+      <form onSubmit={handleSubmit} className="space-y-2.5 text-left">
+        <Input
+          ref={businessNameRef}
+          required
+          placeholder="Business name"
+          disabled={status === "submitting"}
+          className={fieldClass}
+        />
+        <Input
+          ref={emailRef}
+          type="email"
+          required
+          placeholder="Business email"
+          disabled={status === "submitting"}
+          className={fieldClass}
+        />
+        <Button
+          type="submit"
+          disabled={status === "submitting"}
+          className="w-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
+        >
+          {status === "submitting" ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              Go to checkout
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+        {message && (
+          <p className={"text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
+        )}
+      </form>
     </OptionShell>
   );
 }

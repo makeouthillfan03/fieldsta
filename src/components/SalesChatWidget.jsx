@@ -51,6 +51,33 @@ async function fetchWithBusyRetry(url, options, attempts = 2, delayMs = 500) {
   }
 }
 
+// Harper's replies routinely include a real Stripe checkout link
+// (collect_payment) or a booking URL -- rendered as plain text before, so
+// the one thing a prospect actually needs to click was inert and, for long
+// checkout URLs specifically, overflowed the bubble outright since nothing
+// told the browser it was allowed to break mid-word. Splitting on the URL
+// keeps every match as its own React child (never raw HTML), so this stays
+// as safe as the plain-text rendering it replaces.
+const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
+
+function MessageContent({ text }) {
+  return text.split(URL_PATTERN).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all underline underline-offset-2 hover:opacity-80"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 const GREETING = {
   role: "assistant",
   content:
@@ -231,13 +258,13 @@ export default function SalesChatWidget() {
               <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
                 <div
                   className={
-                    "max-w-[85%] rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed " +
+                    "max-w-[85%] break-words rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed " +
                     (m.role === "user"
                       ? "bg-[#F5F5F5] text-[#0a0a0a]"
                       : "bg-[#F5F5F5]/[0.06] text-[#E5E5E7]")
                   }
                 >
-                  {m.content}
+                  <MessageContent text={m.content} />
                 </div>
               </div>
             ))}
