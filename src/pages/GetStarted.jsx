@@ -67,13 +67,18 @@ export default function GetStarted() {
   );
 }
 
-function OptionShell({ title, blurb, children }) {
+function OptionShell({ title, badge, blurb, children }) {
   return (
     <div className="flex h-full flex-col py-8 text-center sm:px-8 sm:py-0">
       <div className="flex justify-center">
         <Triangle className="mb-3" />
       </div>
       <h2 className="text-base font-semibold text-[var(--text)]">{title}</h2>
+      {badge && (
+        <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
+          {badge}
+        </div>
+      )}
       <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--text)] opacity-70">{blurb}</p>
       <div className="mt-6">{children}</div>
     </div>
@@ -137,7 +142,8 @@ function CheckoutCard() {
   return (
     <OptionShell
       title="Check out now"
-      blurb="14-day free trial, capped at 3 leads/day. Enter your business and we'll take you straight to Stripe checkout — fill in the rest of your setup after."
+      badge="14-day free trial"
+      blurb="Enter your business and we'll take you straight to Stripe checkout — fill in the rest of your setup after."
     >
       <form onSubmit={handleSubmit} className="space-y-2.5 text-left">
         <Input
