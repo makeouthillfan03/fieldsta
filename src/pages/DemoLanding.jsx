@@ -423,7 +423,7 @@ function Features() {
           </div>
           <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
             It doesn&apos;t just send auto-replies —{" "}
-            <span className="text-[var(--accent)]">it&apos;s fed your business, shaped by your edits, and grows sharper the more it runs.</span>
+            <span className="text-[var(--accent)]">it&apos;s fed your own rules, plugs into what you already run, and handles the whole handoff end to end.</span>
           </p>
         </Reveal>
 
