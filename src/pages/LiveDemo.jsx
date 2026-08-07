@@ -195,8 +195,12 @@ export default function LiveDemo() {
             Live demo
           </div>
           <h1 className="font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
-            Watch it qualify a real lead
+            Paste a real lead. Watch it stop going cold.
           </h1>
+          <p className="max-w-lg text-sm text-[var(--text)] opacity-70">
+            Same agent running on paying accounts right now — not a script, not a recording. If
+            your lead genuinely wouldn&apos;t qualify, this will say so.
+          </p>
         </div>
 
         <form onSubmit={run} className="mt-8 space-y-5">
@@ -274,7 +278,8 @@ export default function LiveDemo() {
                 />
               </div>
               <p className="text-xs text-[var(--text)] opacity-60">
-                This takes 20–40 seconds — it's a real agent reading the lead, not a lookup.
+                Reading the message and checking it against qualifying criteria — the same steps
+                as a live account, 20–40 seconds start to finish.
               </p>
             </div>
           )}
@@ -308,8 +313,8 @@ export default function LiveDemo() {
             Run this on your own leads
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text)] opacity-70">
-            Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
-            anytime. Interested? Just ask Harper below to get set up.
+            Every lead that isn&apos;t running through this right now is doing exactly what you just
+            watched — except nobody&apos;s catching it. $500/month, free pilot to start, cancel anytime.
           </p>
           <Button
             size="lg"
@@ -343,7 +348,16 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
   useEffect(() => setDecision(null), [result]);
 
   return (
-    <div className="mt-10 space-y-4">
+    <div className="animate-fade-up mt-10 space-y-4">
+      {round === 2 && appliedEdit && (
+        <div className="flex items-center gap-2.5 rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/[0.06] px-4 py-3 text-sm text-[var(--text)]">
+          <span className="text-base">✨</span>
+          <span>
+            <span className="font-semibold text-[var(--accent)]">That correction just applied itself.</span>{" "}
+            This is a different lead, and it already knows what you fixed.
+          </span>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-4">
         {result.score && (
           <div className="flex items-center gap-3">
@@ -368,7 +382,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       </div>
 
       <Card className="space-y-4 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <Block title="Why">
+        <Block title={result.score ? `Why this scored ${result.score.score}, not 100` : "Why"}>
           <p>{result.reasoning}</p>
         </Block>
 
@@ -412,15 +426,8 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       </Card>
 
       <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
-            Drafted reply — nothing sends until a human approves it
-          </div>
-          {round === 2 && appliedEdit && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-400">
-              ✨ Reflects your edit below
-            </span>
-          )}
+        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
+          Drafted reply — nothing sends until a human approves it
         </div>
         {result.subject && (
           <div className="text-sm font-medium text-[var(--text)]">{result.subject}</div>
@@ -477,14 +484,14 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         >
           {decision === "approved" ? (
             <>
-              <span className="font-medium text-emerald-400">That's the whole loop.</span>{" "}
+              <span className="font-medium text-emerald-400">That&apos;s the whole loop.</span>{" "}
               On a live account this reply would be on its way to the lead within seconds of them
               writing in — no one waiting on a free moment to get to it.{" "}
               <span className="opacity-70">Nothing was sent from this demo.</span>
             </>
           ) : (
             <>
-              <span className="font-medium text-red-400">Rejected — and that's the useful part.</span>{" "}
+              <span className="font-medium text-red-400">Rejected — and that&apos;s the useful part.</span>{" "}
               On a live account nothing goes out, and if you fix the draft instead of binning it, that
               correction becomes the example it follows next time.{" "}
               {round === 1 ? (
@@ -498,25 +505,29 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       )}
 
       {round === 1 ? (
-        <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-          <Block title="See it actually learn">
-            <p className="text-[13px] text-[var(--text)] opacity-70">
-              Edit the reply below like a reviewer would, then run a new, different lead — watch the correction
-              apply automatically, without retraining anything.
+        <Card className="space-y-3 border-[var(--accent)]/40 bg-[var(--accent)]/[0.05] p-5 shadow-lg shadow-[var(--accent)]/5">
+          <div className="space-y-1">
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)]">
+              Now watch it become yours
+            </div>
+            <p className="text-[13px] leading-relaxed text-[var(--text)] opacity-80">
+              Edit the reply below — tone, an offer to cut, anything a reviewer would actually
+              change. Then run a different lead and watch that exact correction apply on its
+              own. No retraining, no waiting for an update.
             </p>
-          </Block>
+          </div>
           <textarea
             value={editedDraft}
             onChange={(e) => setEditedDraft(e.target.value)}
             placeholder={result.draftReply}
             rows={4}
-            className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-sm leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] focus-visible:border-[rgba(var(--text-rgb),0.35)] focus-visible:outline-none"
+            className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-sm leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] focus-visible:border-[var(--accent)]/50 focus-visible:outline-none"
           />
           <Button
             type="button"
             disabled={!editedDraft.trim() || running}
             onClick={onRunWithEdit}
-            className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90"
+            className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
           >
             {running ? (
               <>
@@ -558,14 +569,14 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       </Card>
 
       <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <Block title="In this dashboard, you also get">
+        <Block title="Not a one-time trick — this is what every lead gets">
           <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
-            <li>Score breakdown for every lead (0-100)</li>
+            <li>This same scoring and breakdown, on every lead that comes in — not just this one</li>
+            <li>Every correction you make becomes a permanent rule, exactly like you just watched</li>
+            <li>A human reviews every booking before it&apos;s confirmed</li>
             <li>Customize what email replies come from</li>
-            <li>Train the agent with your voice/style</li>
             <li>Connect HubSpot, Meta, Slack, Google Calendar</li>
-            <li>See all integrations wired up</li>
-            <li>Daily reports on meetings booked & replies sent</li>
+            <li>Daily reports on meetings booked &amp; replies sent</li>
           </ul>
         </Block>
       </Card>
