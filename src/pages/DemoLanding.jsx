@@ -942,7 +942,7 @@ function DemoForm() {
         </Reveal>
         <Reveal delay={100}>
           <div className="mx-auto mt-10 max-w-md border-t border-[rgba(var(--text-rgb),0.1)] pt-10">
-            <LeadCaptureForm ctaLabel="Get My Custom Automation Plan" />
+            <LeadCaptureForm ctaLabel="Get in Touch" />
           </div>
         </Reveal>
       </div>
