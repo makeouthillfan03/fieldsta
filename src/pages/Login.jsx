@@ -108,7 +108,7 @@ export default function Login() {
         <div className="mb-6 text-center">
           <h1 className="text-xl font-semibold">Account sign in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            For Find a Pro's admin tools — homeowners and contractors don't need an account.
+            For Fieldsta customer accounts — visitors trying the live demo don&apos;t need to sign in.
           </p>
         </div>
 

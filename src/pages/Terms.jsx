@@ -22,11 +22,11 @@ export default function Terms() {
       </div>
 
       <p>
-        Fieldsta ("Fieldsta," "we," "us") provides an AI-assisted service that drafts replies to
-        a business's inbound leads and, where enabled, drafts outbound prospecting messages, for
-        review and approval by that business ("Customer," "you"). By signing up for, configuring,
+        Fieldsta (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) provides an AI-assisted service that drafts replies to
+        a business&apos;s inbound leads and, where enabled, drafts outbound prospecting messages, for
+        review and approval by that business (&quot;Customer,&quot; &quot;you&quot;). By signing up for, configuring,
         or using Fieldsta, you agree to these Terms on behalf of yourself and the business you
-        represent. If you don't agree, don't use Fieldsta.
+        represent. If you don&apos;t agree, don&apos;t use Fieldsta.
       </p>
 
       <Section title="1. What Fieldsta does">
@@ -53,11 +53,11 @@ export default function Terms() {
 
       <Section title="3. Compliance with anti-spam and communications law">
         <p>
-          Where Fieldsta is used to send unsolicited commercial email ("cold outbound"), the
+          Where Fieldsta is used to send unsolicited commercial email (&quot;cold outbound&quot;), the
           Customer is responsible for ensuring their own use complies with CAN-SPAM, CASL, GDPR,
           and any other applicable law in the jurisdictions they contact, including maintaining a
           working opt-out mechanism and accurate sender information. Fieldsta is not responsible
-          for a Customer's decision to contact a particular recipient or list. Fieldsta reserves
+          for a Customer&apos;s decision to contact a particular recipient or list. Fieldsta reserves
           the right to suspend outbound sending for any account that generates spam complaints,
           abuse reports, or deliverability problems at a rate we determine puts our sending
           infrastructure at risk.
@@ -67,7 +67,7 @@ export default function Terms() {
       <Section title="4. Data provided by the Customer">
         <p>
           The Customer may provide Fieldsta with lead data, contact information, and business
-          details belonging to the Customer or the Customer's own end clients. The Customer
+          details belonging to the Customer or the Customer&apos;s own end clients. The Customer
           represents that they have the right to share this data with Fieldsta and to have
           Fieldsta process it for the purpose of drafting and sending communications. See our{" "}
           <Link to="/privacy" className="underline">
@@ -79,9 +79,9 @@ export default function Terms() {
 
       <Section title="5. No warranties">
         <p>
-          Fieldsta is provided "as is" and "as available," without warranties of any kind, express
+          Fieldsta is provided &quot;as is&quot; and &quot;as available,&quot; without warranties of any kind, express
           or implied, including any warranty of merchantability, fitness for a particular purpose,
-          or non-infringement. We don't warrant that any draft will be accurate, that any lead will
+          or non-infringement. We don&apos;t warrant that any draft will be accurate, that any lead will
           respond, that any message will be delivered, or that the service will be uninterrupted
           or error-free.
         </p>
@@ -89,7 +89,7 @@ export default function Terms() {
 
       <Section title="6. Limitation of liability">
         <p>
-          To the maximum extent permitted by law, Fieldsta's total liability to a Customer for any
+          To the maximum extent permitted by law, Fieldsta&apos;s total liability to a Customer for any
           claim arising from use of the service is limited to the amount the Customer paid
           Fieldsta in the three months preceding the claim. In no event will Fieldsta be liable for
           indirect, incidental, special, consequential, or punitive damages, including lost
@@ -101,10 +101,10 @@ export default function Terms() {
       <Section title="7. Indemnification">
         <p>
           The Customer agrees to indemnify, defend, and hold harmless Fieldsta from any claim,
-          damage, loss, or expense (including reasonable attorney's fees) arising out of or related
-          to: content the Customer approved and sent through Fieldsta; the Customer's violation of
-          applicable law, including anti-spam or data-privacy law; or the Customer's violation of
-          these Terms. This does not apply to the extent a claim results from Fieldsta's own
+          damage, loss, or expense (including reasonable attorney&apos;s fees) arising out of or related
+          to: content the Customer approved and sent through Fieldsta; the Customer&apos;s violation of
+          applicable law, including anti-spam or data-privacy law; or the Customer&apos;s violation of
+          these Terms. This does not apply to the extent a claim results from Fieldsta&apos;s own
           violation of law.
         </p>
       </Section>
@@ -120,9 +120,9 @@ export default function Terms() {
 
       <Section title="9. Changes to these Terms">
         <p>
-          We may update these Terms as Fieldsta's product changes. Continued use of the service
+          We may update these Terms as Fieldsta&apos;s product changes. Continued use of the service
           after a change means you accept the updated Terms. Material changes will update the
-          "Last updated" date above.
+          &quot;Last updated&quot; date above.
         </p>
       </Section>
 

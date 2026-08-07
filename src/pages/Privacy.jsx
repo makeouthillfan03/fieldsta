@@ -23,7 +23,7 @@ export default function Privacy() {
       </div>
 
       <p>
-        This policy explains what Fieldsta ("Fieldsta," "we," "us") collects, why, and what rights
+        This policy explains what Fieldsta (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) collects, why, and what rights
         you have. It applies both to visitors of this website and to individuals whose contact
         information a Fieldsta Customer submits to our service as part of their own lead-response
         workflow.
@@ -36,9 +36,9 @@ export default function Privacy() {
           browser, pages visited) collected automatically by our hosting provider.
         </p>
         <p className="mt-2">
-          <strong>From Customers' end-leads:</strong> when a business uses Fieldsta to draft
+          <strong>From Customers&apos; end-leads:</strong> when a business uses Fieldsta to draft
           replies to their own inbound leads, we process the contact information and message
-          content that business submits to us on that lead's behalf — typically name, email,
+          content that business submits to us on that lead&apos;s behalf — typically name, email,
           phone number, and the content of their inquiry.
         </p>
       </Section>
@@ -56,7 +56,7 @@ export default function Privacy() {
           We do not sell personal information. We share it only with service providers who help us
           operate: our email provider (Zoho Mail) to send messages, our AI provider (Anthropic) to
           draft message content, and our hosting providers (Vercel, Firebase) to run the site and
-          store data. Where Fieldsta sends outbound prospecting email on a Customer's behalf, a
+          store data. Where Fieldsta sends outbound prospecting email on a Customer&apos;s behalf, a
           third-party email-delivery platform may also process recipient contact information for
           that purpose. These providers are contractually limited to using data only to provide
           their service to us.
@@ -67,7 +67,7 @@ export default function Privacy() {
         <p>
           We retain lead and message data for as long as reasonably needed to provide the service
           and meet legal obligations. A Customer may request deletion of their data or their
-          leads' data at any time by contacting us; we will delete it unless we're required to
+          leads&apos; data at any time by contacting us; we will delete it unless we&apos;re required to
           retain it by law.
         </p>
       </Section>
@@ -102,8 +102,8 @@ export default function Privacy() {
 
       <Section title="8. Changes to this policy">
         <p>
-          We may update this policy as Fieldsta's product changes. Material changes will update
-          the "Last updated" date above.
+          We may update this policy as Fieldsta&apos;s product changes. Material changes will update
+          the &quot;Last updated&quot; date above.
         </p>
       </Section>
 
