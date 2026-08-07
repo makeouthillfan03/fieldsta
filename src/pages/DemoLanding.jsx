@@ -733,6 +733,7 @@ const faqs = [
 const PRICING_INCLUDES = [
   "Responds to every inbound lead in under a minute, day or night",
   "Qualifies against your own criteria before it ever reaches your calendar",
+  "A human reviews every booking before it's confirmed — nothing goes out unchecked",
   "Learns your voice from your edits — sounds like you, not a generic bot",
   "Works alongside HubSpot, Meta Lead Ads, Slack, or any CRM",
 ];
@@ -743,11 +744,18 @@ const PRICING_INCLUDES = [
 // self-serve checkout; Growth/Scale are real prices but require an actual
 // conversation first since usage-based cost varies enough at that volume
 // that it isn't a click-and-go purchase.
+//
+// `fit` is volume-sizing guidance only -- deliberately not a feature
+// claim (every tier is functionally identical) or a fabricated stat
+// ("most agencies choose..."). It just helps a visitor self-select
+// against their own real lead volume, the one differentiator that
+// actually exists between these three.
 const PLANS = [
   {
     name: "Starter",
     price: "$500",
     volume: "Up to ~150 qualified leads/mo",
+    fit: "Fits one account, or a single active campaign's lead flow.",
     cta: "Start your free pilot",
     action: "signup",
     highlight: false,
@@ -756,6 +764,7 @@ const PLANS = [
     name: "Growth",
     price: "$1,500",
     volume: "Up to ~500 qualified leads/mo",
+    fit: "Fits an agency running lead flow across a handful of clients.",
     cta: "Book a setup call",
     action: "call",
     highlight: true,
@@ -764,6 +773,7 @@ const PLANS = [
     name: "Scale",
     price: "$3,000",
     volume: "Up to ~1,500 qualified leads/mo",
+    fit: "Fits volume from paid campaigns already running at real scale.",
     cta: "Book a setup call",
     action: "call",
     highlight: false,
@@ -784,6 +794,9 @@ function Pricing() {
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
             14-day free trial
           </div>
+          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--text)] opacity-70">
+            This is a line item next to your ad spend, not next to your software subscriptions.
+          </p>
         </Reveal>
 
         <Reveal delay={80}>
@@ -807,6 +820,7 @@ function Pricing() {
                   <span className="text-sm text-[var(--text)] opacity-70">/ month</span>
                 </div>
                 <div className="mt-3 text-sm text-[var(--text)] opacity-70">{plan.volume}</div>
+                <div className="mt-2 text-xs text-[var(--text)] opacity-50">{plan.fit}</div>
                 <div className="flex-1" />
                 <Button
                   size="lg"
