@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Analytics, track } from "@vercel/analytics/react";
 import App from "./App.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
-import { captureAttribution } from "./lib/attribution.js";
+import { captureAttribution, reportFunnelEvent } from "./lib/attribution.js";
 import "./index.css";
 
 // If this pageload carries utm_source/cid/etc (a cold-email link), stash it
@@ -15,6 +15,7 @@ import "./index.css";
 const attribution = captureAttribution();
 if (Object.keys(attribution).length > 0) {
   track("email_click", attribution);
+  reportFunnelEvent("click");
 }
 
 // Cleanup for visitors who loaded this site while vite-plugin-pwa was still

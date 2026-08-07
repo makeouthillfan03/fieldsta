@@ -11,7 +11,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
-import { getAttribution } from "@/lib/attribution.js";
+import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -120,6 +120,7 @@ export default function LiveDemo() {
     const attribution = getAttribution();
     if (!overrides.priorEdit) {
       track("demo_started", { ...attribution, vertical });
+      reportFunnelEvent("demo_started", { vertical });
     }
 
     try {
@@ -139,6 +140,7 @@ export default function LiveDemo() {
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
       if (!overrides.priorEdit) {
         track("demo_completed", { ...attribution, vertical, qualification: data.qualification || "unknown" });
+        reportFunnelEvent("demo_completed", { vertical, qualification: data.qualification || "unknown" });
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");

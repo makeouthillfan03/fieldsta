@@ -28,3 +28,21 @@ export function getAttribution() {
     return {};
   }
 }
+
+const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
+
+// Mirrors the same event to studio.fieldsta.com's campaign dashboard (not
+// just Vercel Analytics) so click-through and demo completion show up next
+// to the actual prospect record, not only in a separate analytics tool. A
+// no-op when there's no cid -- only cold-email-sourced visits are tied to a
+// campaign prospect at all, so there's nothing to attach a non-cid visit to.
+export function reportFunnelEvent(event, extra = {}) {
+  const attribution = getAttribution();
+  if (!attribution.cid) return;
+  fetch(`${AGENTS_BASE}/api/track/funnel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cid: attribution.cid, event, ...extra }),
+    keepalive: true,
+  }).catch(() => {});
+}
