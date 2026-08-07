@@ -15,7 +15,11 @@ import "./index.css";
 const attribution = captureAttribution();
 if (Object.keys(attribution).length > 0) {
   track("email_click", attribution);
-  reportFunnelEvent("click");
+  // utm_medium carries which stage's link was actually clicked (see
+  // buildSequenceEmail in fieldsta-agents) -- forwarded so the campaign
+  // dashboard's Variant performance table can break clicks down by source,
+  // not just count them.
+  reportFunnelEvent("click", { utmMedium: attribution.utm_medium });
 }
 
 // Cleanup for visitors who loaded this site while vite-plugin-pwa was still
