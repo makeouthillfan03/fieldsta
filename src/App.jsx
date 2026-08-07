@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
@@ -7,18 +7,30 @@ import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
 
-// Login and /growth are the only two routes that touch Firebase (auth,
-// the growth stats page) -- every other route here is the live product,
-// which has nothing to do with it. Lazy-loading these three means
-// AuthContext (and therefore the whole firebase package) is only ever
-// fetched and executed for someone actually navigating to /login or
-// /growth, not bundled into and run for every visitor of the live site.
+// /growth is the only remaining route that touches Firebase auth --
+// lazy-loading it means AuthContext (and therefore the whole firebase
+// package) is only ever fetched and executed for someone actually
+// navigating there, not bundled into and run for every visitor of the
+// live site.
 const AuthProvider = lazy(() =>
   import("@/context/AuthContext").then((m) => ({ default: m.AuthProvider }))
 );
-const Login = lazy(() => import("@/pages/Login"));
 const GrowthDashboard = lazy(() => import("@/pages/GrowthDashboard"));
 const RequireAuthOnly = lazy(() => import("@/components/RequireAuthOnly"));
+
+// fieldsta.com/login used to be a Google/Firebase sign-in page for the old
+// HVAC-marketplace pivot -- unconnected to how real customers actually log
+// in today (email+password, created at checkout, on studio.fieldsta.com's
+// own account system). Rather than fix a sign-in flow nobody uses, this
+// sends anyone who lands here straight to the real one. window.location
+// (not <Navigate>) because studio.fieldsta.com is a different origin --
+// react-router can't route there.
+function RedirectToStudioLogin() {
+  useEffect(() => {
+    window.location.replace("https://studio.fieldsta.com/login");
+  }, []);
+  return null;
+}
 
 // ---------------------------------------------------------------------
 // The old Fieldsta HVAC/general-contractor SaaS tool (Dashboard, jobs,
@@ -62,16 +74,7 @@ export default function App() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/agreement" element={<Agreement />} />
-      <Route
-        path="/login"
-        element={
-          <Suspense fallback={null}>
-            <AuthProvider>
-              <Login />
-            </AuthProvider>
-          </Suspense>
-        }
-      />
+      <Route path="/login" element={<RedirectToStudioLogin />} />
 
       <Route
         path="/growth"
