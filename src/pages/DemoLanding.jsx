@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  CalendarCheck,
-  MessageSquareText,
-  ArrowRight,
-  Check,
-  Mail,
-  Database,
-  Megaphone,
-  Plug,
-} from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -169,11 +160,6 @@ function Nav() {
         </nav>
         <div className="flex items-center gap-3 justify-self-end">
           <ThemeToggle />
-          <Link to="/get-started">
-            <Button size="sm" className="bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]">
-              Start Free Trial
-            </Button>
-          </Link>
           <Link to="/try">
             <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
               Try Demo
@@ -407,15 +393,11 @@ function HowItWorks() {
   );
 }
 
-// First two actually differentiate this from "yet another auto-reply bot";
-// last two are real but table stakes -- every CRM-bundled AI agent claims
-// them too. Order carries the emphasis now instead of a separate card
-// treatment, since a flat list ranks by position, not by border weight.
+// The correction-loop story (the strongest differentiator) used to also
+// run as its own dedicated section below with a second mockup -- two
+// tellings of one idea. It now lives in exactly one place (AlwaysImproving),
+// so these three stay distinct from each other and from that section.
 const features = [
-  {
-    title: "It grows with every correction",
-    desc: "Edit a draft before it goes out and that correction becomes an example the agent sees on every reply after — no retraining, no waiting days for it to sink in. Say no to a phrasing once and it stops using it, permanently.",
-  },
   {
     title: "Built and fed around your business, not a script",
     desc: "You feed it your own qualifying criteria, your tone, and a hard list of anything it can never claim on your behalf. It's not a generic template with your logo on it — it's shaped by your rules and grows sharper from your own edits over time.",
@@ -428,15 +410,6 @@ const features = [
     title: "One system, not one templated reply",
     desc: "Respond, qualify, and book straight onto your calendar — the whole handoff, not a bot that fires one message and stops.",
   },
-];
-
-const integrations = [
-  { name: "Email", note: "Reply from & notification settings", icon: Mail },
-  { name: "HubSpot", note: "Pushes qualified leads and status", icon: Database },
-  { name: "Meta Lead Ads", note: "Facebook & Instagram lead forms", icon: Megaphone },
-  { name: "Slack", note: "Real-time lead notifications", icon: MessageSquareText },
-  { name: "Google Calendar", note: "Auto-book meetings", icon: CalendarCheck },
-  { name: "Webhooks", note: "Zapier, Make, custom systems", icon: Plug },
 ];
 
 function Features() {
@@ -454,7 +427,7 @@ function Features() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-3">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 100}>
               <div
@@ -474,35 +447,10 @@ function Features() {
         </div>
 
         <Reveal delay={300}>
-          <div className="mx-auto mt-16 max-w-3xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
-            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--text)] opacity-60">
-              Also wired up today
-            </div>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-              {integrations.map((i) => (
-                <div
-                  key={i.name}
-                  title={i.note}
-                  className="flex items-center gap-2 text-sm font-semibold text-[var(--text)] opacity-80"
-                >
-                  <i.icon className="h-4 w-4 flex-shrink-0" />
-                  {i.name}
-                </div>
-              ))}
-              <div className="text-sm text-[var(--text)] opacity-50">+ tell us what else you use</div>
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal delay={350}>
-          <div className="mx-auto mt-14 max-w-3xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
-            <h3 className="text-base font-semibold text-[var(--text)]">Why not just use my CRM&apos;s built-in AI?</h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm text-[var(--text)] opacity-70">
-              Fair question — a lot of CRMs ship some version of an AI reply assistant now. Fieldsta isn&apos;t trying to
-              replace your CRM&apos;s dashboard; it sits in front of it. It works whether you run HubSpot, something else,
-              or nothing at all, and it&apos;s built around one job — responding to and qualifying inbound leads — instead
-              of being a general assistant bolted onto a much bigger platform. That focus is also why setup takes
-              minutes instead of a CRM configuration project.
+          <div className="mx-auto mt-16 max-w-2xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
+            <p className="text-sm text-[var(--text)] opacity-70">
+              Works alongside HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — this isn&apos;t asking
+              you to replace anything you already run.
             </p>
           </div>
         </Reveal>
@@ -522,22 +470,24 @@ const CORRECTION_EXAMPLE = {
     "“Thanks for reaching out. We have openings Thursday and Friday this week — which works better for you?”",
 };
 
+// This is the one place the correction-loop differentiator lives on the
+// page (see the comment on `features` above) -- each point states what
+// changes for the business, not what the model is doing under the hood.
+// The claim itself is the strongest thing here; the job of this copy is
+// to not bury it under capability language ("adapts instantly," "gets
+// smarter") the way an earlier draft did in two separate sections.
 const ALWAYS_IMPROVING_POINTS = [
   {
-    title: "Continuously improving",
-    desc: "Every account runs on the latest version automatically — no update to install, no plan to upgrade to.",
+    title: "Never makes the same mistake twice",
+    desc: "Correct a phrasing once and it's gone for good — not just for that conversation. No retraining, no waiting days for it to stick.",
   },
   {
-    title: "Gets smarter over time",
-    desc: "Sharpens from your own corrections, not a slow, generic update cycle.",
+    title: "The fix is live on the very next lead",
+    desc: "Not the next release, not next week's update. What you correct today is what every reply sounds like an hour from now.",
   },
   {
-    title: "Customizable to your business",
-    desc: "Your qualifying criteria, your tone, and a hard list of what it can never say — not a one-size-fits-all script.",
-  },
-  {
-    title: "Adapts instantly",
-    desc: "A correction applies to the very next reply — not the next release.",
+    title: "It won't cross the lines you set",
+    desc: "Pricing, guarantees, anything you haven't approved — tell it once and it never says it, no matter how the conversation goes.",
   },
 ];
 
@@ -601,7 +551,7 @@ function AlwaysImproving() {
         </Reveal>
 
         <Reveal delay={200}>
-          <ul className="mx-auto mt-14 grid max-w-4xl gap-x-8 gap-y-6 text-sm sm:grid-cols-2">
+          <ul className="mx-auto mt-14 grid max-w-4xl gap-x-8 gap-y-6 text-sm sm:grid-cols-3">
             {ALWAYS_IMPROVING_POINTS.map((point) => (
               <li
                 key={point.title}
@@ -672,12 +622,6 @@ function SetupFlow() {
             </Reveal>
           ))}
         </div>
-
-        <Reveal delay={400} className="mt-14 text-center">
-          <div className="font-mono text-xs font-semibold tracking-[0.2em] text-[var(--accent)]">
-            FULLY AUTONOMOUS — BUILT TO SAVE YOU TIME AND MONEY
-          </div>
-        </Reveal>
       </div>
     </section>
   );
@@ -775,7 +719,6 @@ const faqs = [
 ];
 
 const PRICING_INCLUDES = [
-  "14-day free trial, capped at 3 leads/day, before you pay anything",
   "Responds to every inbound lead in under a minute, day or night",
   "Qualifies against your own criteria before it ever reaches your calendar",
   "Learns your voice from your edits — sounds like you, not a generic bot",
@@ -826,9 +769,9 @@ function Pricing() {
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Straightforward Pricing, No Surprises
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-[var(--text)] opacity-70">
-            Every plan starts with a 14-day free trial — capped at 3 leads/day until you upgrade.
-          </p>
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
+            14-day free trial
+          </div>
         </Reveal>
 
         <Reveal delay={80}>

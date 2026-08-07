@@ -122,6 +122,15 @@ export default function GrowthDashboard() {
                       {pipeline.growth.error ? `Error: ${pipeline.growth.error}` : "Finished short"}
                     </p>
                   )}
+                  {pipeline.growth.lastLog?.length > 0 && (
+                    <div className="mt-1 max-h-40 overflow-y-auto rounded bg-black/90 p-2 font-mono text-[11px] leading-relaxed text-green-400">
+                      {pipeline.growth.lastLog.slice(-20).map((line, i) => (
+                        <div key={i} className="whitespace-pre-wrap">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -141,6 +150,15 @@ export default function GrowthDashboard() {
                   )}
                   {!pipeline.tailor.running && pipeline.tailor.withHook > 0 && (
                     <p className="text-xs text-green-600">✓ {pipeline.tailor.fitConcerns} fit concerns flagged</p>
+                  )}
+                  {pipeline.tailor.lastLog?.length > 0 && (
+                    <div className="mt-1 max-h-40 overflow-y-auto rounded bg-black/90 p-2 font-mono text-[11px] leading-relaxed text-green-400">
+                      {pipeline.tailor.lastLog.slice(-20).map((line, i) => (
+                        <div key={i} className="whitespace-pre-wrap">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
