@@ -299,7 +299,7 @@ export default function LiveDemo() {
             className="mt-6 inline-block"
           >
             <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
-              Start your free pilot
+              Talk to Harper
               <ArrowRight className="h-4 w-4" />
             </Button>
           </button>
