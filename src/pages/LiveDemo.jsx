@@ -293,16 +293,14 @@ export default function LiveDemo() {
             Same agent, pointed at your inbox — $500/month, free pilot to start, cancel
             anytime. Interested? Just ask Harper below to get set up.
           </p>
-          <button
-            type="button"
+          <Button
+            size="lg"
             onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-            className="mt-6 inline-block"
+            className="mt-6 bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90"
           >
-            <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
-              Talk to Harper
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </button>
+            Talk to Harper
+            <ArrowRight className="h-4 w-4" />
+          </Button>
           <p className="mt-3 text-xs text-[var(--text)] opacity-60">
             Or{" "}
             <Link to="/#demo" className="underline underline-offset-2 hover:opacity-100">
