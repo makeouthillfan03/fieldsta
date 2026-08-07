@@ -602,7 +602,7 @@ function SetupFlow() {
             Set up in 5 minutes
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--text)] opacity-70">
-            Pay → get a setup link → connect your integrations → start receiving qualified leads
+            Sign up free → connect your integrations → test it on a real lead → you&apos;re live
           </p>
         </Reveal>
 
@@ -634,11 +634,19 @@ const WITHOUT_FIELDSTA = [
   "Slow response means the deal goes to whoever called back first",
 ];
 
+// Each line is the direct flip of the WITHOUT item at the same index --
+// this section's job is contrast, not another features checklist. The
+// response-time / qualification / voice claims already have a home
+// (Pricing's includes list); repeating them here just to fill four rows
+// duplicated that list almost verbatim. What belongs here is what only
+// makes sense stated as a before/after: the lead gets a reply before
+// they've moved on, follow-ups stop depending on someone remembering,
+// and being first is the thing that actually wins the deal.
 const WITH_FIELDSTA = [
-  "Replies in under a minute, day or night",
-  "Every lead qualified automatically, against your own criteria",
-  "Meeting booked straight onto your calendar — no admin work",
-  "Hours back every week that used to go to manual replies — and it sounds more like you the more you correct it",
+  "Lead gets a reply before they've closed the tab",
+  "Every lead qualified the same way, every time — no one skipped on a busy day",
+  "Follow-ups go out on schedule automatically, not when someone remembers",
+  "You're the one who gets there first",
 ];
 
 function WhySwitch() {
