@@ -202,15 +202,15 @@ function Hero() {
       <div className="container relative z-10 py-14">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <h1 className="animate-fade-up font-editorial text-4xl font-medium leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
-            Answer <span className="font-semibold text-[var(--accent)]">every lead</span>
+            You already <span className="font-semibold text-[var(--accent)]">paid</span> for the lead.
             <br />
-            <span className="font-semibold text-[var(--accent)]">before</span> your competitor
+            The <span className="font-semibold text-[var(--accent)]">expensive part</span> is losing it
             <br />
-            picks up the phone
+            before anyone replies.
           </h1>
 
           <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[var(--text)]">
-            Respond. Qualify. Book.
+            Your competitor only has to reply first.
           </p>
 
           <Link
@@ -661,6 +661,10 @@ function WhySwitch() {
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Why businesses switch
           </h2>
+          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--text)] opacity-70">
+            You already spent money getting that lead. What happens in the next few minutes decides
+            whether it was worth it.
+          </p>
         </Reveal>
         <div className="mx-auto mt-14 grid max-w-4xl divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <Reveal delay={80}>
