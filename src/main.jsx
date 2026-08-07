@@ -1,10 +1,21 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics, track } from "@vercel/analytics/react";
 import App from "./App.jsx";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
+import { captureAttribution } from "./lib/attribution.js";
 import "./index.css";
+
+// If this pageload carries utm_source/cid/etc (a cold-email link), stash it
+// for the session and fire one event now -- this is the "did they click
+// through from the email" signal. /try's own demo_started/demo_completed
+// events (see LiveDemo.jsx) reuse the same stashed attribution so the two
+// can be joined in Analytics without needing a query param on every route.
+const attribution = captureAttribution();
+if (Object.keys(attribution).length > 0) {
+  track("email_click", attribution);
+}
 
 // Cleanup for visitors who loaded this site while vite-plugin-pwa was still
 // active (the old "Find a Pro" marketplace manifest -- see git history).

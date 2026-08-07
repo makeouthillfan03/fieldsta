@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { track } from "@vercel/analytics/react";
 import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
+import { getAttribution } from "@/lib/attribution.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -112,6 +114,14 @@ export default function LiveDemo() {
     setError("");
     setResult(null);
 
+    // round 1 (no priorEdit) is the actual funnel entry -- round 2 is a
+    // bonus rerun of an already-engaged visitor, not a fresh attempt, so it
+    // shouldn't inflate "how many people tried the demo" numbers.
+    const attribution = getAttribution();
+    if (!overrides.priorEdit) {
+      track("demo_started", { ...attribution, vertical });
+    }
+
     try {
       const res = await fetch(`${AGENTS_BASE}/api/demo-qualify`, {
         method: "POST",
@@ -127,9 +137,15 @@ export default function LiveDemo() {
       setResult(data);
       setStatus("done");
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
+      if (!overrides.priorEdit) {
+        track("demo_completed", { ...attribution, vertical, qualification: data.qualification || "unknown" });
+      }
     } catch (err) {
       setError(err.message || "Something went wrong.");
       setStatus("error");
+      if (!overrides.priorEdit) {
+        track("demo_error", { ...attribution, vertical });
+      }
     }
   }
 
