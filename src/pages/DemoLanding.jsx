@@ -446,14 +446,6 @@ function Features() {
           ))}
         </div>
 
-        <Reveal delay={300}>
-          <div className="mx-auto mt-16 max-w-2xl border-t border-[rgba(var(--text-rgb),0.1)] pt-10 text-center">
-            <p className="text-sm text-[var(--text)] opacity-70">
-              Works alongside HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — this isn&apos;t asking
-              you to replace anything you already run.
-            </p>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
@@ -477,18 +469,9 @@ const CORRECTION_EXAMPLE = {
 // to not bury it under capability language ("adapts instantly," "gets
 // smarter") the way an earlier draft did in two separate sections.
 const ALWAYS_IMPROVING_POINTS = [
-  {
-    title: "Never makes the same mistake twice",
-    desc: "Correct a phrasing once and it's gone for good — not just for that conversation. No retraining, no waiting days for it to stick.",
-  },
-  {
-    title: "The fix is live on the very next lead",
-    desc: "Not the next release, not next week's update. What you correct today is what every reply sounds like an hour from now.",
-  },
-  {
-    title: "It won't cross the lines you set",
-    desc: "Pricing, guarantees, anything you haven't approved — tell it once and it never says it, no matter how the conversation goes.",
-  },
+  { title: "Never makes the same mistake twice" },
+  { title: "The fix is live on the very next lead" },
+  { title: "It won't cross the lines you set" },
 ];
 
 function CorrectionMockup() {
@@ -558,10 +541,7 @@ function AlwaysImproving() {
                 className="flex items-start gap-3 border-t border-[rgba(var(--text-rgb),0.12)] pt-4"
               >
                 <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
-                <div>
-                  <div className="font-semibold text-[var(--text)]">{point.title}</div>
-                  <div className="mt-1 text-[var(--text)] opacity-70">{point.desc}</div>
-                </div>
+                <div className="font-semibold text-[var(--text)]">{point.title}</div>
               </li>
             ))}
           </ul>
@@ -661,10 +641,6 @@ function WhySwitch() {
           <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Why businesses switch
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--text)] opacity-70">
-            You already spent money getting that lead. What happens in the next few minutes decides
-            whether it was worth it.
-          </p>
         </Reveal>
         <div className="mx-auto mt-14 grid max-w-4xl divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <Reveal delay={80}>
@@ -794,9 +770,6 @@ function Pricing() {
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
             14-day free trial
           </div>
-          <p className="mx-auto mt-4 max-w-lg text-sm text-[var(--text)] opacity-70">
-            This is a line item next to your ad spend, not next to your software subscriptions.
-          </p>
         </Reveal>
 
         <Reveal delay={80}>
