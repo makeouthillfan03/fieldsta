@@ -160,6 +160,15 @@ function Nav() {
         </nav>
         <div className="flex items-center gap-3 justify-self-end">
           <ThemeToggle />
+          <a href="/get-started" className="hidden sm:block">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-[rgba(var(--text-rgb),0.25)] text-[var(--text)] hover:bg-[rgba(var(--text-rgb),0.06)]"
+            >
+              Get Started
+            </Button>
+          </a>
           <Link to="/try">
             <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
               Try Demo

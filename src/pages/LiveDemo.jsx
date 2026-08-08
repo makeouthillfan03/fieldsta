@@ -316,14 +316,22 @@ export default function LiveDemo() {
             Every lead that isn&apos;t running through this right now is doing exactly what you just
             watched — except nobody&apos;s catching it. $500/month, free pilot to start, cancel anytime.
           </p>
-          <Button
-            size="lg"
-            onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-            className="mt-6 bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90"
-          >
-            Talk to Harper
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a href="/get-started">
+              <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
+                Get Started
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </a>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
+              className="border-[rgba(var(--text-rgb),0.25)] text-[var(--text)] hover:bg-[rgba(var(--text-rgb),0.06)]"
+            >
+              Talk to Harper
+            </Button>
+          </div>
           <p className="mt-3 text-xs text-[var(--text)] opacity-60">
             Or{" "}
             <Link to="/#demo" className="underline underline-offset-2 hover:opacity-100">
