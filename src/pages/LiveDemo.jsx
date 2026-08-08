@@ -318,7 +318,7 @@ export default function LiveDemo() {
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <a href="/get-started">
-              <Button size="lg" className="bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90">
+              <Button size="lg" className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
                 Get Started
                 <ArrowRight className="h-4 w-4" />
               </Button>

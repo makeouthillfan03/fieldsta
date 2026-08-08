@@ -163,8 +163,7 @@ function Nav() {
           <a href="/get-started" className="hidden sm:block">
             <Button
               size="sm"
-              variant="outline"
-              className="border-[rgba(var(--text-rgb),0.25)] text-[var(--text)] hover:bg-[rgba(var(--text-rgb),0.06)]"
+              className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
             >
               Get Started
             </Button>
