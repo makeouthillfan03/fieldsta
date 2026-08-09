@@ -9,6 +9,7 @@ import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
+import { reportFunnelEvent } from "@/lib/attribution.js";
 
 // Landing spot for the pricing section's "Start your free pilot" CTA.
 // "Check out now" used to open Harper pre-primed with an auto-message and
@@ -118,6 +119,11 @@ function CheckoutCard() {
       }
 
       track("get_started_checkout_now");
+      // cid-gated no-op for non-cold-email visits (see reportFunnelEvent's
+      // own doc comment) -- ties a checkout-started event back to the
+      // specific prospect record for cold-email-sourced signups, the same
+      // way demo_started/demo_completed already do on LiveDemo.jsx.
+      reportFunnelEvent("checkout_started");
       if (data.checkoutUrl) {
         // Redirect rather than open in a new tab -- this is a real Stripe
         // Checkout session tied to the pilot account just created, not a
