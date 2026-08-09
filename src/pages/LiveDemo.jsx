@@ -25,6 +25,18 @@ import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 // serverless timeout would cut it off.
 const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
 
+// Conversion ID from LinkedIn Campaign Manager > Account Assets >
+// Conversion Tracking (create a "Demo Completed" conversion there, not
+// the same as the Insight Tag's Partner ID in index.html). No-ops until
+// both the env var is set and the Insight Tag script has actually loaded
+// -- window.lintrk won't exist yet if an ad blocker stripped the tag, or
+// briefly during the tag's own async load.
+const LINKEDIN_CONVERSION_ID = import.meta.env.VITE_LINKEDIN_CONVERSION_ID;
+function fireLinkedInConversion() {
+  if (!LINKEDIN_CONVERSION_ID || typeof window.lintrk !== "function") return;
+  window.lintrk("track", { conversion_id: LINKEDIN_CONVERSION_ID });
+}
+
 const VERTICALS = [
   {
     value: "saas",
@@ -141,6 +153,7 @@ export default function LiveDemo() {
       if (!overrides.priorEdit) {
         track("demo_completed", { ...attribution, vertical, qualification: data.qualification || "unknown" });
         reportFunnelEvent("demo_completed", { vertical, qualification: data.qualification || "unknown" });
+        fireLinkedInConversion();
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
