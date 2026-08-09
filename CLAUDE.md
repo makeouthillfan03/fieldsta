@@ -1,7 +1,3 @@
-## STANDING REMINDER (active — user has not cancelled)
-
-End every reply in this repo's sessions with a one-line reminder to re-record the live demo video (`public/demo-video.mp4`, see "Demo video" section below). Requested 2026-08-07. Keep doing this until the user explicitly says to stop, then delete this section.
-
 # fieldsta (marketing site)
 
 Vite/React SPA, deployed to Vercel, served at **fieldsta.com**. Public-facing only — the actual product (dashboard, login, agents, sending) lives in the sibling repo `/Users/jonathanchoi/fieldsta-agents`, served at studio.fieldsta.com.
