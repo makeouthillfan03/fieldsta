@@ -262,14 +262,20 @@ function DemoVideo() {
 
 function LeadReviewDemo() {
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-24">
       <div className="container flex flex-col items-center">
-        <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[var(--text)]">
-          Know exactly why a lead is worth your time
-        </div>
-        <div className="animate-fade-up [animation-delay:100ms] w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
+        <Reveal className="text-center">
+          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            <Triangle />
+            Lead review
+          </div>
+          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
+            Know exactly why a lead is worth your time
+          </h2>
+        </Reveal>
+        <Reveal delay={100} className="mt-14 w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
           <DashboardMockup />
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -327,7 +333,7 @@ function DashboardMockup() {
         </div>
 
         <div>
-          <div className="text-sm uppercase tracking-[0.18em] text-[var(--text)]">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
             Why this lead scored 88, not 100
           </div>
           <ul className="mt-4 space-y-3">
