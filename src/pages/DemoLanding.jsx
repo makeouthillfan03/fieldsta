@@ -114,6 +114,17 @@ function Reveal({ children, delay = 0, className = "" }) {
 }
 
 
+// Underline grows in from the left on hover instead of just appearing --
+// relative + an absolutely-positioned ::after scaled to 0 width at rest,
+// scaled to 1 (full width) on hover, animated via transform so it's cheap
+// (no layout/width animation). scale-x-0 + origin-left is what makes it
+// grow left-to-right rather than from the center.
+const NAV_LINK_CLASS =
+  "relative pb-1 transition-colors hover:text-[var(--text)] " +
+  "after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left " +
+  "after:scale-x-0 after:bg-[var(--accent)] after:transition-transform after:duration-300 after:ease-out " +
+  "hover:after:scale-x-100";
+
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
@@ -146,16 +157,16 @@ function Nav() {
           </span>
         </a>
         <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
-          <a href="#how-it-works" className="hover:text-[var(--text)]">
+          <a href="#how-it-works" className={NAV_LINK_CLASS}>
             How It Works
           </a>
-          <a href="#features" className="hover:text-[var(--text)]">
+          <a href="#features" className={NAV_LINK_CLASS}>
             Features
           </a>
-          <a href="#pricing" className="hover:text-[var(--text)]">
+          <a href="#pricing" className={NAV_LINK_CLASS}>
             Pricing
           </a>
-          <a href="#faq" className="hover:text-[var(--text)]">
+          <a href="#faq" className={NAV_LINK_CLASS}>
             FAQ
           </a>
         </nav>
