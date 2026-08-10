@@ -10,6 +10,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
+import { getSampleRun } from "@/data/sampleRuns.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -128,31 +129,6 @@ export default function LiveDemo() {
     el.style.height = `${el.scrollHeight}px`;
   }, [message]);
 
-  // "I corrected it and it learned" is the most persuasive thing on this page
-  // and the hardest to reach: it asks someone who just waited half a minute
-  // to wait another half a minute. They spend that time writing the
-  // correction anyway, so the request starts on a typing pause and the
-  // submit usually resolves in a couple of seconds instead of thirty.
-  //
-  // The cost is one speculative agent run per visitor who starts an edit and
-  // then abandons it. That's a small, already-engaged group, and the 1.5s
-  // debounce means idle keystrokes don't each fire one.
-  const prefetchRef = useRef({ key: null, promise: null });
-  useEffect(() => {
-    const edited = editedDraft.trim();
-    if (round !== 1 || !result?.draftReply || edited.length < 15) return;
-    if (edited === result.draftReply.trim()) return;
-    if (prefetchRef.current.key === edited) return;
-    const timer = setTimeout(() => {
-      const promise = startQualify({
-        message: active.sample2 || active.sample,
-        priorEdit: { draft: result.draftReply, edited },
-      }).catch(() => null);
-      prefetchRef.current = { key: edited, promise };
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [editedDraft, result, round]);
-
   useEffect(() => {
     if (status === "running") {
       setProgress(4);
@@ -229,20 +205,10 @@ export default function LiveDemo() {
     }
 
     try {
-      // overrides.pending is an already-in-flight request started while the
-      // visitor was typing (see the round-2 prefetch). It carries its own
-      // start time so the elapsed figure stays the agent's real duration --
-      // reporting the time from *submit* would show "2 seconds" for work
-      // that actually took thirty, which is the one number on this page
-      // that has to be true.
-      // A prefetch that failed resolves to null rather than rejecting (so it
-      // can't surface as an unhandled rejection while the visitor is still
-      // typing); falling back to a fresh request here is what makes that
-      // safe -- a warm request that died must not take the real one down
-      // with it.
-      let payload = overrides.pending ? await overrides.pending : null;
-      if (!payload) payload = await startQualify({ message: msg, priorEdit: overrides.priorEdit });
-      const { data, elapsedMs: took } = payload;
+      const { data, elapsedMs: took } = await startQualify({
+        message: msg,
+        priorEdit: overrides.priorEdit,
+      });
       setElapsedMs(took);
       setResult(data);
       setStatus("done");
@@ -283,16 +249,8 @@ export default function LiveDemo() {
     const nextMessage = active.sample2 || active.sample;
     setMessage(nextMessage);
     setRound(2);
-    // Only reuse the warm request if it was started from *exactly* this text.
-    // If they kept typing after the prefetch fired, the key no longer matches
-    // and this falls through to a fresh run -- showing a result computed from
-    // a half-written correction while claiming "that correction just applied
-    // itself" would be a lie, and it's the whole point of the feature.
-    const warm = prefetchRef.current;
-    const pending = warm.key === edited ? warm.promise : null;
-    prefetchRef.current = { key: null, promise: null };
-    track("demo_edit_rerun", { vertical, prefetched: Boolean(pending) });
-    run(null, { message: nextMessage, priorEdit, pending });
+    track("demo_edit_rerun", { vertical });
+    run(null, { message: nextMessage, priorEdit });
   }
 
   function resetDemo() {
@@ -320,7 +278,16 @@ export default function LiveDemo() {
           </h1>
         </div>
 
-        {!result && status !== "running" && <SamplePeek />}
+        {!result && status !== "running" && (
+          <SampleRun
+            vertical={vertical}
+            onRunOwn={() => {
+              track("try_run_own_from_peek", { vertical });
+              messageRef.current?.focus({ preventScroll: false });
+              messageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
+          />
+        )}
 
         <form onSubmit={run} className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
           <div className="space-y-2">
@@ -541,29 +508,97 @@ function RunSteps({ progress }) {
 // back in, sized to stay compact enough that the primary CTA is still above
 // the fold. It unmounts the moment a real run starts, so it never sits next
 // to (or gets mistaken for) the visitor's own result.
-function SamplePeek() {
-  const { Icon } = VERDICT.qualified;
+// A real captured run (src/data/sampleRuns.js), rendered on load so the
+// product is visible in zero seconds instead of behind a 20-40s wait a cold
+// visitor has no reason to spend. Deliberately shows the verdict and the
+// drafted reply verbatim -- including when the agent says "needs more info"
+// rather than "qualified", which is the honest thing it actually returns for
+// these samples and a stronger proof than a hand-picked win would be.
+//
+// Labelled as captured, with the live run one tap away, so "same agent as
+// the paying accounts, not a recording" stays true: this IS what that agent
+// returned, and the visitor can make it do it again on their own lead.
+function SampleRun({ vertical, onRunOwn }) {
+  const run = getSampleRun(vertical);
+  const lead = VERTICALS.find((v) => v.value === vertical)?.sample;
+  // A vertical with no capture yet still gets the CTA -- losing the whole
+  // block (and with it the only trial link above the fold) is a worse
+  // failure than showing no sample. Never substitute another vertical's run:
+  // it would be captioned as this one's and it isn't.
+  if (!run) {
+    return (
+      <div className="mt-6">
+        <SampleRunCta onRunOwn={onRunOwn} />
+      </div>
+    );
+  }
+  const verdict = VERDICT[run.qualification] ?? VERDICT.needs_more_info;
+  const { Icon } = verdict;
+  const firstPara = (run.draftReply || "").split("\n\n").filter(Boolean)[1] || run.draftReply;
+
   return (
-    <div className="animate-fade-up mt-6">
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-50">
-        What comes back — example
+    <div className="animate-fade-up mt-6 space-y-4">
+      <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-50">
+        What this agent returned — a captured run
       </div>
-      <div className="flex items-center gap-4">
-        <ScoreRing score={88} size={52} stroke={4} />
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400">
-            <Icon className="h-3 w-3" />
-            {VERDICT.qualified.label}
-          </span>
-          <p className="truncate text-[13px] leading-relaxed text-[var(--text)] opacity-70">
-            &ldquo;Thanks for reaching out — I can get someone out Thursday morning to take a
-            look before your adjuster comes…&rdquo;
-          </p>
+
+      {/* The reply means little without the message that produced it -- the
+          whole story is lead in, judgement and draft out, and that has to be
+          legible without scrolling or clicking. */}
+      {lead && (
+        <p className="border-l-2 border-[rgba(var(--text-rgb),0.15)] pl-3 text-[13px] leading-relaxed text-[var(--text)] opacity-55">
+          {lead}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-4">
+        {run.score && (
+          <div className="flex items-center gap-3">
+            <ScoreRing score={run.score.score} size={56} stroke={4} />
+            <span className="max-w-[9rem] text-xs leading-snug text-[var(--text)] opacity-70">
+              {run.score.tierLabel}
+            </span>
+          </div>
+        )}
+        <span className={"inline-flex items-center gap-1.5 text-xs font-medium " + verdict.flatClassName}>
+          <Icon className="h-3.5 w-3.5" />
+          {verdict.label}
+        </span>
+        {run.needsHumanReview && (
+          <span className="text-[11px] text-[var(--text)] opacity-60">Flagged for human review</span>
+        )}
+      </div>
+
+      <div className="border-t border-[rgba(var(--text-rgb),0.1)] pt-4">
+        <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-50">
+          What it drafted back
         </div>
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-85">
+          {firstPara}
+        </p>
       </div>
-      <p className="mt-2.5 text-[11px] leading-relaxed text-[var(--text)] opacity-55">
-        Score, criteria checked, and a drafted reply — about 30 seconds.
-      </p>
+
+      <SampleRunCta onRunOwn={onRunOwn} />
+    </div>
+  );
+}
+
+function SampleRunCta({ onRunOwn }) {
+  return (
+    <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+      <a href="/get-started" onClick={() => track("try_peek_cta")}>
+        <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
+          Start free trial
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </a>
+      <button
+        type="button"
+        onClick={onRunOwn}
+        className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+      >
+        Or run it live on your own lead ↓
+      </button>
     </div>
   );
 }
