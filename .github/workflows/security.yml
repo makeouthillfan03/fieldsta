@@ -1,0 +1,71 @@
+name: Security checks
+
+# This repo had no CI at all. The gate is deliberately narrow: each check
+# below corresponds to something that was actually wrong here, and nothing
+# is included merely because a scanner offers it. A workflow that goes red
+# on things nobody intends to fix is one everybody learns to ignore.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 9 * * 1"
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npx vite build
+
+      # Critical only, and that is a considered choice rather than laziness.
+      # The outstanding highs are all firebase and its transitive undici,
+      # which no routed page imports -- verified by the bundle having no
+      # firebase chunk. Failing on them would mean a permanently red
+      # workflow for code that cannot reach a browser. If a critical lands,
+      # or if firebase ever becomes reachable again, that is worth stopping
+      # for. See the "Firebase stays out of the bundle" check below, which
+      # is what actually holds that assumption in place.
+      - name: Dependency advisories (production)
+        run: npm audit --omit=dev --audit-level=critical
+
+      # The reason the firebase advisories are tolerable is that firebase is
+      # not shipped. /growth was unrouted on 2026-08-10 and that removed the
+      # last importer. If someone re-routes it, the advisories above stop
+      # being theoretical and this fails loudly instead of silently.
+      - name: Firebase stays out of the bundle
+        run: |
+          if grep -rql "firebase" dist/assets/*.js 2>/dev/null; then
+            echo "::error::firebase is back in the shipped bundle. Its known advisories now reach real visitors, and the audit gate above assumes it does not."
+            exit 1
+          fi
+          echo "OK: no firebase in the bundle"
+
+      # The CSP and the rest of the headers live in vercel.json. Losing them
+      # is invisible in review -- the site looks identical -- so it is
+      # checked rather than trusted.
+      - name: Security headers still configured
+        run: |
+          for h in Content-Security-Policy X-Frame-Options X-Content-Type-Options Referrer-Policy Strict-Transport-Security; do
+            grep -q "$h" vercel.json || { echo "::error::$h is missing from vercel.json"; exit 1; }
+          done
+          grep -q "frame-ancestors 'none'" vercel.json || { echo "::error::frame-ancestors is no longer 'none' -- /try and /get-started become framable."; exit 1; }
+          echo "OK: headers present"
+
+      - name: No credentials in the working tree
+        run: |
+          if git grep -nIE '(sk-ant-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{32,}|xoxb-[0-9]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC )?PRIVATE KEY-----)' -- . ':!*.md' ':!.github/workflows/*'; then
+            echo "::error::Something matching a real credential is committed. Rotate it first, then remove it."
+            exit 1
+          fi
+          echo "OK: no credential patterns found"
