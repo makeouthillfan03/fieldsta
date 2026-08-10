@@ -349,16 +349,22 @@ export default function LiveDemo() {
             Get started
           </div>
           <h2 className="mt-4 font-editorial text-2xl font-medium text-[var(--text)] sm:text-3xl">
-            Run this on your own leads
+            Start free — no card
           </h2>
+          {/* Led with "$500/month" before the free pilot, which is the number
+              that creates hesitation ahead of the one that removes it. The
+              trial genuinely asks for a business name and an email and
+              nothing else (see GetStarted's CheckoutCard, skipCheckout:
+              true), so that's what goes first; the price still gets said,
+              just after. */}
           <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text)] opacity-70">
-            Every lead that isn&apos;t running through this right now is doing exactly what you just
-            watched — except nobody&apos;s catching it. $500/month, free pilot to start, cancel anytime.
+            14 days on your own leads, no card required — just a name and an email. $500/month
+            after that, cancel anytime.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a href="/get-started">
+            <a href="/get-started" onClick={() => track("try_footer_cta")}>
               <Button size="lg" className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-                Get Started
+                Start free trial
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </a>
@@ -460,6 +466,25 @@ function SamplePeek() {
       </div>
       <p className="mt-2.5 text-[11px] leading-relaxed text-[var(--text)] opacity-55">
         Score, criteria checked, and a drafted reply — about 30 seconds.
+      </p>
+    </div>
+  );
+}
+
+function ResultCta() {
+  return (
+    <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row sm:items-center">
+      <a href="/get-started" onClick={() => track("try_result_cta")}>
+        <Button
+          size="lg"
+          className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
+        >
+          Run this on your own leads
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </a>
+      <p className="text-[13px] leading-relaxed text-[var(--text)] opacity-60">
+        14 days free, no card — just your name and email.
       </p>
     </div>
   );
@@ -576,10 +601,10 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           onClick={() => setDecision("approved")}
           aria-pressed={decision === "approved"}
           className={
-            "flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-emerald-400 transition-all " +
+            "flex-1 border-b-2 px-4 py-2 text-sm font-semibold text-emerald-400 transition-all " +
             (decision === "approved"
-              ? "bg-emerald-500/30 ring-1 ring-emerald-400/50"
-              : "bg-emerald-500/20 hover:bg-emerald-500/30")
+              ? "border-emerald-400 opacity-100"
+              : "border-transparent opacity-70 hover:border-emerald-400/40 hover:opacity-100")
           }
         >
           ✓ Approve &amp; Send
@@ -589,10 +614,10 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           onClick={() => setDecision("rejected")}
           aria-pressed={decision === "rejected"}
           className={
-            "flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-red-400 transition-all " +
+            "flex-1 border-b-2 px-4 py-2 text-sm font-semibold text-red-400 transition-all " +
             (decision === "rejected"
-              ? "bg-red-500/30 ring-1 ring-red-400/50"
-              : "bg-red-500/20 hover:bg-red-500/30")
+              ? "border-red-400 opacity-100"
+              : "border-transparent opacity-70 hover:border-red-400/40 hover:opacity-100")
           }
         >
           ✕ Reject
@@ -631,6 +656,14 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         </div>
       )}
 
+      {/* The result landing is the highest-intent moment on the site, and it
+          used to be the furthest thing from an ask -- two explainer cards and
+          an optional second 30s run sat between it and the only CTA, which
+          was at the very bottom of the page. Leads with "no card required"
+          rather than the price: /get-started asks for a name and an email and
+          nothing else, which is the fact that actually unblocks a click. */}
+      <ResultCta />
+
       {round === 1 ? (
         <Card className="space-y-3 border-[var(--accent)]/40 bg-[var(--accent)]/[0.05] p-5 shadow-lg shadow-[var(--accent)]/5">
           <div className="space-y-1">
@@ -648,7 +681,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
             onChange={(e) => setEditedDraft(e.target.value)}
             placeholder={result.draftReply}
             rows={4}
-            className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-sm leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] focus-visible:border-[var(--accent)]/50 focus-visible:outline-none"
+            className="w-full resize-none border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-sm leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.3)] transition-colors focus-visible:border-[var(--accent)]/60 focus-visible:outline-none focus-visible:ring-0"
           />
           <Button
             type="button"
@@ -678,35 +711,27 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         </div>
       )}
 
-      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <Block title="On a live account, this is what would happen next">
-          <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
-            <li>→ Reply goes to {result.leadEmail || "lead@example.com"} once approved</li>
-            {/* verdict.label, not result.qualification -- the raw value is a
-                snake_case enum, so this line read "Pushed to HubSpot as
-                needs_more_info" on two of the three possible outcomes. */}
-            <li>→ Pushed to HubSpot as {verdict.label}</li>
-            <li>→ Notification posted to your team Slack</li>
-            <li>→ Meeting link added if they accept</li>
-          </ul>
-          <p className="pt-1 text-xs text-[var(--text)] opacity-60">
-            Nothing was actually sent, pushed, or notified — this is a demo, and no account is connected.
-          </p>
-        </Block>
-      </Card>
-
-      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <Block title="Not a one-time trick — this is what every lead gets">
-          <ul className="space-y-2 text-sm text-[var(--text)] opacity-80">
-            <li>This same scoring and breakdown, on every lead that comes in — not just this one</li>
-            <li>Every correction you make becomes a permanent rule, exactly like you just watched</li>
-            <li>A human reviews every booking before it&apos;s confirmed</li>
-            <li>Customize what email replies come from</li>
-            <li>Connect HubSpot, Meta, Slack, Google Calendar</li>
-            <li>Daily reports on meetings booked &amp; replies sent</li>
-          </ul>
-        </Block>
-      </Card>
+      {/* Was two cards of six and four bullets. Most of it restated what the
+          visitor had just watched happen ("this same scoring, on every lead",
+          "every correction becomes a rule") and pushed the ask further down
+          the page. What's left is only what the demo genuinely can't show:
+          where a real reply goes, and that a human gates every booking. */}
+      <div className="space-y-2 pt-2 text-sm text-[var(--text)] opacity-70">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] opacity-70">
+          On a live account
+        </div>
+        <ul className="space-y-1.5">
+          <li>→ Reply goes to {result.leadEmail || "the lead"} once approved</li>
+          {/* verdict.label, not result.qualification -- the raw value is a
+              snake_case enum, so this line read "Pushed to HubSpot as
+              needs_more_info" on two of the three possible outcomes. */}
+          <li>→ Pushed to HubSpot as {verdict.label}, your team notified in Slack</li>
+          <li>→ A human reviews every booking before it&apos;s confirmed</li>
+        </ul>
+        <p className="pt-0.5 text-xs opacity-70">
+          Nothing was sent, pushed, or notified here — no account is connected.
+        </p>
+      </div>
     </div>
   );
 }
