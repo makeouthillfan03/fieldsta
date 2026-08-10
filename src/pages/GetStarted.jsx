@@ -101,6 +101,12 @@ function CheckoutCard() {
   const emailRef = useRef(null);
   const [status, setStatus] = useState("idle"); // idle | submitting | error
   const [message, setMessage] = useState("");
+  // The link that finishes setup, handed back by /api/quick-checkout so this
+  // page can offer it directly. Signing up used to end at "check your email":
+  // the pilot was already live, but the only way in was to leave the site,
+  // find a message and come back, which spends a new signup's enthusiasm on
+  // their inbox at precisely the moment it's highest.
+  const [setupUrl, setSetupUrl] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -126,7 +132,8 @@ function CheckoutCard() {
 
       track("get_started_start_trial");
       setStatus("idle");
-      setMessage(data.message || "Your pilot is live — check your email to set your password.");
+      setSetupUrl(data.setupUrl || "");
+      setMessage(data.message || "Your 14-day pilot is live.");
       e.target.reset();
     } catch {
       setStatus("error");
@@ -171,6 +178,19 @@ function CheckoutCard() {
         </Button>
         {message && (
           <p className={"text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
+        )}
+        {setupUrl && (
+          <a href={setupUrl} onClick={() => track("get_started_open_dashboard")} className="block">
+            <Button className="w-full bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
+              Set a password &amp; open your dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </a>
+        )}
+        {setupUrl && (
+          <p className="text-[11px] leading-relaxed text-[var(--text)] opacity-60">
+            Sent to your email too, in case you want to finish on another device.
+          </p>
         )}
       </form>
     </OptionShell>
