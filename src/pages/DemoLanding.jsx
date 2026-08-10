@@ -47,6 +47,7 @@ export default function DemoLanding() {
     <div className="font-body bg-[var(--bg)] text-[var(--text)]">
       <Nav />
       <Hero />
+      <TrustedBy />
       <DemoVideo />
       <LeadReviewDemo />
       <HowItWorks />
@@ -235,6 +236,40 @@ function Hero() {
         </div>
       </div>
 
+    </section>
+  );
+}
+
+// Real clients only -- WOWCABINET and ViralPicks (see clients.ts in the
+// agents repo). No fabricated logos, no "trusted by hundreds" inflation --
+// this site's honesty policy applies to social proof the same as every
+// other claim on it. Kept out of a card/border treatment on purpose, same
+// restraint as the rest of the page -- just the marks themselves, muted
+// until hovered.
+const TRUSTED_LOGOS = [
+  { name: "WOWCABINET", src: "/logos/wowcabinet.png", height: 22 },
+  { name: "ViralPicks", src: "/logos/viralpicks.png", height: 34 },
+];
+
+function TrustedBy() {
+  return (
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-14">
+      <Reveal className="container flex flex-col items-center gap-8">
+        <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-50">
+          Working with
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-6">
+          {TRUSTED_LOGOS.map((logo) => (
+            <img
+              key={logo.name}
+              src={logo.src}
+              alt={logo.name}
+              style={{ height: logo.height }}
+              className="opacity-60 grayscale transition-opacity duration-200 hover:opacity-100"
+            />
+          ))}
+        </div>
+      </Reveal>
     </section>
   );
 }
