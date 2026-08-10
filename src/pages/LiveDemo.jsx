@@ -10,7 +10,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
-import { getSampleRun } from "@/data/sampleRuns.js";
+import { getSampleRun, getWeakRun } from "@/data/sampleRuns.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
 // they wrote themselves, without booking a call first. This calls the SAME
@@ -113,6 +113,11 @@ export default function LiveDemo() {
   // -- the pitch is that a lead goes cold in minutes, so the elapsed time IS
   // the proof. Measured, not estimated: set from the real request duration.
   const [elapsedMs, setElapsedMs] = useState(null);
+  // A captured run has no duration this visitor experienced, so the elapsed
+  // line has to stay off for it -- showing "0 seconds" for a replay, next to
+  // copy asking how long their process takes, would be the page's one
+  // measured claim turned into a lie.
+  const [resultIsCached, setResultIsCached] = useState(false);
 
   const active = VERTICALS.find((v) => v.value === vertical);
 
@@ -186,10 +191,9 @@ export default function LiveDemo() {
     // in hand -- submitting anyway falls back to the vertical's sample and
     // fills the textarea so they can see exactly what got run, rather than
     // hitting a disabled button and leaving. Typing still wins over the sample.
-    const usedSample = !(overrides.message ?? message).trim();
-    const msg = usedSample ? active.sample : (overrides.message ?? message);
-    if (!msg.trim() || status === "running") return;
-    if (usedSample) setMessage(msg);
+    const msg = (overrides.message ?? message).trim();
+    if (!msg || status === "running") return;
+    const usedSample = msg === active.sample;
     setStatus("running");
     setError("");
     setResult(null);
@@ -210,6 +214,7 @@ export default function LiveDemo() {
         priorEdit: overrides.priorEdit,
       });
       setElapsedMs(took);
+      setResultIsCached(false);
       setResult(data);
       setStatus("done");
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
@@ -234,11 +239,47 @@ export default function LiveDemo() {
   // sceptical visitor than another success does, and it's the claim the page
   // already makes. Runs the same endpoint on a deliberately out-of-ICP lead;
   // the verdict is still whatever the agent genuinely returns.
+  // With the captured run already on screen, "run the example" would spend
+  // one of three hourly runs to recompute an answer the visitor is currently
+  // looking at. So an empty box no longer fires a request -- it puts the
+  // cursor where their own lead goes, which is the only input we don't
+  // already have an answer for. Not a dead button: it does something, and
+  // nothing is being withheld behind it any more.
+  const [needsLead, setNeedsLead] = useState(false);
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!message.trim()) {
+      setNeedsLead(true);
+      messageRef.current?.focus();
+      messageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setNeedsLead(false);
+    run(e);
+  }
+
+  // The rejection demo always sends the same fixed lead, so a live call here
+  // spends one of the visitor's three hourly runs to recompute an answer we
+  // already have verbatim. Replaying the capture makes it instant and free,
+  // and leaves the live budget for leads we haven't seen -- theirs. Falls
+  // back to a real run only where no capture exists yet.
   function runWeak() {
     if (status === "running") return;
     const msg = active.weakSample;
+    const cached = getWeakRun(vertical);
     setMessage(msg);
-    track("demo_weak_lead", { vertical });
+    if (cached) {
+      track("demo_weak_lead", { vertical, cached: true });
+      setError("");
+      setElapsedMs(null);
+      setResultIsCached(true);
+      setResult(cached);
+      setRound(1);
+      setStatus("done");
+      markVirtualPageview("completed");
+      return;
+    }
+    track("demo_weak_lead", { vertical, cached: false });
     run(null, { message: msg });
   }
 
@@ -289,7 +330,7 @@ export default function LiveDemo() {
           />
         )}
 
-        <form onSubmit={run} className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
               What kind of business
@@ -331,7 +372,10 @@ export default function LiveDemo() {
               id="leadMessage"
               ref={messageRef}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (e.target.value.trim()) setNeedsLead(false);
+              }}
               rows={2}
               maxLength={4000}
               placeholder="Paste or type what a lead sent you… (optional — leave blank to use an example)"
@@ -354,12 +398,15 @@ export default function LiveDemo() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Qualifying… {Math.round(progress)}%
                 </>
-              ) : message.trim() ? (
-                "Run it"
               ) : (
-                "Watch it run on an example lead"
+                "Run it on your own lead"
               )}
             </Button>
+            {needsLead && (
+              <p className="w-full text-[13px] text-[var(--accent)]">
+                Paste a lead above and it runs live on that — the example is already answered up top.
+              </p>
+            )}
             {status !== "running" && (
               <button
                 type="button"
@@ -397,6 +444,7 @@ export default function LiveDemo() {
           <Result
             result={result}
             elapsedMs={elapsedMs}
+            isCached={resultIsCached}
             round={round}
             appliedEdit={appliedEdit}
             editedDraft={editedDraft}
@@ -706,7 +754,7 @@ function WaitMath({ elapsedMs }) {
   );
 }
 
-function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running, elapsedMs }) {
+function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running, elapsedMs, isCached }) {
   const verdict = VERDICT[result.qualification] ?? VERDICT.needs_more_info;
   const { Icon } = verdict;
   // Approve/Reject is per-result: this component stays mounted across a
@@ -753,6 +801,12 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           visitor supplies about their own process persuades harder than a
           stat we'd have to source, and we don't have to stand behind
           someone else's survey to make the point. */}
+      {isCached && (
+        <p className="text-[13px] text-[var(--text)] opacity-55">
+          A captured run on this lead — paste your own below to watch it live.
+        </p>
+      )}
+
       {elapsedMs != null && (
         <div className="space-y-2">
           <p className="text-sm text-[var(--text)]">
