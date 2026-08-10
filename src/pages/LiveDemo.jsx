@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
-import ParticleSkyline from "@/components/ParticleSkyline";
 import SiteHeader from "@/components/SiteHeader";
-import { useIsDarkTheme } from "@/components/ThemeToggle";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
@@ -89,7 +87,6 @@ const VERDICT = {
 };
 
 export default function LiveDemo() {
-  const dark = useIsDarkTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [vertical, setVertical] = useState("saas");
@@ -131,6 +128,31 @@ export default function LiveDemo() {
     el.style.height = `${el.scrollHeight}px`;
   }, [message]);
 
+  // "I corrected it and it learned" is the most persuasive thing on this page
+  // and the hardest to reach: it asks someone who just waited half a minute
+  // to wait another half a minute. They spend that time writing the
+  // correction anyway, so the request starts on a typing pause and the
+  // submit usually resolves in a couple of seconds instead of thirty.
+  //
+  // The cost is one speculative agent run per visitor who starts an edit and
+  // then abandons it. That's a small, already-engaged group, and the 1.5s
+  // debounce means idle keystrokes don't each fire one.
+  const prefetchRef = useRef({ key: null, promise: null });
+  useEffect(() => {
+    const edited = editedDraft.trim();
+    if (round !== 1 || !result?.draftReply || edited.length < 15) return;
+    if (edited === result.draftReply.trim()) return;
+    if (prefetchRef.current.key === edited) return;
+    const timer = setTimeout(() => {
+      const promise = startQualify({
+        message: active.sample2 || active.sample,
+        priorEdit: { draft: result.draftReply, edited },
+      }).catch(() => null);
+      prefetchRef.current = { key: edited, promise };
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [editedDraft, result, round]);
+
   useEffect(() => {
     if (status === "running") {
       setProgress(4);
@@ -162,6 +184,26 @@ export default function LiveDemo() {
     navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
   }
 
+  // One request, timed from the moment it actually leaves. Split out of run()
+  // so the round-2 prefetch can start the same call early and hand the
+  // in-flight promise back in.
+  function startQualify({ message: msg, priorEdit }) {
+    const startedAt = Date.now();
+    return fetch(`${AGENTS_BASE}/api/demo-qualify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        vertical,
+        message: msg,
+        ...(priorEdit ? { priorEdit } : {}),
+      }),
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Something went wrong.");
+      return { data, elapsedMs: Date.now() - startedAt };
+    });
+  }
+
   async function run(e, overrides = {}) {
     e?.preventDefault?.();
     // An empty box is the common case for ad traffic, who arrive with no lead
@@ -186,20 +228,22 @@ export default function LiveDemo() {
       markVirtualPageview("running");
     }
 
-    const startedAt = Date.now();
     try {
-      const res = await fetch(`${AGENTS_BASE}/api/demo-qualify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vertical,
-          message: msg,
-          ...(overrides.priorEdit ? { priorEdit: overrides.priorEdit } : {}),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || "Something went wrong.");
-      setElapsedMs(Date.now() - startedAt);
+      // overrides.pending is an already-in-flight request started while the
+      // visitor was typing (see the round-2 prefetch). It carries its own
+      // start time so the elapsed figure stays the agent's real duration --
+      // reporting the time from *submit* would show "2 seconds" for work
+      // that actually took thirty, which is the one number on this page
+      // that has to be true.
+      // A prefetch that failed resolves to null rather than rejecting (so it
+      // can't surface as an unhandled rejection while the visitor is still
+      // typing); falling back to a fresh request here is what makes that
+      // safe -- a warm request that died must not take the real one down
+      // with it.
+      let payload = overrides.pending ? await overrides.pending : null;
+      if (!payload) payload = await startQualify({ message: msg, priorEdit: overrides.priorEdit });
+      const { data, elapsedMs: took } = payload;
+      setElapsedMs(took);
       setResult(data);
       setStatus("done");
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
@@ -234,11 +278,21 @@ export default function LiveDemo() {
 
   function runWithEdit() {
     if (!editedDraft.trim() || !result?.draftReply) return;
-    const priorEdit = { draft: result.draftReply, edited: editedDraft.trim() };
+    const edited = editedDraft.trim();
+    const priorEdit = { draft: result.draftReply, edited };
     const nextMessage = active.sample2 || active.sample;
     setMessage(nextMessage);
     setRound(2);
-    run(null, { message: nextMessage, priorEdit });
+    // Only reuse the warm request if it was started from *exactly* this text.
+    // If they kept typing after the prefetch fired, the key no longer matches
+    // and this falls through to a fresh run -- showing a result computed from
+    // a half-written correction while claiming "that correction just applied
+    // itself" would be a lie, and it's the whole point of the feature.
+    const warm = prefetchRef.current;
+    const pending = warm.key === edited ? warm.promise : null;
+    prefetchRef.current = { key: null, promise: null };
+    track("demo_edit_rerun", { vertical, prefetched: Boolean(pending) });
+    run(null, { message: nextMessage, priorEdit, pending });
   }
 
   function resetDemo() {
@@ -252,12 +306,6 @@ export default function LiveDemo() {
 
   return (
     <div className="relative min-h-screen bg-[var(--bg)] font-body text-[var(--text)]">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(140%_95%_at_50%_0%,rgba(var(--text-rgb),0.06)_0%,rgba(var(--text-rgb),0.02)_28%,transparent_62%)]" />
-        <ParticleSkyline className="absolute inset-0 h-full w-full opacity-60" dark={dark} />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(var(--bg-rgb),0.5)_55%,var(--bg)_100%)]" />
-      </div>
-
       <SiteHeader />
 
       <div className="container relative z-10 max-w-3xl py-6 sm:py-10">
@@ -270,9 +318,6 @@ export default function LiveDemo() {
             Paste a real <span className="font-semibold text-[var(--accent)]">lead</span>. Watch it{" "}
             <span className="font-semibold text-[var(--accent)]">stop going cold</span>.
           </h1>
-          <p className="max-w-lg text-sm text-[var(--text)] opacity-70">
-            Same agent as the paying accounts. It will tell you no when the answer is no.
-          </p>
         </div>
 
         {!result && status !== "running" && <SamplePeek />}
@@ -791,9 +836,6 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           <li>→ Pushed to HubSpot as {verdict.label}, your team notified in Slack</li>
           <li>→ A human reviews every booking before it&apos;s confirmed</li>
         </ul>
-        <p className="pt-0.5 text-xs opacity-70">
-          Nothing was sent, pushed, or notified here — no account is connected.
-        </p>
       </div>
     </div>
   );
