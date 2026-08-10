@@ -140,8 +140,14 @@ export default function LiveDemo() {
 
   async function run(e, overrides = {}) {
     e?.preventDefault?.();
-    const msg = overrides.message ?? message;
+    // An empty box is the common case for ad traffic, who arrive with no lead
+    // in hand -- submitting anyway falls back to the vertical's sample and
+    // fills the textarea so they can see exactly what got run, rather than
+    // hitting a disabled button and leaving. Typing still wins over the sample.
+    const usedSample = !(overrides.message ?? message).trim();
+    const msg = usedSample ? active.sample : (overrides.message ?? message);
     if (!msg.trim() || status === "running") return;
+    if (usedSample) setMessage(msg);
     setStatus("running");
     setError("");
     setResult(null);
@@ -151,8 +157,8 @@ export default function LiveDemo() {
     // shouldn't inflate "how many people tried the demo" numbers.
     const attribution = getAttribution();
     if (!overrides.priorEdit) {
-      track("demo_started", { ...attribution, vertical });
-      reportFunnelEvent("demo_started", { vertical });
+      track("demo_started", { ...attribution, vertical, usedSample });
+      reportFunnelEvent("demo_started", { vertical, usedSample });
       markVirtualPageview("running");
     }
 
@@ -292,7 +298,7 @@ export default function LiveDemo() {
 
           <Button
             type="submit"
-            disabled={!message.trim() || status === "running"}
+            disabled={status === "running"}
             className="w-full bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
           >
             {status === "running" ? (
@@ -300,8 +306,10 @@ export default function LiveDemo() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Qualifying… {Math.round(progress)}%
               </>
-            ) : (
+            ) : message.trim() ? (
               "Run it"
+            ) : (
+              "Watch it run on an example lead"
             )}
           </Button>
 
