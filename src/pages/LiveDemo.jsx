@@ -587,6 +587,90 @@ function ResultCta() {
   );
 }
 
+// Turns the question the elapsed line already asks into an input, using only
+// arithmetic on numbers the visitor supplies and the run they just watched.
+//
+// Deliberately NOT a revenue figure. "You're losing $47,000 a month" needs a
+// close rate and a deal size we don't have and a slow-response penalty we'd
+// have to invent -- and an invented multiplier is exactly what makes a
+// sophisticated buyer stop believing the rest of the page. Leads x wait is a
+// quantity that's simply true, and "1,200 hours a month of leads sitting
+// unanswered" lands harder than a number they can tell we made up.
+function WaitMath({ elapsedMs }) {
+  const [leads, setLeads] = useState("");
+  const [hours, setHours] = useState("");
+
+  const leadsNum = Number(leads);
+  const hoursNum = Number(hours);
+  const ready = leadsNum > 0 && hoursNum > 0 && Number.isFinite(leadsNum) && Number.isFinite(hoursNum);
+
+  const theirs = ready ? leadsNum * hoursNum : 0;
+  const ours = ready ? (leadsNum * (elapsedMs / 1000)) / 3600 : 0;
+
+  // Fires once per completed pair, debounced so half-typed numbers ("4" on
+  // the way to "400") don't each report. Worth capturing beyond funnel
+  // curiosity: this is real prospects self-reporting their lead volume and
+  // current response time, which is the ICP data the outbound targeting is
+  // otherwise guessing at.
+  const reported = useRef(null);
+  useEffect(() => {
+    if (!ready) return;
+    const key = `${leadsNum}:${hoursNum}`;
+    if (reported.current === key) return;
+    const timer = setTimeout(() => {
+      reported.current = key;
+      track("demo_wait_math", { leadsPerMonth: leadsNum, responseHours: hoursNum });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [ready, leadsNum, hoursNum]);
+  const fmt = (n) => (n >= 10 ? Math.round(n).toLocaleString() : n.toFixed(1));
+
+  const fieldClass =
+    "w-16 border-0 border-b border-[rgba(var(--text-rgb),0.25)] bg-transparent px-0 py-0.5 text-center text-[var(--text)] transition-colors focus-visible:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-0";
+
+  return (
+    <div className="space-y-2 pt-1 text-sm text-[var(--text)]">
+      <p className="opacity-70">
+        About{" "}
+        <input
+          type="number"
+          min="1"
+          inputMode="numeric"
+          value={leads}
+          onChange={(e) => setLeads(e.target.value)}
+          placeholder="400"
+          aria-label="Leads per month"
+          className={fieldClass}
+        />{" "}
+        leads a month, and roughly{" "}
+        <input
+          type="number"
+          min="0"
+          step="0.5"
+          inputMode="decimal"
+          value={hours}
+          onChange={(e) => setHours(e.target.value)}
+          placeholder="3"
+          aria-label="Hours before someone replies"
+          className={fieldClass}
+        />{" "}
+        hours before someone replies?
+      </p>
+      {ready && (
+        <p className="leading-relaxed">
+          <span className="font-medium">{fmt(theirs)} hours a month</span>
+          <span className="opacity-70">
+            {" "}
+            of leads sitting unanswered. At the speed you just watched, that same volume waits{" "}
+          </span>
+          <span className="font-medium">{fmt(ours)} hours</span>
+          <span className="opacity-70">.</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running, elapsedMs }) {
   const verdict = VERDICT[result.qualification] ?? VERDICT.needs_more_info;
   const { Icon } = verdict;
@@ -635,15 +719,15 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           stat we'd have to source, and we don't have to stand behind
           someone else's survey to make the point. */}
       {elapsedMs != null && (
-        <p className="text-sm text-[var(--text)]">
-          <span className="font-medium">
-            {(elapsedMs / 1000).toFixed(0)} seconds
-          </span>
-          <span className="opacity-70">
-            {" "}
-            from message to drafted reply. How long does that take you today?
-          </span>
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-[var(--text)]">
+            <span className="font-medium">
+              {(elapsedMs / 1000).toFixed(0)} seconds
+            </span>
+            <span className="opacity-70"> from message to drafted reply.</span>
+          </p>
+          <WaitMath elapsedMs={elapsedMs} />
+        </div>
       )}
 
       <div className="space-y-4 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
