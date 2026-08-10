@@ -165,7 +165,7 @@ function Nav() {
               size="sm"
               className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
             >
-              Get Started
+              Start Free Trial
             </Button>
           </a>
           <Link to="/try">
@@ -712,7 +712,7 @@ const faqs = [
   },
   {
     q: "How does the free trial work?",
-    a: "It's live the moment you sign up — 14 days, capped at 3 leads/day so you can see real replies against your own leads before paying anything. Upgrade to Starter whenever you're ready and the cap lifts.",
+    a: "No card required — it's live the moment you sign up. 14 days, capped at 3 leads/day so you can see real replies against your own leads before paying anything. Upgrade to Starter whenever you're ready and the cap lifts.",
   },
   {
     q: "Can I feed it my own data?",
@@ -746,7 +746,7 @@ const PLANS = [
     price: "$500",
     volume: "Up to ~150 qualified leads/mo",
     fit: "Fits one account, or a single active campaign's lead flow.",
-    cta: "Start your free pilot",
+    cta: "Start free trial",
     action: "signup",
     highlight: false,
   },
@@ -782,7 +782,7 @@ function Pricing() {
             Straightforward Pricing, No Surprises
           </h2>
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
-            14-day free trial
+            14-day free trial — no card required to start
           </div>
         </Reveal>
 
