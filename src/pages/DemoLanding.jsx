@@ -163,15 +163,27 @@ function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
       <div className="container grid h-16 grid-cols-[1fr_auto_1fr] items-center">
-        {/* Desktop only -- on mobile the logo moves to the center slot
-            below instead, since the left slot is empty there (nav links
-            and the logo's usual spot both drop out), and an empty 1fr
-            track still holds its share of width either way, which is
-            what keeps the center slot visually centered rather than
-            drifting toward whichever side has content. */}
-        <a href="/" className="hidden items-center gap-2 justify-self-start md:flex">
-          <FieldstaLogoMark />
-        </a>
+        <div className="justify-self-start">
+          {/* Desktop only -- on mobile the logo moves to the center slot
+              below instead. */}
+          <a href="/" className="hidden items-center gap-2 md:flex">
+            <FieldstaLogoMark />
+          </a>
+          {/* display:none contributes zero width to its grid track, so a
+              simply-hidden left slot collapses toward 0 while the button-
+              heavy right slot stays wide -- that asymmetry is what was
+              actually dragging the "centered" logo left instead of
+              centering it. An invisible clone of the real button (same
+              markup, `invisible` instead of `hidden` so it keeps its
+              layout box) reserves the same width on the left as the real
+              button takes on the right, keeping the two side tracks equal
+              and the logo genuinely centered between them. */}
+          <div className="invisible md:hidden" aria-hidden="true">
+            <Button size="sm" className="font-bold">
+              Start Free Trial
+            </Button>
+          </div>
+        </div>
         <div className="flex items-center justify-self-center">
           <a href="/" className="flex items-center gap-2 md:hidden">
             <FieldstaLogoMark />
