@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { track } from "@vercel/analytics/react";
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
+import { ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,8 @@ import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
-import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
+import SiteHeader from "@/components/SiteHeader";
+import { useIsDarkTheme } from "@/components/ThemeToggle";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
@@ -218,19 +219,10 @@ export default function LiveDemo() {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(var(--bg-rgb),0.5)_55%,var(--bg)_100%)]" />
       </div>
 
-      <div className="container relative z-10 max-w-3xl py-6 sm:py-10">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-xs text-[var(--text)] opacity-70 transition-colors hover:opacity-100"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Fieldsta
-          </Link>
-          <ThemeToggle />
-        </div>
+      <SiteHeader />
 
-        <div className="mt-6 space-y-3 sm:mt-8">
+      <div className="container relative z-10 max-w-3xl py-6 sm:py-10">
+        <div className="space-y-3">
           <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
             <Triangle />
             Live demo
@@ -317,16 +309,16 @@ export default function LiveDemo() {
           </Button>
 
           {status === "running" && (
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-[rgba(var(--text-rgb),0.1)]">
                 <div
                   className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs text-[var(--text)] opacity-60">
-                Reading the message and checking it against qualifying criteria — the same steps
-                as a live account, 20–40 seconds start to finish.
+              <RunSteps progress={progress} />
+              <p className="text-xs text-[var(--text)] opacity-50">
+                Same steps as a live account — 20–40 seconds start to finish.
               </p>
             </div>
           )}
@@ -390,6 +382,53 @@ export default function LiveDemo() {
       </div>
       <SalesChatWidget />
     </div>
+  );
+}
+
+// The run is a single opaque request -- the agents service reports no
+// intermediate progress -- so these are paced off the same eased timer the
+// bar uses, not real telemetry. They're the actual stages the Responder goes
+// through, in order, which is why the finished result has a criteria
+// breakdown and research notes in it; what's estimated is when each one
+// lands, not whether it happens. A bar alone over 40 seconds reads as a hang,
+// and this is the stretch where a visitor who just clicked has the least
+// invested and the most reason to leave.
+const RUN_STEPS = [
+  "Reading the message",
+  "Checking it against qualifying criteria",
+  "Filling in what the message left out",
+  "Drafting the reply",
+];
+
+function RunSteps({ progress }) {
+  const activeStep = Math.min(RUN_STEPS.length - 1, Math.floor(progress / (100 / RUN_STEPS.length)));
+  return (
+    <ul className="space-y-2">
+      {RUN_STEPS.map((step, i) => {
+        const done = i < activeStep;
+        const active = i === activeStep;
+        return (
+          <li
+            key={step}
+            className={
+              "flex items-center gap-2.5 text-[13px] transition-opacity duration-300 " +
+              (done ? "opacity-45" : active ? "opacity-100" : "opacity-25")
+            }
+          >
+            <span className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">
+              {done ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+              ) : active ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--accent)]" />
+              ) : (
+                <span className="h-1 w-1 rounded-full bg-[var(--text)]" />
+              )}
+            </span>
+            <span className="text-[var(--text)]">{step}</span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
