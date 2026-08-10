@@ -45,6 +45,8 @@ const VERTICALS = [
       "We run paid ads for about a dozen contractor clients and generate maybe 400 leads a month between them. Honestly our follow-up is inconsistent — leads sit for hours before anyone calls. What does something like this cost?",
     sample2:
       "We're a smaller agency, maybe 150 leads a month across 4 clients. Our issue isn't volume, it's that whoever's free just wings the reply and it's inconsistent. Curious if this could plug into what we already use.",
+    weakSample:
+      "Hi! I'm a second-year student writing a paper on AI in sales and I found your site. Could you send over any documentation or whitepapers you have? Not looking to buy anything, just for my coursework.",
   },
   {
     value: "home-services",
@@ -53,6 +55,8 @@ const VERTICALS = [
       "We had that big hailstorm come through last week and I'm seeing dented gutters and shingles in the yard. Insurance adjuster is coming Friday but I want a roofer's opinion before then. Can someone come take a look this week?",
     sample2:
       "Noticed a soft spot on the roof near the chimney after all that rain last week. Nothing's leaking yet but I'd rather get ahead of it. Could someone swing by sometime this week to take a look?",
+    weakSample:
+      "hey do you guys sell gift cards? looking for something for my brother in law, he just bought a house. thanks",
   },
   {
     value: "legal",
@@ -61,6 +65,8 @@ const VERTICALS = [
       "I was rear ended on the highway last Tuesday. Other driver admitted fault to the officer but their insurance is already lowballing me. I have a police report and went to urgent care same day, still getting neck pain. Do you handle cases like this?",
     sample2:
       "Slipped on a wet floor at a grocery store two weeks ago, no warning sign was out. Hurt my wrist pretty bad, went to the ER same day and got an X-ray. Store manager took a report. Is this something you'd take on?",
+    weakSample:
+      "My landlord put my rent up by $40 a month and I don't think that's fair. Is that something you'd be able to help with?",
   },
 ];
 
@@ -68,17 +74,17 @@ const VERDICT = {
   qualified: {
     label: "Qualified",
     Icon: CheckCircle2,
-    className: "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
+    flatClassName: "text-emerald-400",
   },
   needs_more_info: {
     label: "Needs more info",
     Icon: HelpCircle,
-    className: "text-amber-400 border-amber-400/30 bg-amber-400/10",
+    flatClassName: "text-amber-400",
   },
   not_a_fit: {
     label: "Not a fit",
     Icon: XCircle,
-    className: "text-[#FF4438] border-[#FF4438]/30 bg-[#FF4438]/10",
+    flatClassName: "text-[#FF4438]",
   },
 };
 
@@ -104,8 +110,26 @@ export default function LiveDemo() {
   // 100% the moment the real response actually lands.
   const [progress, setProgress] = useState(0);
   const progressTimer = useRef(null);
+  // How long the run actually took. The page used to apologise for this
+  // number ("20-40 seconds start to finish") when it's the thing being sold
+  // -- the pitch is that a lead goes cold in minutes, so the elapsed time IS
+  // the proof. Measured, not estimated: set from the real request duration.
+  const [elapsedMs, setElapsedMs] = useState(null);
 
   const active = VERTICALS.find((v) => v.value === vertical);
+
+  // Grows to fit its content instead of scrolling. A fixed height can't win
+  // here: tall enough for a pasted lead pushes the CTA under the fold on a
+  // small phone, short enough to protect the fold makes the sample scroll
+  // the moment it's filled in. Auto-sizing gets both -- compact while empty,
+  // never a scrollbar once there's text.
+  const messageRef = useRef(null);
+  useEffect(() => {
+    const el = messageRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [message]);
 
   useEffect(() => {
     if (status === "running") {
@@ -162,6 +186,7 @@ export default function LiveDemo() {
       markVirtualPageview("running");
     }
 
+    const startedAt = Date.now();
     try {
       const res = await fetch(`${AGENTS_BASE}/api/demo-qualify`, {
         method: "POST",
@@ -174,6 +199,7 @@ export default function LiveDemo() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong.");
+      setElapsedMs(Date.now() - startedAt);
       setResult(data);
       setStatus("done");
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
@@ -190,6 +216,20 @@ export default function LiveDemo() {
         track("demo_error", { ...attribution, vertical });
       }
     }
+  }
+
+  // "It will tell you no when the answer is no" was an assertion with nothing
+  // behind it -- every sample on the page is a lead that qualifies, so nobody
+  // ever saw a refusal. Watching it turn something down does more for a
+  // sceptical visitor than another success does, and it's the claim the page
+  // already makes. Runs the same endpoint on a deliberately out-of-ICP lead;
+  // the verdict is still whatever the agent genuinely returns.
+  function runWeak() {
+    if (status === "running") return;
+    const msg = active.weakSample;
+    setMessage(msg);
+    track("demo_weak_lead", { vertical });
+    run(null, { message: msg });
   }
 
   function runWithEdit() {
@@ -269,20 +309,21 @@ export default function LiveDemo() {
           </div>
 
           <div className="space-y-2">
-            <Label
-              htmlFor="leadMessage"
-              className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60"
-            >
+            {/* The placeholder already says what this is and that it's
+                optional, so the label was a second copy of the same sentence
+                costing a line of fold. Kept for screen readers. */}
+            <Label htmlFor="leadMessage" className="sr-only">
               What the lead said
             </Label>
             <textarea
               id="leadMessage"
+              ref={messageRef}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={2}
               maxLength={4000}
               placeholder="Paste or type what a lead sent you… (optional — leave blank to use an example)"
-              className="w-full resize-none border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.3)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0"
+              className="w-full resize-none overflow-hidden border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.3)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
 
@@ -290,22 +331,33 @@ export default function LiveDemo() {
               full-width CTA sitting inside the fold collides with it on
               mobile -- reserve the bubble's width rather than let it sit on
               top of the page's primary action. */}
-          <Button
-            type="submit"
-            disabled={status === "running"}
-            className="w-[calc(100%-4.5rem)] bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
-          >
-            {status === "running" ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Qualifying… {Math.round(progress)}%
-              </>
-            ) : message.trim() ? (
-              "Run it"
-            ) : (
-              "Watch it run on an example lead"
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Button
+              type="submit"
+              disabled={status === "running"}
+              className="w-[calc(100%-4.5rem)] bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
+            >
+              {status === "running" ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Qualifying… {Math.round(progress)}%
+                </>
+              ) : message.trim() ? (
+                "Run it"
+              ) : (
+                "Watch it run on an example lead"
+              )}
+            </Button>
+            {status !== "running" && (
+              <button
+                type="button"
+                onClick={runWeak}
+                className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+              >
+                Or watch it turn one down →
+              </button>
             )}
-          </Button>
+          </div>
 
           {status === "running" && (
             <div className="space-y-3">
@@ -332,6 +384,7 @@ export default function LiveDemo() {
         {result && (
           <Result
             result={result}
+            elapsedMs={elapsedMs}
             round={round}
             appliedEdit={appliedEdit}
             editedDraft={editedDraft}
@@ -489,7 +542,7 @@ function ResultCta() {
   );
 }
 
-function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running }) {
+function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRunWithEdit, onReset, running, elapsedMs }) {
   const verdict = VERDICT[result.qualification] ?? VERDICT.needs_more_info;
   const { Icon } = verdict;
   // Approve/Reject is per-result: this component stays mounted across a
@@ -501,8 +554,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
   return (
     <div className="animate-fade-up mt-10 space-y-4">
       {round === 2 && appliedEdit && (
-        <div className="flex items-center gap-2.5 rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/[0.06] px-4 py-3 text-sm text-[var(--text)]">
-          <span className="text-base">✨</span>
+        <div className="flex items-center gap-2.5 border-l-0 text-sm text-[var(--text)]">
           <span>
             <span className="font-semibold text-[var(--accent)]">That correction just applied itself.</span>{" "}
             This is a different lead, and it already knows what you fixed.
@@ -520,8 +572,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         )}
         <span
           className={
-            "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium " +
-            verdict.className
+            "inline-flex items-center gap-1.5 text-xs font-medium " + verdict.flatClassName
           }
         >
           <Icon className="h-3.5 w-3.5" />
@@ -531,6 +582,24 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
           <span className="text-[11px] text-[var(--text)] opacity-60">Flagged for human review</span>
         )}
       </div>
+
+      {/* The elapsed time is the pitch, not an apology for a wait -- the
+          whole product is that a lead goes cold before anyone gets to it.
+          Deliberately asks rather than citing a benchmark: a number the
+          visitor supplies about their own process persuades harder than a
+          stat we'd have to source, and we don't have to stand behind
+          someone else's survey to make the point. */}
+      {elapsedMs != null && (
+        <p className="text-sm text-[var(--text)]">
+          <span className="font-medium">
+            {(elapsedMs / 1000).toFixed(0)} seconds
+          </span>
+          <span className="opacity-70">
+            {" "}
+            from message to drafted reply. How long does that take you today?
+          </span>
+        </p>
+      )}
 
       <div className="space-y-4 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
         <Block title={result.score ? `Why this scored ${result.score.score}, not 100` : "Why"}>
@@ -626,12 +695,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       {decision && (
         <div
           role="status"
-          className={
-            "rounded-lg border px-4 py-3 text-sm leading-relaxed " +
-            (decision === "approved"
-              ? "border-emerald-400/30 bg-emerald-400/10 text-[var(--text)]"
-              : "border-red-400/30 bg-red-400/10 text-[var(--text)]")
-          }
+          className="pt-1 text-sm leading-relaxed text-[var(--text)] opacity-80"
         >
           {decision === "approved" ? (
             <>
