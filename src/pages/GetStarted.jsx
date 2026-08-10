@@ -9,21 +9,18 @@ import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
-import { reportFunnelEvent } from "@/lib/attribution.js";
 
 // Landing spot for the pricing section's "Start free trial" CTA. The first
 // card used to open Harper pre-primed with an auto-message and let the
 // conversation produce a Stripe link -- replaced with a direct form against
-// fieldsta-agents' POST /api/quick-checkout, which creates the pilot
-// (14-day trial, capped at 3 leads/day -- see server.ts) with no LLM turn
-// in the loop at all. Two buttons on that one form: "Start free trial"
-// (skipCheckout: true) leaves it there, no card ever asked for -- the pilot
-// is already fully live and usable at that point regardless, card entry
-// was never actually gating trial access. "Go straight to checkout" does
-// the identical signup plus an immediate Stripe redirect, for anyone who's
-// already decided to pay. "Talk to Harper" and "have someone reach out" are
-// unchanged -- chat is still the right tool for anyone who actually wants
-// to ask something first.
+// fieldsta-agents' POST /api/quick-checkout (skipCheckout: true), which
+// creates the pilot (14-day trial, capped at 3 leads/day -- see server.ts)
+// with no card asked for and no LLM turn in the loop at all -- the pilot is
+// fully live and usable at that point regardless, card entry was never
+// actually gating trial access; paying is a Billing-settings action once
+// someone's in the dashboard, not a choice made on this page. "Talk to
+// Harper" and "have someone reach out" are unchanged -- chat is still the
+// right tool for anyone who actually wants to ask something first.
 export default function GetStarted() {
   const dark = useIsDarkTheme();
 
@@ -69,20 +66,20 @@ export default function GetStarted() {
   );
 }
 
-function OptionShell({ title, badge, blurb, children }) {
+function OptionShell({ title, badge, children }) {
   return (
     <div className="flex h-full flex-col py-8 text-center sm:px-8 sm:py-0">
       <div className="flex justify-center">
         <Triangle className="mb-3" />
       </div>
-      <h2 className="text-base font-semibold text-[var(--text)]">{title}</h2>
+      <h2 className="font-editorial text-2xl font-medium tracking-tight text-[var(--text)]">{title}</h2>
       {badge && (
-        <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
+        <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
           {badge}
         </div>
       )}
-      <p className="mt-2 flex-1 text-sm leading-relaxed text-[var(--text)] opacity-70">{blurb}</p>
-      <div className="mt-6">{children}</div>
+      <div className="mt-6 flex-1" />
+      <div>{children}</div>
     </div>
   );
 }
@@ -92,22 +89,22 @@ const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fiel
 const fieldClass =
   "border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.5)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
 
-// Two submit buttons, one form: "Start free trial" creates the pilot with
-// skipCheckout so no card is ever asked for (the pilot is fully live and
-// usable either way -- see server.ts's /api/quick-checkout, which grants it
-// before Stripe ever enters the picture), "Go to checkout" does the same
-// signup but adds the immediate Stripe redirect for anyone who's already
-// decided to pay. Sharing one form/one handler means the two paths can never
-// drift apart on what counts as a valid business name/email.
+// One button, matching TalkToHarperCard/ReachOutCard's shape exactly (a
+// single full-width solid button, no secondary link) -- creates the pilot
+// with skipCheckout so no card is ever asked for. The pilot is fully live
+// and usable at that point regardless (see server.ts's /api/quick-checkout,
+// which grants it before Stripe ever enters the picture) -- paying is
+// something to do later from the dashboard's Billing settings once someone
+// actually wants to, not a second choice to make on this page.
 function CheckoutCard() {
   const businessNameRef = useRef(null);
   const emailRef = useRef(null);
-  const [status, setStatus] = useState("idle"); // idle | "trial" | "checkout" | error
+  const [status, setStatus] = useState("idle"); // idle | submitting | error
   const [message, setMessage] = useState("");
 
-  async function handleSubmit(skipCheckout) {
-    if (!businessNameRef.current.reportValidity() || !emailRef.current.reportValidity()) return;
-    setStatus(skipCheckout ? "trial" : "checkout");
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("submitting");
     setMessage("");
 
     try {
@@ -117,7 +114,7 @@ function CheckoutCard() {
         body: JSON.stringify({
           businessName: businessNameRef.current.value,
           contactEmail: emailRef.current.value,
-          skipCheckout,
+          skipCheckout: true,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -127,53 +124,27 @@ function CheckoutCard() {
         return;
       }
 
-      track(skipCheckout ? "get_started_start_trial" : "get_started_checkout_now");
-      if (data.checkoutUrl) {
-        // cid-gated no-op for non-cold-email visits (see reportFunnelEvent's
-        // own doc comment) -- ties a checkout-started event back to the
-        // specific prospect record for cold-email-sourced signups, the same
-        // way demo_started/demo_completed already do on LiveDemo.jsx. Only
-        // fired on the real checkout path -- starting a free trial isn't a
-        // checkout-started event.
-        reportFunnelEvent("checkout_started");
-        // Redirect rather than open in a new tab -- this is a real Stripe
-        // Checkout session tied to the pilot account just created, not a
-        // reference link; leaving this tab on a dead form after the
-        // account already exists would be confusing.
-        window.location.href = data.checkoutUrl;
-        return;
-      }
-
-      // Pilot account is live either way (see server.ts's /api/quick-
-      // checkout) even for the checkout path if Stripe itself wasn't
-      // reachable -- only the redirect failed, not the signup.
+      track("get_started_start_trial");
       setStatus("idle");
       setMessage(data.message || "Your pilot is live — check your email to set your password.");
-      businessNameRef.current.value = "";
-      emailRef.current.value = "";
+      e.target.reset();
     } catch {
       setStatus("error");
       setMessage("Something went wrong. Try again.");
     }
   }
 
-  const submitting = status === "trial" || status === "checkout";
-
   return (
     <OptionShell
       title="Start free"
       badge="14-day free trial — no card required"
-      blurb="Enter your business and it's live in seconds. Pay only if you go over 3 leads/day or want to keep it past 14 days."
     >
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        className="space-y-2.5 text-left"
-      >
+      <form onSubmit={handleSubmit} className="space-y-2.5 text-left">
         <Input
           ref={businessNameRef}
           required
           placeholder="Business name"
-          disabled={submitting}
+          disabled={status === "submitting"}
           className={fieldClass}
         />
         <Input
@@ -181,16 +152,15 @@ function CheckoutCard() {
           type="email"
           required
           placeholder="Business email"
-          disabled={submitting}
+          disabled={status === "submitting"}
           className={fieldClass}
         />
         <Button
-          type="button"
-          onClick={() => handleSubmit(true)}
-          disabled={submitting}
+          type="submit"
+          disabled={status === "submitting"}
           className="w-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
         >
-          {status === "trial" ? (
+          {status === "submitting" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
@@ -198,15 +168,6 @@ function CheckoutCard() {
               <ArrowRight className="h-4 w-4" />
             </>
           )}
-        </Button>
-        <Button
-          type="button"
-          onClick={() => handleSubmit(false)}
-          disabled={submitting}
-          variant="ghost"
-          className="w-full text-xs text-[var(--text)] opacity-60 hover:opacity-100"
-        >
-          {status === "checkout" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Already decided? Go straight to checkout"}
         </Button>
         {message && (
           <p className={"text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
@@ -218,10 +179,7 @@ function CheckoutCard() {
 
 function TalkToHarperCard() {
   return (
-    <OptionShell
-      title="Talk to Harper"
-      blurb="Ask questions, describe your business, and let the conversation decide whether that's a free pilot, a checkout link, or a call with a human."
-    >
+    <OptionShell title="Talk to Harper">
       <Button
         onClick={() => {
           track("get_started_talk_to_harper");
@@ -238,10 +196,7 @@ function TalkToHarperCard() {
 
 function ReachOutCard() {
   return (
-    <OptionShell
-      title="Have us reach out"
-      blurb="Leave your name and email -- a person on the team will follow up to set everything up with you directly."
-    >
+    <OptionShell title="Have us reach out">
       <LeadCaptureForm
         compact
         source="get-started"
