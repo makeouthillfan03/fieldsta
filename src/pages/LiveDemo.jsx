@@ -218,7 +218,7 @@ export default function LiveDemo() {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(var(--bg-rgb),0.5)_55%,var(--bg)_100%)]" />
       </div>
 
-      <div className="container relative z-10 max-w-3xl py-10">
+      <div className="container relative z-10 max-w-3xl py-6 sm:py-10">
         <div className="flex items-center justify-between">
           <Link
             to="/"
@@ -230,7 +230,7 @@ export default function LiveDemo() {
           <ThemeToggle />
         </div>
 
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 space-y-3 sm:mt-8">
           <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
             <Triangle />
             Live demo
@@ -240,66 +240,69 @@ export default function LiveDemo() {
             <span className="font-semibold text-[var(--accent)]">stop going cold</span>.
           </h1>
           <p className="max-w-lg text-sm text-[var(--text)] opacity-70">
-            Same agent running on paying accounts right now — not a script, not a recording. If
-            your lead genuinely wouldn&apos;t qualify, this will say so.
+            Same agent as the paying accounts. It will tell you no when the answer is no.
           </p>
         </div>
 
-        <form onSubmit={run} className="mt-8 space-y-5">
+        {!result && status !== "running" && <SamplePeek />}
+
+        <form onSubmit={run} className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
               What kind of business
             </Label>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2">
               {VERTICALS.map((v) => (
                 <button
                   key={v.value}
                   type="button"
                   onClick={() => setVertical(v.value)}
                   className={
-                    "rounded-lg border px-3 py-2.5 text-left transition-all duration-200 " +
+                    "border-b-2 px-0.5 py-2 text-left transition-all duration-200 " +
                     (vertical === v.value
-                      ? "border-[rgba(var(--text-rgb),0.4)] bg-[rgba(var(--text-rgb),0.06)] scale-[1.02]"
-                      : "border-[rgba(var(--text-rgb),0.1)] hover:border-[rgba(var(--text-rgb),0.25)] hover:bg-[rgba(var(--text-rgb),0.02)]")
+                      ? "border-[var(--accent)]"
+                      : "border-transparent hover:border-[rgba(var(--text-rgb),0.2)]")
                   }
                 >
-                  <div className="text-sm font-medium text-[var(--text)]">{v.label}</div>
+                  <div
+                    className={
+                      "text-sm text-[var(--text)] transition-opacity duration-200 " +
+                      (vertical === v.value ? "font-medium opacity-100" : "opacity-55")
+                    }
+                  >
+                    {v.label}
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label
-                htmlFor="leadMessage"
-                className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60"
-              >
-                What the lead said
-              </Label>
-              <button
-                type="button"
-                onClick={() => setMessage(active.sample)}
-                className="text-[11px] text-[var(--text)] opacity-70 underline underline-offset-2 hover:opacity-100"
-              >
-                Use an example
-              </button>
-            </div>
+            <Label
+              htmlFor="leadMessage"
+              className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60"
+            >
+              What the lead said
+            </Label>
             <textarea
               id="leadMessage"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={5}
+              rows={2}
               maxLength={4000}
-              placeholder="Paste or type what a lead sent you…"
-              className="w-full rounded-lg border border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] px-3.5 py-3 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.35)] focus-visible:outline-none"
+              placeholder="Paste or type what a lead sent you… (optional — leave blank to use an example)"
+              className="w-full resize-none border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.3)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
 
+          {/* The chat widget is fixed to the viewport's bottom-right, so a
+              full-width CTA sitting inside the fold collides with it on
+              mobile -- reserve the bubble's width rather than let it sit on
+              top of the page's primary action. */}
           <Button
             type="submit"
             disabled={status === "running"}
-            className="w-full bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
+            className="w-[calc(100%-4.5rem)] bg-[var(--text)] text-[var(--bg-deep)] transition-all duration-200 hover:opacity-90 sm:w-auto"
           >
             {status === "running" ? (
               <>
@@ -369,9 +372,9 @@ export default function LiveDemo() {
             </a>
             <Button
               size="lg"
-              variant="outline"
+              variant="ghost"
               onClick={() => window.dispatchEvent(new CustomEvent("fieldsta:open-chat"))}
-              className="border-[rgba(var(--text-rgb),0.25)] text-[var(--text)] hover:bg-[rgba(var(--text-rgb),0.06)]"
+              className="border-0 bg-transparent text-[var(--text)] opacity-70 transition-opacity hover:bg-transparent hover:opacity-100"
             >
               Talk to Harper
             </Button>
@@ -386,6 +389,39 @@ export default function LiveDemo() {
         </div>
       </div>
       <SalesChatWidget />
+    </div>
+  );
+}
+
+// A visitor who has never seen a result has no reason to spend 20-40 seconds
+// waiting for one -- the page asked for the wait before showing what it buys.
+// This is a static, clearly-labelled sample of the shape a real result comes
+// back in, sized to stay compact enough that the primary CTA is still above
+// the fold. It unmounts the moment a real run starts, so it never sits next
+// to (or gets mistaken for) the visitor's own result.
+function SamplePeek() {
+  const { Icon } = VERDICT.qualified;
+  return (
+    <div className="animate-fade-up mt-6">
+      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-50">
+        What comes back — example
+      </div>
+      <div className="flex items-center gap-4">
+        <ScoreRing score={88} size={52} stroke={4} />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400">
+            <Icon className="h-3 w-3" />
+            {VERDICT.qualified.label}
+          </span>
+          <p className="truncate text-[13px] leading-relaxed text-[var(--text)] opacity-70">
+            &ldquo;Thanks for reaching out — I can get someone out Thursday morning to take a
+            look before your adjuster comes…&rdquo;
+          </p>
+        </div>
+      </div>
+      <p className="mt-2.5 text-[11px] leading-relaxed text-[var(--text)] opacity-55">
+        Score, criteria checked, and a drafted reply — about 30 seconds.
+      </p>
     </div>
   );
 }
