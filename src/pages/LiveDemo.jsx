@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { track } from "@vercel/analytics/react";
 import { ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScoreRing } from "@/components/ScoreRing";
@@ -533,7 +532,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         )}
       </div>
 
-      <Card className="space-y-4 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
+      <div className="space-y-4 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
         <Block title={result.score ? `Why this scored ${result.score.score}, not 100` : "Why"}>
           <p>{result.reasoning}</p>
         </Block>
@@ -575,10 +574,10 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
             <p>{result.reviewReason}</p>
           </Block>
         )}
-      </Card>
+      </div>
 
-      <Card className="space-y-3 border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] p-5">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
+      <div className="space-y-3 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
           Drafted reply — nothing sends until a human approves it
         </div>
         {result.subject && (
@@ -587,7 +586,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-80">
           {result.draftReply}
         </p>
-      </Card>
+      </div>
 
       {/* These are the highest-intent clicks on the page -- the visitor is
           reaching for the product, not reading about it. They used to do
@@ -665,7 +664,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       <ResultCta />
 
       {round === 1 ? (
-        <Card className="space-y-3 border-[var(--accent)]/40 bg-[var(--accent)]/[0.05] p-5 shadow-lg shadow-[var(--accent)]/5">
+        <div className="space-y-3 border-t border-[var(--accent)]/40 pt-5">
           <div className="space-y-1">
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)]">
               Now watch it become yours
@@ -698,7 +697,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
               "Run a new lead with this edit"
             )}
           </Button>
-        </Card>
+        </div>
       ) : (
         <div className="flex justify-center pt-2">
           <button
