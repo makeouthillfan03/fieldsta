@@ -417,7 +417,7 @@ export default function LiveDemo() {
               }}
               rows={2}
               maxLength={4000}
-              placeholder="Paste or type what a lead sent you… (optional — leave blank to use an example)"
+              placeholder="Paste or type what a lead sent you…"
               className="w-full resize-none overflow-hidden border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[15px] leading-relaxed text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.3)] transition-colors duration-200 focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
