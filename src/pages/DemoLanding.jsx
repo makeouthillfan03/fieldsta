@@ -127,7 +127,13 @@ const NAV_LINK_CLASS =
 
 // Shared between the desktop left-aligned slot and the mobile centered
 // slot below so the fairly large inline SVG only has to be written once.
-function FieldstaLogoMark() {
+// `withWordmark` off for the mobile instance -- measured on the live page:
+// full logo 132px + phantom-matched button 124px + real button 124px is
+// 380px against a 343px content width (375 viewport - 2rem container
+// padding), which is what caused the button to clip off-screen on the
+// first attempt at this. Icon-only brings the total to ~272px, comfortably
+// inside budget with room for the two gaps.
+function FieldstaLogoMark({ withWordmark = true }) {
   return (
     <>
       <svg width="24" height="24" viewBox="0 0 200 200" className="text-[var(--text)]" aria-hidden="true">
@@ -152,9 +158,11 @@ function FieldstaLogoMark() {
           <rect x="158" y="115" width="20" height="35" />
         </g>
       </svg>
-      <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
-        Fieldsta
-      </span>
+      {withWordmark && (
+        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
+          Fieldsta
+        </span>
+      )}
     </>
   );
 }
@@ -186,7 +194,7 @@ function Nav() {
         </div>
         <div className="flex items-center justify-self-center">
           <a href="/" className="flex items-center gap-2 md:hidden">
-            <FieldstaLogoMark />
+            <FieldstaLogoMark withWordmark={false} />
           </a>
           <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
             <a href="#how-it-works" className={NAV_LINK_CLASS}>
