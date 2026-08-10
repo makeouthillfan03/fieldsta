@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { track } from "@vercel/analytics/react";
 import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,8 @@ const VERDICT = {
 
 export default function LiveDemo() {
   const dark = useIsDarkTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [vertical, setVertical] = useState("saas");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("idle"); // idle | running | done | error
@@ -118,6 +120,24 @@ export default function LiveDemo() {
     return () => clearInterval(progressTimer.current);
   }, [status]);
 
+  // Vercel's bounce-rate metric counts only distinct PAGE VIEWS (real route
+  // changes) per session, not engagement -- and this entire demo runs on
+  // one URL with no navigation, so a visitor who fully ran it and left
+  // still registered identically to one who left instantly. Vercel's own
+  // analytics script already listens for SPA route changes (it works with
+  // react-router elsewhere on this site), so a real -- if visually
+  // invisible -- query-param change is what actually flips the bounce
+  // math for a genuinely engaged session, not a workaround bolted on top
+  // of it. `replace`, not `push`: this shouldn't add a real back-button
+  // stop, and idempotent (checks the param first) so re-running the demo
+  // doesn't keep appending it.
+  function markVirtualPageview(step) {
+    const params = new URLSearchParams(location.search);
+    if (params.get("step") === step) return;
+    params.set("step", step);
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
+  }
+
   async function run(e, overrides = {}) {
     e?.preventDefault?.();
     const msg = overrides.message ?? message;
@@ -133,6 +153,7 @@ export default function LiveDemo() {
     if (!overrides.priorEdit) {
       track("demo_started", { ...attribution, vertical });
       reportFunnelEvent("demo_started", { vertical });
+      markVirtualPageview("running");
     }
 
     try {
@@ -154,6 +175,7 @@ export default function LiveDemo() {
         track("demo_completed", { ...attribution, vertical, qualification: data.qualification || "unknown" });
         reportFunnelEvent("demo_completed", { vertical, qualification: data.qualification || "unknown" });
         fireLinkedInConversion();
+        markVirtualPageview("completed");
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
