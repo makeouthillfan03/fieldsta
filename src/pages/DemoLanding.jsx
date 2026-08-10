@@ -125,51 +125,72 @@ const NAV_LINK_CLASS =
   "after:scale-x-0 after:bg-[var(--accent)] after:transition-transform after:duration-300 after:ease-out " +
   "hover:after:scale-x-100";
 
+// Shared between the desktop left-aligned slot and the mobile centered
+// slot below so the fairly large inline SVG only has to be written once.
+function FieldstaLogoMark() {
+  return (
+    <>
+      <svg width="24" height="24" viewBox="0 0 200 200" className="text-[var(--text)]" aria-hidden="true">
+        <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
+        <g fill="none" stroke="currentColor" strokeWidth="1.2">
+          {/* Left building cluster */}
+          <rect x="20" y="110" width="15" height="50" />
+          <rect x="38" y="85" width="12" height="75" />
+          <rect x="53" y="120" width="14" height="40" />
+          {/* Center tower */}
+          <rect x="72" y="60" width="11" height="100" />
+          <polygon points="77.5,50 82,60 73,60" />
+          {/* Chrysler building style */}
+          <polygon points="85,95 92,85 99,95" />
+          <rect x="85" y="95" width="14" height="65" />
+          {/* Right cluster */}
+          <rect x="105" y="90" width="13" height="70" />
+          <rect x="122" y="130" width="11" height="30" />
+          <rect x="138" y="105" width="15" height="55" />
+          <polygon points="145,100 150,105 140,105" />
+          {/* Far right */}
+          <rect x="158" y="115" width="20" height="35" />
+        </g>
+      </svg>
+      <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
+        Fieldsta
+      </span>
+    </>
+  );
+}
+
 function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
       <div className="container grid h-16 grid-cols-[1fr_auto_1fr] items-center">
-        <a href="/" className="flex items-center gap-2 justify-self-start">
-          <svg width="24" height="24" viewBox="0 0 200 200" className="text-[var(--text)]" aria-hidden="true">
-            <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" strokeWidth="2" />
-            <g fill="none" stroke="currentColor" strokeWidth="1.2">
-              {/* Left building cluster */}
-              <rect x="20" y="110" width="15" height="50" />
-              <rect x="38" y="85" width="12" height="75" />
-              <rect x="53" y="120" width="14" height="40" />
-              {/* Center tower */}
-              <rect x="72" y="60" width="11" height="100" />
-              <polygon points="77.5,50 82,60 73,60" />
-              {/* Chrysler building style */}
-              <polygon points="85,95 92,85 99,95" />
-              <rect x="85" y="95" width="14" height="65" />
-              {/* Right cluster */}
-              <rect x="105" y="90" width="13" height="70" />
-              <rect x="122" y="130" width="11" height="30" />
-              <rect x="138" y="105" width="15" height="55" />
-              <polygon points="145,100 150,105 140,105" />
-              {/* Far right */}
-              <rect x="158" y="115" width="20" height="35" />
-            </g>
-          </svg>
-          <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
-            Fieldsta
-          </span>
+        {/* Desktop only -- on mobile the logo moves to the center slot
+            below instead, since the left slot is empty there (nav links
+            and the logo's usual spot both drop out), and an empty 1fr
+            track still holds its share of width either way, which is
+            what keeps the center slot visually centered rather than
+            drifting toward whichever side has content. */}
+        <a href="/" className="hidden items-center gap-2 justify-self-start md:flex">
+          <FieldstaLogoMark />
         </a>
-        <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
-          <a href="#how-it-works" className={NAV_LINK_CLASS}>
-            How It Works
+        <div className="flex items-center justify-self-center">
+          <a href="/" className="flex items-center gap-2 md:hidden">
+            <FieldstaLogoMark />
           </a>
-          <a href="#features" className={NAV_LINK_CLASS}>
-            Features
-          </a>
-          <a href="#pricing" className={NAV_LINK_CLASS}>
-            Pricing
-          </a>
-          <a href="#faq" className={NAV_LINK_CLASS}>
-            FAQ
-          </a>
-        </nav>
+          <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
+            <a href="#how-it-works" className={NAV_LINK_CLASS}>
+              How It Works
+            </a>
+            <a href="#features" className={NAV_LINK_CLASS}>
+              Features
+            </a>
+            <a href="#pricing" className={NAV_LINK_CLASS}>
+              Pricing
+            </a>
+            <a href="#faq" className={NAV_LINK_CLASS}>
+              FAQ
+            </a>
+          </nav>
+        </div>
         <div className="flex items-center gap-3 justify-self-end">
           {/* Theme toggle and "Try Demo" both drop below `sm` -- on a
               narrow phone there isn't room for the logo, toggle, and two
