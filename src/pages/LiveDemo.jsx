@@ -230,7 +230,8 @@ export default function LiveDemo() {
             Live demo
           </div>
           <h1 className="font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
-            Paste a real lead. Watch it stop going cold.
+            Paste a real <span className="font-semibold text-[var(--accent)]">lead</span>. Watch it{" "}
+            <span className="font-semibold text-[var(--accent)]">stop going cold</span>.
           </h1>
           <p className="max-w-lg text-sm text-[var(--text)] opacity-70">
             Same agent running on paying accounts right now — not a script, not a recording. If

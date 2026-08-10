@@ -171,8 +171,17 @@ function Nav() {
           </a>
         </nav>
         <div className="flex items-center gap-3 justify-self-end">
-          <ThemeToggle />
-          <a href="/get-started" className="hidden sm:block">
+          {/* Theme toggle and "Try Demo" both drop below `sm` -- on a
+              narrow phone there isn't room for the logo, toggle, and two
+              full-width buttons without something giving, and "Start Free
+              Trial" is the one that actually has to stay: it's the only
+              persistent access to it while scrolled past the hero (whose
+              own CTA is "Try Demo", so that action isn't lost, just no
+              longer duplicated in the nav on small screens too). */}
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
+          <a href="/get-started">
             <Button
               size="sm"
               className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
@@ -180,7 +189,7 @@ function Nav() {
               Start Free Trial
             </Button>
           </a>
-          <Link to="/try">
+          <Link to="/try" className="hidden sm:block">
             <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
               Try Demo
             </Button>
