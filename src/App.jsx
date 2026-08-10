@@ -69,7 +69,13 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<DemoLanding />} />
-      <Route path="/try" element={<LiveDemo />} />
+      {/* Splat so /try/running and /try/completed keep the same element at
+          the same position -- React Router reuses the instance, so the demo
+          does not remount and lose its result mid-run. The nested paths exist
+          purely so an engaged session registers: Vercel Analytics fires a
+          pageview on pathname changes only, never on a search-param change,
+          so the ?step= marker this used to set was invisible to it. */}
+      <Route path="/try/*" element={<LiveDemo />} />
       <Route path="/get-started" element={<GetStarted />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />

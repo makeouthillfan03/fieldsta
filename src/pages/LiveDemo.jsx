@@ -158,12 +158,32 @@ export default function LiveDemo() {
   // of it. `replace`, not `push`: this shouldn't add a real back-button
   // stop, and idempotent (checks the param first) so re-running the demo
   // doesn't keep appending it.
+  // Registers an engaged session with Vercel Analytics, which is what keeps
+  // it out of the bounce bucket. Two things had to be true and neither was:
+  //
+  //   1. It must change the PATHNAME. A search param does nothing -- probed
+  //      in dev, pushState to /try?probe fired no [view], /try/probe fired one.
+  //      This used to set ?step= only.
+  //   2. It must go through pushState. replaceState fires nothing either,
+  //      even to a new pathname -- and this used { replace: true } precisely
+  //      so it wouldn't add a back-button stop.
+  //
+  // So every visitor who ran the demo still counted as a bounce, which is
+  // the exact thing this was written to fix.
+  //
+  // Pushes once and only once, then falls back to replace: one pageview is
+  // all it takes to stop being a bounce, and pushing every step would make
+  // Back walk /try/completed -> /try/running -> /try before leaving the page.
+  const hasPushedRef = useRef(false);
   function markVirtualPageview(step) {
-    const params = new URLSearchParams(location.search);
-    if (params.get("step") === step) return;
-    params.set("step", step);
-    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
+    const target = `/try/${step}`;
+    if (location.pathname === target) return;
+    const replace = hasPushedRef.current;
+    hasPushedRef.current = true;
+    navigate({ pathname: target, search: location.search }, { replace });
   }
+
+
 
   // One request, timed from the moment it actually leaves. Split out of run()
   // so the round-2 prefetch can start the same call early and hand the
@@ -246,6 +266,20 @@ export default function LiveDemo() {
   // already have an answer for. Not a dead button: it does something, and
   // nothing is being withheld behind it any more.
   const [needsLead, setNeedsLead] = useState(false);
+  // Switching vertical swaps in an entirely different captured run, so it is
+  // the cheapest real look at the product on the page -- and it fired
+  // nothing at all, neither analytics nor a route change. Same reasoning as
+  // markVirtualPageview itself: this demo lives on one URL, so engagement
+  // that isn't a navigation is invisible unless we say so. A visitor who
+  // reads two verticals' results and leaves understood more than one who
+  // clicked run and bounced, and was counted worse.
+  function selectVertical(value) {
+    if (value === vertical) return;
+    setVertical(value);
+    track("try_vertical_switch", { vertical: value });
+    markVirtualPageview("explored");
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!message.trim()) {
@@ -332,15 +366,20 @@ export default function LiveDemo() {
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">
           <div className="space-y-2">
+            {/* Was "What kind of business" -- which reads as a form field to
+                fill in before the real thing happens. It isn't: each of these
+                swaps the answered example above for a different real one, so
+                it's the fastest look at the product on the page and the label
+                should say so. */}
             <Label className="text-xs uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
-              What kind of business
+              See it on a different business
             </Label>
             <div className="grid grid-cols-3 gap-2">
               {VERTICALS.map((v) => (
                 <button
                   key={v.value}
                   type="button"
-                  onClick={() => setVertical(v.value)}
+                  onClick={() => selectVertical(v.value)}
                   className={
                     "border-b-2 px-0.5 py-2 text-left transition-all duration-200 " +
                     (vertical === v.value
@@ -407,14 +446,22 @@ export default function LiveDemo() {
                 Paste a lead above and it runs live on that — the example is already answered up top.
               </p>
             )}
+            {/* The only action on this page that costs the visitor nothing
+                and still produces a result they haven't seen -- the primary
+                CTA now requires them to write out a real lead first. It was
+                a 13px 60%-opacity link next to a solid button, which is how
+                you style an afterthought, not the one thing a visitor with
+                no lead to hand can actually do. */}
             {status !== "running" && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={runWeak}
-                className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+                className="border-[rgba(var(--text-rgb),0.25)] bg-transparent text-[var(--text)] hover:bg-[rgba(var(--text-rgb),0.05)]"
               >
-                Or watch it turn one down →
-              </button>
+                Watch it turn one down
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             )}
           </div>
 
@@ -594,7 +641,10 @@ function SampleRun({ vertical, onRunOwn }) {
           whole story is lead in, judgement and draft out, and that has to be
           legible without scrolling or clicking. */}
       {lead && (
-        <p className="border-l-2 border-[rgba(var(--text-rgb),0.15)] pl-3 text-[13px] leading-relaxed text-[var(--text)] opacity-55">
+        <p
+          className="border-l-2 border-[rgba(var(--text-rgb),0.15)] pl-3 text-[13px] leading-relaxed text-[var(--text)] opacity-55"
+          style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+        >
           {lead}
         </p>
       )}
@@ -621,7 +671,10 @@ function SampleRun({ vertical, onRunOwn }) {
         <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-50">
           What it drafted back
         </div>
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-85">
+        <p
+          className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-85"
+          style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+        >
           {firstPara}
         </p>
       </div>
