@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
@@ -6,17 +6,6 @@ import GetStarted from "@/pages/GetStarted";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import Agreement from "@/pages/Agreement";
-
-// /growth is the only remaining route that touches Firebase auth --
-// lazy-loading it means AuthContext (and therefore the whole firebase
-// package) is only ever fetched and executed for someone actually
-// navigating there, not bundled into and run for every visitor of the
-// live site.
-const AuthProvider = lazy(() =>
-  import("@/context/AuthContext").then((m) => ({ default: m.AuthProvider }))
-);
-const GrowthDashboard = lazy(() => import("@/pages/GrowthDashboard"));
-const RequireAuthOnly = lazy(() => import("@/components/RequireAuthOnly"));
 
 // fieldsta.com/login used to be a Google/Firebase sign-in page for the old
 // HVAC-marketplace pivot -- unconnected to how real customers actually log
@@ -52,11 +41,9 @@ function RedirectToStudioLogin() {
 // untouched too — nothing was deleted, it's just not reachable. Bringing
 // any of it back is a routing change here, not a rebuild.
 //
-// Note: /growth (GrowthDashboard) only reports Find a Pro signup stats, so
-// with the marketplace unrouted it'll just show zeros going forward — left
-// in place since removing it wasn't asked for, but it has nothing left to
-// track. The live "personal dashboard" for actual demo-request leads is
-// the separate fieldsta-agents Railway service, not this route.
+// With /growth unrouted (see below), nothing here imports Firebase auth
+// any more — AuthContext, RequireAuthOnly and GrowthDashboard are all
+// still in the tree, just unreachable, like the rest of the pivot pages.
 //
 // "/" is now the demo-request landing page (DemoLanding.jsx), ported over
 // from the standalone fieldsta-lead-booker Vercel project, which was a
@@ -82,18 +69,16 @@ export default function App() {
       <Route path="/agreement" element={<Agreement />} />
       <Route path="/login" element={<RedirectToStudioLogin />} />
 
-      <Route
-        path="/growth"
-        element={
-          <Suspense fallback={null}>
-            <AuthProvider>
-              <RequireAuthOnly>
-                <GrowthDashboard />
-              </RequireAuthOnly>
-            </AuthProvider>
-          </Suspense>
-        }
-      />
+      {/* /growth removed 2026-08-10. It polled studio.fieldsta.com's
+          /api/pipeline-progress cross-origin, and being cross-origin meant
+          that endpoint could not require a session cookie -- so it was
+          public, and its response embeds prospect-growth's live log,
+          i.e. the literal Apollo queries that make up the target segment
+          list. This page was a duplicate of /outbound/campaign in the
+          dashboard, which shows the same growth status, is same-origin so
+          the session cookie works, and also carries the generate-prospects
+          control this page never had. GrowthDashboard.jsx is left in place
+          like the other unrouted pages here. */}
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
