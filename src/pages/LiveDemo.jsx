@@ -10,6 +10,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
+import { trackLinkedInConversion } from "@/lib/linkedin.js";
 import { getSampleRun, getWeakRun } from "@/data/sampleRuns.js";
 
 // Self-serve interactive demo — the prospect sees the product work on a lead
@@ -23,18 +24,6 @@ import { getSampleRun, getWeakRun } from "@/data/sampleRuns.js";
 // function, because a real agent run takes tens of seconds and Vercel's
 // serverless timeout would cut it off.
 const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
-
-// Conversion ID from LinkedIn Campaign Manager > Account Assets >
-// Conversion Tracking (create a "Demo Completed" conversion there, not
-// the same as the Insight Tag's Partner ID in index.html). No-ops until
-// both the env var is set and the Insight Tag script has actually loaded
-// -- window.lintrk won't exist yet if an ad blocker stripped the tag, or
-// briefly during the tag's own async load.
-const LINKEDIN_CONVERSION_ID = import.meta.env.VITE_LINKEDIN_CONVERSION_ID;
-function fireLinkedInConversion() {
-  if (!LINKEDIN_CONVERSION_ID || typeof window.lintrk !== "function") return;
-  window.lintrk("track", { conversion_id: LINKEDIN_CONVERSION_ID });
-}
 
 const VERTICALS = [
   {
@@ -224,6 +213,7 @@ export default function LiveDemo() {
     const attribution = getAttribution();
     if (!overrides.priorEdit) {
       track("demo_started", { ...attribution, vertical, usedSample });
+      trackLinkedInConversion("demoStarted");
       reportFunnelEvent("demo_started", { vertical, usedSample });
       markVirtualPageview("running");
     }
@@ -240,8 +230,8 @@ export default function LiveDemo() {
       if (overrides.priorEdit) setAppliedEdit(overrides.priorEdit);
       if (!overrides.priorEdit) {
         track("demo_completed", { ...attribution, vertical, qualification: data.qualification || "unknown" });
+        trackLinkedInConversion("demoCompleted");
         reportFunnelEvent("demo_completed", { vertical, qualification: data.qualification || "unknown" });
-        fireLinkedInConversion();
         markVirtualPageview("completed");
       }
     } catch (err) {
@@ -654,6 +644,7 @@ function SampleRun({ vertical, onRunOwn }) {
         if (entries.some((e) => e.isIntersecting) && !exampleReadTracked) {
           exampleReadTracked = true;
           track("try_example_read", { ...attribution, vertical });
+          trackLinkedInConversion("exampleRead");
           io.disconnect();
         }
       },

@@ -9,6 +9,7 @@ import Triangle from "@/components/Triangle";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
+import { trackLinkedInConversion } from "@/lib/linkedin.js";
 
 // Landing spot for the pricing section's "Start free trial" CTA. The first
 // card used to open Harper pre-primed with an auto-message and let the
@@ -151,6 +152,7 @@ function CheckoutCard() {
       }
 
       track("get_started_start_trial");
+      trackLinkedInConversion("signup");
       setStatus("idle");
       setSetupUrl(data.setupUrl || "");
       setMessage(data.message || "Your 14-day pilot is live.");
