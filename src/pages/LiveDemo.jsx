@@ -9,6 +9,7 @@ import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
+import StreamedText from "@/components/StreamedText";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 import { trackLinkedInConversion } from "@/lib/linkedin.js";
 import { getSampleRun, getWeakRun } from "@/data/sampleRuns.js";
@@ -591,7 +592,15 @@ function RunSteps({ progress }) {
                 <span className="h-1 w-1 rounded-full bg-[var(--text)]" />
               )}
             </span>
-            <span className="text-[var(--text)]">{step}</span>
+            {active ? (
+              <span
+                className="animate-shimmer bg-[linear-gradient(90deg,rgba(var(--text-rgb),0.55)_35%,rgba(var(--text-rgb),1)_50%,rgba(var(--text-rgb),0.55)_65%)] bg-[length:200%_100%] bg-clip-text text-transparent motion-reduce:bg-none motion-reduce:text-[var(--text)]"
+              >
+                {step}
+              </span>
+            ) : (
+              <span className="text-[var(--text)]">{step}</span>
+            )}
           </li>
         );
       })}
@@ -964,9 +973,14 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
         {result.subject && (
           <div className="text-sm font-medium text-[var(--text)]">{result.subject}</div>
         )}
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-80">
-          {result.draftReply}
-        </p>
+        {/* The reply types itself out — the one place motion is honest,
+            because this text was genuinely just produced. Keyed by content
+            so a re-render never restarts the stream; a new run does. */}
+        <StreamedText
+          key={result.draftReply}
+          text={result.draftReply}
+          className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text)] opacity-80"
+        />
       </div>
 
       {/* These are the highest-intent clicks on the page -- the visitor is

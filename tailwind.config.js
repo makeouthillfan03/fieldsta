@@ -65,12 +65,22 @@ export default {
           "0%, 100%": { transform: "translate(-50%, -50%)" },
           "50%": { transform: "translate(-46%, -54%)" },
         },
+        caret: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "150% 0" },
+          "100%": { backgroundPosition: "-150% 0" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.8s cubic-bezier(0.16,1,0.3,1) both",
         twinkle: "twinkle 4s ease-in-out infinite",
         beacon: "beacon 2.4s ease-in-out infinite",
         drift: "drift 14s ease-in-out infinite",
+        caret: "caret 1s steps(1) infinite",
+        shimmer: "shimmer 2.4s linear infinite",
       },
     },
   },

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Loader2, Mic, Square } from "lucide-react";
 import { track } from "@vercel/analytics/react";
+import VoiceWaveform from "@/components/VoiceWaveform";
 
 // Talks to the real conversational sales agent (fieldsta-agents'
 // src/agents/sales-agent.ts via POST /api/sales-chat) — not a scripted
@@ -278,6 +279,7 @@ export default function SalesChatWidget() {
             {error && <div className="text-xs text-[#FF9A93]">{error}</div>}
           </div>
 
+          <VoiceWaveform audioRef={audioPlayerRef} busy={voiceBusy} />
           <form onSubmit={send} className="flex items-center gap-2 border-t border-[#F5F5F5]/10 p-3">
             <input
               value={input}
