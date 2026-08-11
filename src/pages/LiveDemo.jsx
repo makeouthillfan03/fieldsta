@@ -443,7 +443,19 @@ export default function LiveDemo() {
             </Button>
             {needsLead && (
               <p className="w-full text-[13px] text-[var(--accent)]">
-                Paste a lead above and it runs live on that — the example is already answered up top.
+                Paste a lead above and it runs live on that.{" "}
+                {/* The refusal used to dead-end the exact visitor the cold
+                    campaign paid to get here — someone with no lead text in
+                    hand. Bridge them to the cached rejection replay (free,
+                    instant) instead of scolding them; the live paste-run
+                    stays the primary path for anyone who has a real lead. */}
+                <button
+                  type="button"
+                  onClick={runWeak}
+                  className="underline underline-offset-2 hover:opacity-70"
+                >
+                  No lead handy? Watch it turn one down instead
+                </button>
               </p>
             )}
             {/* The only action on this page that costs the visitor nothing
