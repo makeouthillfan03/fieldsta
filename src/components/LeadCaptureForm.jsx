@@ -5,8 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 
+// Hairline underline, no box, no fill -- the same field language /try and
+// the get-started page use. This form renders in both places, so the style
+// lives here rather than being overridden per-caller.
 const fieldClass =
-  "mt-1.5 border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.5)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
+  "mt-1.5 rounded-none border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] transition-colors focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0";
 
 // One /api/lead form, two amounts of upfront detail depending on where the
 // visitor already is in the funnel: `compact` (the /get-started "have us
@@ -143,7 +146,7 @@ export default function LeadCaptureForm({ compact = false, source, ctaLabel = "G
       <Button
         type="submit"
         disabled={status === "submitting"}
-        className="w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
+        className="w-full rounded-none bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90"
         size={compact ? "default" : "lg"}
       >
         {status === "submitting" ? (compact ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submitting...") : ctaLabel}

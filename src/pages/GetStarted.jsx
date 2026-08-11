@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SalesChatWidget from "@/components/SalesChatWidget";
@@ -66,19 +66,29 @@ export default function GetStarted() {
   );
 }
 
-function OptionShell({ title, badge, children }) {
+// Every column gets the same three slots — mark, title, one quiet line —
+// so the action row lands at the same height by content instead of being
+// pushed there by a stretched empty spacer. Two of the three used to have
+// nothing between the title and the button, which is what left the middle
+// of the row visibly hollow.
+function OptionShell({ title, note, accentNote, children }) {
   return (
-    <div className="flex h-full flex-col py-8 text-center sm:px-8 sm:py-0">
+    <div className="flex h-full flex-col py-10 text-center sm:px-8 sm:py-0">
       <div className="flex justify-center">
         <Triangle className="mb-3" />
       </div>
       <h2 className="font-editorial text-2xl font-medium tracking-tight text-[var(--text)]">{title}</h2>
-      {badge && (
-        <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--accent)] opacity-80">
-          {badge}
+      {note && (
+        <div
+          className={
+            "mx-auto mt-3 max-w-[24ch] text-[13px] leading-relaxed " +
+            (accentNote ? "text-[var(--accent)]" : "text-[var(--text)] opacity-55")
+          }
+        >
+          {note}
         </div>
       )}
-      <div className="mt-6 flex-1" />
+      <div className="mt-8 flex-1" />
       <div>{children}</div>
     </div>
   );
@@ -86,8 +96,18 @@ function OptionShell({ title, badge, children }) {
 
 const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
 
+// Hairline-underline fields and squared buttons — the same language /try
+// and the homepage hero already speak. The boxed, rounded, tinted-fill
+// inputs this page used before were the only place on the site that drew a
+// container around an input, which is what made the signup step read as a
+// heavier, more generic form than everything leading up to it.
 const fieldClass =
-  "border-[rgba(var(--text-rgb),0.15)] bg-[rgba(var(--text-rgb),0.04)] text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.5)] focus-visible:ring-[rgba(var(--text-rgb),0.4)]";
+  "rounded-none border-0 border-b border-[rgba(var(--text-rgb),0.15)] bg-transparent px-0 py-2.5 text-[var(--text)] placeholder:text-[rgba(var(--text-rgb),0.35)] transition-colors focus-visible:border-[rgba(var(--text-rgb),0.45)] focus-visible:outline-none focus-visible:ring-0";
+
+const primaryBtnClass =
+  "w-full rounded-none bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]";
+const secondaryBtnClass =
+  "w-full rounded-none bg-[var(--text)] text-[var(--bg-deep)] hover:opacity-90";
 
 // One button, matching TalkToHarperCard/ReachOutCard's shape exactly (a
 // single full-width solid button, no secondary link) -- creates the pilot
@@ -142,55 +162,40 @@ function CheckoutCard() {
   }
 
   return (
-    <OptionShell
-      title="Start free"
-      badge="14-day free trial — no card required"
-    >
-      <form onSubmit={handleSubmit} className="space-y-2.5 text-left">
-        <Input
-          ref={businessNameRef}
-          required
-          placeholder="Business name"
-          disabled={status === "submitting"}
-          className={fieldClass}
-        />
-        <Input
-          ref={emailRef}
-          type="email"
-          required
-          placeholder="Business email"
-          disabled={status === "submitting"}
-          className={fieldClass}
-        />
-        <Button
-          type="submit"
-          disabled={status === "submitting"}
-          className="w-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
-        >
-          {status === "submitting" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              Start free trial
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
+    <OptionShell title="Start free" note="14-day pilot. No card required." accentNote>
+      <form onSubmit={handleSubmit} className="text-left">
+        <div className="space-y-4">
+          <Input
+            ref={businessNameRef}
+            required
+            placeholder="Business name"
+            disabled={status === "submitting"}
+            className={fieldClass}
+          />
+          <Input
+            ref={emailRef}
+            type="email"
+            required
+            placeholder="Business email"
+            disabled={status === "submitting"}
+            className={fieldClass}
+          />
+        </div>
+        <Button type="submit" disabled={status === "submitting"} className={primaryBtnClass + " mt-6"}>
+          {status === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Start free trial"}
         </Button>
         {message && (
-          <p className={"text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
+          <p className={"mt-3 text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
         )}
         {setupUrl && (
-          <a href={setupUrl} onClick={() => track("get_started_open_dashboard")} className="block">
-            <Button className="w-full bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-              Set a password &amp; open your dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </a>
-        )}
-        {setupUrl && (
-          <p className="text-[11px] leading-relaxed text-[var(--text)] opacity-60">
-            Sent to your email too, in case you want to finish on another device.
-          </p>
+          <>
+            <a href={setupUrl} onClick={() => track("get_started_open_dashboard")} className="mt-3 block">
+              <Button className={primaryBtnClass + " font-bold"}>Set a password &amp; open your dashboard</Button>
+            </a>
+            <p className="mt-2 text-[11px] leading-relaxed text-[var(--text)] opacity-60">
+              Sent to your email too, in case you want to finish on another device.
+            </p>
+          </>
         )}
       </form>
     </OptionShell>
@@ -199,16 +204,15 @@ function CheckoutCard() {
 
 function TalkToHarperCard() {
   return (
-    <OptionShell title="Talk to Harper">
+    <OptionShell title="Talk to Harper" note="Ask anything first — it's the same agent you'd be buying.">
       <Button
         onClick={() => {
           track("get_started_talk_to_harper");
           window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
         }}
-        className="w-full bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white"
+        className={secondaryBtnClass}
       >
         Open chat
-        <ArrowRight className="h-4 w-4" />
       </Button>
     </OptionShell>
   );
@@ -216,7 +220,7 @@ function TalkToHarperCard() {
 
 function ReachOutCard() {
   return (
-    <OptionShell title="Have us reach out">
+    <OptionShell title="Have us reach out" note="Leave your details and we'll call you back.">
       <LeadCaptureForm
         compact
         source="get-started"
