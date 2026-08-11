@@ -625,9 +625,44 @@ function RunSteps({ progress }) {
 // Labelled as captured, with the live run one tap away, so "same agent as
 // the paying accounts, not a recording" stays true: this IS what that agent
 // returned, and the visitor can make it do it again on their own lead.
+// Fired at most once per page load each, however many times SampleRun
+// mounts (it unmounts during a live run and comes back on reset). Without
+// these, a cold visitor who reads the pre-answered example and leaves —
+// the exact experience the sequence emails promise — registered as
+// nothing, so the funnel could only count them as a failure. "Viewed"
+// means the example rendered; "read" means its end actually entered the
+// viewport, which is as close to read-through as a static page can see.
+let exampleViewedTracked = false;
+let exampleReadTracked = false;
+
 function SampleRun({ vertical, onRunOwn }) {
   const run = getSampleRun(vertical);
   const lead = VERTICALS.find((v) => v.value === vertical)?.sample;
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    if (!run) return;
+    const attribution = getAttribution();
+    if (!exampleViewedTracked) {
+      exampleViewedTracked = true;
+      track("try_example_viewed", { ...attribution, vertical });
+    }
+    const el = endRef.current;
+    if (exampleReadTracked || !el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && !exampleReadTracked) {
+          exampleReadTracked = true;
+          track("try_example_read", { ...attribution, vertical });
+          io.disconnect();
+        }
+      },
+      { threshold: 0 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // A vertical with no capture yet still gets the CTA -- losing the whole
   // block (and with it the only trial link above the fold) is a worse
   // failure than showing no sample. Never substitute another vertical's run:
@@ -692,6 +727,9 @@ function SampleRun({ vertical, onRunOwn }) {
       </div>
 
       <SampleRunCta onRunOwn={onRunOwn} />
+      {/* Sentinel for the try_example_read observer above — zero height,
+          sits after the CTA so "read" means the whole block was passed. */}
+      <div ref={endRef} aria-hidden="true" />
     </div>
   );
 }
