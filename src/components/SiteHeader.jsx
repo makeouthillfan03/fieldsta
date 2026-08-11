@@ -113,6 +113,19 @@ export default function SiteHeader() {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
+          {/* Quiet text link, deliberately below both buttons in visual
+              weight: a visitor who already has an account will find it, and
+              it must never compete with Start Free Trial for a new one.
+              Points straight at the real login on studio (this site's own
+              /login is just a redirect there anyway — one less hop).
+              Hidden below sm for the same narrow-viewport budget reasons
+              as Try Demo and the theme toggle above. */}
+          <a
+            href="https://studio.fieldsta.com/login"
+            className="hidden text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100 sm:block"
+          >
+            Log in
+          </a>
           <a href="/get-started">
             <Button
               size="sm"

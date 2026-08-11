@@ -169,6 +169,15 @@ function Hero() {
               Try Demo
             </Button>
           </Link>
+
+          {/* The same proof-first promise the cold emails now make: the
+              demo page opens on an already-answered real run, so the
+              visitor is promised something to READ, not homework to do.
+              Keeping the button label short and putting the promise here,
+              under it, rather than bloating the button itself. */}
+          <p className="animate-fade-up [animation-delay:360ms] mt-4 text-[13px] text-[var(--text)] opacity-60">
+            A real lead, already run through it — read the verdict in 90 seconds. No signup.
+          </p>
         </div>
       </div>
 
