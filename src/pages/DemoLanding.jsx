@@ -1063,6 +1063,12 @@ function Footer() {
           <a href="/try" className="hover:text-[var(--text)]">
             Try Demo
           </a>
+          <a href="/help" className="hover:text-[var(--text)]">
+            Help
+          </a>
+          <a href="/products" className="hover:text-[var(--text)]">
+            Products
+          </a>
           <a href="/terms" className="hover:text-[var(--text)]">
             Terms
           </a>
