@@ -891,6 +891,28 @@ function Pricing() {
               </div>
               <SupportAddonBuy />
             </div>
+
+            {/* Deliberately CTA-less: the outbound product exists (built and
+                verified against a test tenant) but no client can buy it yet,
+                so a click target would over-promise. One line, one interest
+                signal — the mailto is the measurement. */}
+            <div className="mt-6 flex flex-col items-start justify-between gap-2 border-t border-[rgba(var(--text-rgb),0.06)] pt-5 sm:flex-row sm:items-center">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text)] opacity-40">
+                  Coming soon
+                </span>
+                <span className="ml-3 text-sm font-semibold text-[var(--text)] opacity-70">
+                  Outbound — we find the leads, then answer them
+                </span>
+              </div>
+              <a
+                href="mailto:support@fieldsta.com?subject=Interested%20in%20Fieldsta%20outbound"
+                onClick={() => track("pricing_outbound_interest")}
+                className="text-[13px] text-[var(--text)] opacity-50 transition-opacity hover:opacity-100"
+              >
+                Get notified →
+              </a>
+            </div>
           </div>
         </Reveal>
       </div>
