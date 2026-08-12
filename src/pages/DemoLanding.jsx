@@ -750,6 +750,66 @@ const PLANS = [
   },
 ];
 
+// The right-hand side of the add-on strip. "$200/mo on its own" is the buy
+// button itself: one click posts to the agents API (no form — Stripe's own
+// checkout collects email and card), charges $0 today with a real 14-day
+// trial on the subscription, and the webhook provisions the account from
+// the completed payment. Abandoning checkout leaves nothing behind, so the
+// click is genuinely commitment-free. Existing/plan customers take the
+// dashboard path instead (+$150), which the small line under it names.
+function SupportAddonBuy() {
+  const [state, setState] = useState("idle"); // idle | opening | error
+
+  async function buy() {
+    if (state === "opening") return;
+    setState("opening");
+    track("pricing_support_addon_buy");
+    try {
+      const res = await fetch(`${import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com"}/api/support-agent-checkout`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.message || "no url");
+      window.location.href = data.url;
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-2.5 sm:items-end">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="text-sm text-[var(--text)]">
+          <span className="font-bold">+$150/mo</span>
+          <span className="opacity-70"> with any plan</span>
+        </div>
+        <button
+          type="button"
+          onClick={buy}
+          disabled={state === "opening"}
+          className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:bg-[var(--accent-hover)] disabled:opacity-60"
+        >
+          {state === "opening" ? "Opening checkout…" : "$200/mo on its own — start 14 days free"}
+          {state !== "opening" && <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />}
+        </button>
+      </div>
+      <div className="text-xs text-[var(--text)] opacity-50 sm:text-right">
+        {state === "error"
+          ? "Checkout hiccuped — try again, or ask Harper below."
+          : "Card charged nothing for 14 days, cancel anytime. Already a client? Turn it on from your dashboard."}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          track("pricing_support_addon_cta");
+          window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
+        }}
+        className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+      >
+        Questions? Ask Harper →
+      </button>
+    </div>
+  );
+}
+
 function Pricing() {
   return (
     <section id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
@@ -829,28 +889,7 @@ function Pricing() {
                   to install.
                 </p>
               </div>
-              <div className="flex flex-col items-start gap-2.5 sm:items-end">
-                <div className="text-sm text-[var(--text)]">
-                  <span className="font-bold">+$150/mo</span>
-                  <span className="opacity-70"> with any plan</span>
-                  <span className="mx-2 opacity-30">·</span>
-                  <span className="font-bold">$200/mo</span>
-                  <span className="opacity-70"> on its own</span>
-                </div>
-                <div className="text-xs text-[var(--text)] opacity-50">
-                  14 days free — turn it on yourself from your dashboard
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    track("pricing_support_addon_cta");
-                    window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
-                  }}
-                  className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
-                >
-                  Ask Harper about it →
-                </button>
-              </div>
+              <SupportAddonBuy />
             </div>
           </div>
         </Reveal>
