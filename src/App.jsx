@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
+import ProductsPage from "@/pages/ProductsPage";
 import GetStarted from "@/pages/GetStarted";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
@@ -63,6 +64,7 @@ export default function App() {
           pageview on pathname changes only, never on a search-param change,
           so the ?step= marker this used to set was invisible to it. */}
       <Route path="/try/*" element={<LiveDemo />} />
+      <Route path="/products" element={<ProductsPage />} />
       <Route path="/get-started" element={<GetStarted />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />

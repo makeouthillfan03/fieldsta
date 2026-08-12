@@ -88,6 +88,9 @@ export default function SiteHeader() {
             <FieldstaLogoMark withWordmark={false} />
           </a>
           <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
+            <Link to="/products" className={NAV_LINK_CLASS}>
+              Products
+            </Link>
             <a href="/#how-it-works" className={NAV_LINK_CLASS}>
               How It Works
             </a>

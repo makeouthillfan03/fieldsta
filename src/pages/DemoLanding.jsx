@@ -892,6 +892,12 @@ function Pricing() {
               <SupportAddonBuy />
             </div>
 
+            <div className="mt-5 text-center text-[13px] opacity-60">
+              <Link to="/products" className="underline underline-offset-2 transition-opacity hover:opacity-100">
+                See all four products and bundle pricing →
+              </Link>
+            </div>
+
             {/* Deliberately CTA-less: the outbound product exists (built and
                 verified against a test tenant) but no client can buy it yet,
                 so a click target would over-promise. One line, one interest
