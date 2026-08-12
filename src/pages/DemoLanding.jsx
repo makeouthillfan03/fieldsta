@@ -804,6 +804,53 @@ function Pricing() {
             </Reveal>
           ))}
         </div>
+
+        {/* The 24/7 support agent add-on — deliberately quiet: one hairline
+            row, not a fourth pricing card. It's a different product (answers
+            their EXISTING customers on their own website, not their inbound
+            leads) sold as an attach, and the prototype's provisioning is
+            human-in-the-loop — so the CTA opens a conversation, never a
+            checkout that doesn't exist. Bundle priced under standalone on
+            purpose: $500 alone makes +$250-with-any-plan read as the
+            obvious deal rather than an upsell. */}
+        <Reveal delay={200}>
+          <div className="mx-auto mt-14 max-w-4xl border-t border-[rgba(var(--text-rgb),0.1)] pt-8">
+            <div className="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
+              <div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--text)] opacity-50">
+                  Add-on
+                </div>
+                <div className="mt-1.5 text-[15px] font-semibold text-[var(--text)]">
+                  24/7 Support Agent for your website
+                </div>
+                <p className="mt-1 max-w-md text-sm leading-relaxed text-[var(--text)] opacity-70">
+                  A chat bubble on your own site that answers your customers any hour, in your
+                  voice — and hands anything sensitive to a person instead of guessing. One line
+                  to install.
+                </p>
+              </div>
+              <div className="flex flex-col items-start gap-2.5 sm:items-end">
+                <div className="text-sm text-[var(--text)]">
+                  <span className="font-bold">+$250/mo</span>
+                  <span className="opacity-70"> with any plan</span>
+                  <span className="mx-2 opacity-30">·</span>
+                  <span className="font-bold">$500/mo</span>
+                  <span className="opacity-70"> on its own</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    track("pricing_support_addon_cta");
+                    window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
+                  }}
+                  className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+                >
+                  Ask Harper about it →
+                </button>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
