@@ -831,11 +831,14 @@ function Pricing() {
               </div>
               <div className="flex flex-col items-start gap-2.5 sm:items-end">
                 <div className="text-sm text-[var(--text)]">
-                  <span className="font-bold">+$250/mo</span>
+                  <span className="font-bold">+$150/mo</span>
                   <span className="opacity-70"> with any plan</span>
                   <span className="mx-2 opacity-30">·</span>
-                  <span className="font-bold">$500/mo</span>
+                  <span className="font-bold">$200/mo</span>
                   <span className="opacity-70"> on its own</span>
+                </div>
+                <div className="text-xs text-[var(--text)] opacity-50">
+                  14 days free — turn it on yourself from your dashboard
                 </div>
                 <button
                   type="button"
