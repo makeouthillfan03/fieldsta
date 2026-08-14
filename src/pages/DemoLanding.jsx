@@ -757,6 +757,13 @@ const PLANS = [
 // the completed payment. Abandoning checkout leaves nothing behind, so the
 // click is genuinely commitment-free. Existing/plan customers take the
 // dashboard path instead (+$150), which the small line under it names.
+//
+// That second sentence of the caption is load-bearing, not filler: without
+// it an existing client buys the $200 standalone when they should be
+// paying $150 as an add-on. It survives any rewrite of the first half.
+// The caption also deliberately doesn't repeat "14 days" -- the button
+// directly above already says it, and the freed-up room goes to what
+// happens AFTER paying (one line to install), which nothing else here said.
 function SupportAddonBuy() {
   const [state, setState] = useState("idle"); // idle | opening | error
 
@@ -794,7 +801,7 @@ function SupportAddonBuy() {
       <div className="text-xs text-[var(--text)] opacity-50 sm:text-right">
         {state === "error"
           ? "Checkout hiccuped — try again, or ask Harper below."
-          : "Card charged nothing for 14 days, cancel anytime. Already a client? Turn it on from your dashboard."}
+          : "$0 today, cancel anytime — then one line to install. Already a client? Turn it on from your dashboard."}
       </div>
       <button
         type="button"
