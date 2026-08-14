@@ -923,7 +923,21 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       )}
 
       <div className="space-y-4 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
-        <Block title={result.score ? `Why this scored ${result.score.score}, not 100` : "Why"}>
+        {/* "not 100" only makes sense when the score ISN'T 100. The headline
+            hardcoded it, so a lead the agent scored perfectly rendered "Why
+            this scored 100, not 100" — and that is the worst possible case
+            to get wrong: a prospect evaluating this pastes their BEST lead,
+            so the strongest demo run produced the most broken-looking page,
+            on the one asset every cold email links to. */}
+        <Block
+          title={
+            result.score
+              ? result.score.score >= 100
+                ? "Why this scored 100"
+                : `Why this scored ${result.score.score}, not 100`
+              : "Why"
+          }
+        >
           <p>{result.reasoning}</p>
         </Block>
 
