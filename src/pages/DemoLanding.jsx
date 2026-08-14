@@ -860,6 +860,15 @@ function Pricing() {
                   {plan.cta}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
+                {/* Only the self-serve tier earns the ease claim — the call
+                    tiers genuinely start with a conversation, and saying
+                    "2 minutes" next to "Book a setup call" would read as
+                    the page contradicting itself. */}
+                {plan.action === "signup" && (
+                  <div className="mt-2.5 text-[11px] leading-relaxed text-[var(--text)] opacity-50">
+                    Self-serve — live in about two minutes. No card, no call.
+                  </div>
+                )}
               </div>
             </Reveal>
           ))}

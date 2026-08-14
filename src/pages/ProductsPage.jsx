@@ -60,7 +60,13 @@ function BuySupportButton() {
         {state === "opening" ? "Opening checkout…" : "Start 14 days free"}
         <ArrowRight className="h-4 w-4" />
       </Button>
-      {state === "error" && <div className="mt-2 text-xs text-[var(--accent)]">Checkout hiccuped — try again.</div>}
+      {state === "error" ? (
+        <div className="mt-2 text-xs text-[var(--accent)]">Checkout hiccuped — try again.</div>
+      ) : (
+        <div className="mt-2 text-xs opacity-50">
+          One-minute Stripe checkout — $0 today, then one line to install on your site.
+        </div>
+      )}
     </div>
   );
 }
@@ -147,16 +153,25 @@ export default function ProductsPage() {
               <div className="mt-1 text-xs opacity-50">{p.independent}</div>
               <div className="mt-4">
                 {p.cta === "signup" && (
-                  <div className="flex flex-wrap items-center gap-3">
-                    <a href="/get-started">
-                      <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-                        Start free trial
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </a>
-                    <Link to="/try" className="text-[13px] opacity-60 transition-opacity hover:opacity-100">
-                      See it run first →
-                    </Link>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <a href="/get-started">
+                        <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
+                          Start free trial
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </a>
+                      <Link to="/try" className="text-[13px] opacity-60 transition-opacity hover:opacity-100">
+                        See it run first →
+                      </Link>
+                    </div>
+                    {/* The whole signup really is two fields with no card
+                        (see GetStarted.jsx / quick-checkout's skipCheckout
+                        branch) — saying so at the button is what makes the
+                        click feel safe. */}
+                    <div className="mt-2 text-xs opacity-50">
+                      Self-serve — a name and an email, live in about two minutes. No card, no call.
+                    </div>
                   </div>
                 )}
                 {p.cta === "buy-support" && <BuySupportButton />}

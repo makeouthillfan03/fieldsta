@@ -53,6 +53,14 @@ export default function GetStarted() {
           <h1 className="mt-4 font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
             Start your free pilot
           </h1>
+          {/* Two fields really is the entire signup (the pilot goes live
+              before Stripe is ever involved — quick-checkout's skipCheckout
+              branch), so the page can promise this without hedging. */}
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[var(--text)] opacity-60">
+            The whole signup is a name and an email — your dashboard is live in
+            about two minutes, and connecting your lead source is a few clicks
+            from there. No card, no call.
+          </p>
         </div>
 
         <div className="mx-auto mt-14 grid divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
