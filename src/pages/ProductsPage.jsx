@@ -89,7 +89,6 @@ const PRODUCTS = [
     tag: "CRM · Analytics · Customer Success",
     what: "Three dashboards over everything Fieldsta knows for you: who to act on today and why (CRM), whether the machine is actually fast and autonomous (Analytics), and whether your account is healthy — with new risks pushed to your Slack automatically (Customer Success). Every number carries its evidence; the AI can only narrate what the engines computed.",
     priceLine: "+$100/mo with any plan · included on $1,500+ tiers",
-    independent: "Not sold alone — it runs on the data your other Fieldsta products generate.",
     cta: "harper",
     ctaLabel: "Ask Harper for early access",
     ctaEvent: "products_intelligence_cta",
@@ -102,7 +101,6 @@ const PRODUCTS = [
     tag: "We find the leads, then answer them",
     what: "Cold outreach from your own domains with your own copy — warmed, sequenced, reply-detected — feeding straight into the same lead-response machine. Built and running in test; opening to clients soon.",
     priceLine: "Pricing announced at launch",
-    independent: "Will require the lead-response product — outbound generates the leads it answers.",
     cta: "notify",
   },
 ];
@@ -120,11 +118,6 @@ export default function ProductsPage() {
           <h1 className="font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
             One machine, four products.
           </h1>
-          <p className="max-w-lg text-sm opacity-70">
-            Each works on its own. Together they cover the whole loop — finding leads, answering
-            them, supporting the customers they become, and telling you honestly how it&apos;s all
-            going.
-          </p>
         </div>
 
         <div className="mt-12 space-y-0 divide-y divide-[rgba(var(--text-rgb),0.08)]">
@@ -137,7 +130,10 @@ export default function ProductsPage() {
               </div>
               <p className="mt-3 max-w-xl text-sm leading-relaxed opacity-75">{p.what}</p>
               <div className="mt-3 text-sm font-semibold">{p.priceLine}</div>
-              <div className="mt-1 text-xs opacity-50">{p.independent}</div>
+              {/* Only the two standalone-purchasable products carry this
+                  line now; without the guard the other two render an empty
+                  div that still takes its margin. */}
+              {p.independent && <div className="mt-1 text-xs opacity-50">{p.independent}</div>}
               <div className="mt-4">
                 {p.cta === "signup" && (
                   <div>
@@ -151,13 +147,6 @@ export default function ProductsPage() {
                       <Link to="/try" className="text-[13px] opacity-60 transition-opacity hover:opacity-100">
                         See it run first →
                       </Link>
-                    </div>
-                    {/* The whole signup really is two fields with no card
-                        (see GetStarted.jsx / quick-checkout's skipCheckout
-                        branch) — saying so at the button is what makes the
-                        click feel safe. */}
-                    <div className="mt-2 text-xs opacity-50">
-                      Self-serve — a name and an email, live in about two minutes. No card, no call.
                     </div>
                   </div>
                 )}
@@ -198,7 +187,6 @@ export default function ProductsPage() {
           <div className="mt-3 text-sm">
             <span className="opacity-50 line-through">$750/mo separately</span>
             <span className="ml-3 text-lg font-bold">$700/mo bundled</span>
-            <span className="ml-2 text-xs opacity-50">14-day free trial covers all of it</span>
           </div>
           <button
             type="button"
