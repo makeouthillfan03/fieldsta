@@ -295,6 +295,8 @@ export default function LiveDemo() {
     setMessage(msg);
     if (cached) {
       track("demo_weak_lead", { vertical, cached: true });
+      reportFunnelEvent("demo_started", { vertical, usedSample: true });
+      reportFunnelEvent("demo_completed", { vertical, qualification: cached.qualification || "unknown" });
       setError("");
       setElapsedMs(null);
       setResultIsCached(true);
