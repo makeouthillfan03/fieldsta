@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import { track } from "@vercel/analytics/react";
 // Bundle math is a live prototype: the numbers are real intent, labelled
 // as preview so nobody screenshots them as a contract.
 
-const AGENTS_BASE = import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com";
 
 const STATUS_STYLE = {
   live: "text-emerald-400",
