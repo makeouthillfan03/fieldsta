@@ -728,6 +728,11 @@ const PLANS = [
     fit: "Fits one account, or a single active campaign's lead flow.",
     cta: "Start free trial",
     action: "signup",
+    // Every card carries a note so all three buttons land at the same
+    // height by CONTENT. Giving one column a line the others lacked made
+    // it taller and knocked its button out of the row -- the same failure
+    // OptionShell on /get-started already documents.
+    note: "Self-serve — live in about two minutes. No card, no call.",
     highlight: false,
   },
   {
@@ -737,6 +742,7 @@ const PLANS = [
     fit: "Fits an agency running lead flow across a handful of clients.",
     cta: "Book a setup call",
     action: "call",
+    note: "Usage-based at this volume — we size it with you first.",
     highlight: true,
   },
   {
@@ -746,6 +752,7 @@ const PLANS = [
     fit: "Fits volume from paid campaigns already running at real scale.",
     cta: "Book a setup call",
     action: "call",
+    note: "Usage-based at this volume — we size it with you first.",
     highlight: false,
   },
 ];
@@ -867,15 +874,12 @@ function Pricing() {
                   {plan.cta}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                {/* Only the self-serve tier earns the ease claim — the call
-                    tiers genuinely start with a conversation, and saying
-                    "2 minutes" next to "Book a setup call" would read as
-                    the page contradicting itself. */}
-                {plan.action === "signup" && (
-                  <div className="mt-2.5 text-[11px] leading-relaxed text-[var(--text)] opacity-50">
-                    Self-serve — live in about two minutes. No card, no call.
-                  </div>
-                )}
+                {/* Only the self-serve tier claims ease — the call tiers say
+                    why they need a conversation instead. Same slot on every
+                    card either way, so the row stays level. */}
+                <div className="mt-2.5 min-h-[2.6em] text-[11px] leading-relaxed text-[var(--text)] opacity-50">
+                  {plan.note}
+                </div>
               </div>
             </Reveal>
           ))}
