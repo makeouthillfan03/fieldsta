@@ -39,34 +39,21 @@ function openChat(event) {
   window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
 }
 
+// Goes to the signup page rather than straight to Stripe: the buyer should
+// see their account get created — and confirm the email is theirs — before
+// a payment page asks for a card.
 function BuySupportButton() {
-  const [state, setState] = useState("idle");
-  async function buy() {
-    if (state === "opening") return;
-    setState("opening");
-    track("products_support_buy");
-    try {
-      const res = await fetch(`${AGENTS_BASE}/api/support-agent-checkout`, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error("no url");
-      window.location.href = data.url;
-    } catch {
-      setState("error");
-    }
-  }
   return (
     <div>
-      <Button onClick={buy} disabled={state === "opening"} className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-        {state === "opening" ? "Opening checkout…" : "Start 14 days free"}
-        <ArrowRight className="h-4 w-4" />
-      </Button>
-      {state === "error" ? (
-        <div className="mt-2 text-xs text-[var(--accent)]">Checkout hiccuped — try again.</div>
-      ) : (
-        <div className="mt-2 text-xs opacity-50">
-          One-minute Stripe checkout — $0 today, then one line to install on your site.
-        </div>
-      )}
+      <a href="/get-started?product=support-agent" onClick={() => track("products_support_buy")}>
+        <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
+          Start 14 days free
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </a>
+      <div className="mt-2 text-xs opacity-50">
+        Create your account in about a minute — $0 today, then one line to install on your site.
+      </div>
     </div>
   );
 }

@@ -24,6 +24,12 @@ import { trackLinkedInConversion } from "@/lib/linkedin.js";
 // right tool for anyone who actually wants to ask something first.
 export default function GetStarted() {
   const dark = useIsDarkTheme();
+  // ?product=support-agent swaps the first card for the support agent's own
+  // signup. Same page, same three options, so the support buyer gets an
+  // account-first flow without a second near-identical route to maintain.
+  const isSupportAgent =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("product") === "support-agent";
 
   return (
     <div className="relative min-h-screen bg-[var(--bg)] font-body text-[var(--text)]">
@@ -51,20 +57,20 @@ export default function GetStarted() {
             Get started
           </div>
           <h1 className="mt-4 font-editorial text-3xl font-medium tracking-tight sm:text-4xl">
-            Start your free pilot
+            {isSupportAgent ? "Start your 24/7 support agent" : "Start your free pilot"}
           </h1>
           {/* Two fields really is the entire signup (the pilot goes live
               before Stripe is ever involved — quick-checkout's skipCheckout
               branch), so the page can promise this without hedging. */}
           <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[var(--text)] opacity-60">
-            The whole signup is a name and an email — your dashboard is live in
-            about two minutes, and connecting your lead source is a few clicks
-            from there. No card, no call.
+            {isSupportAgent
+              ? "A name and an email creates your account. We'll email you to confirm the address, your agent turns on right away, and billing starts $0 today — 14 days free before anything is charged."
+              : "The whole signup is a name and an email — your dashboard is live in about two minutes, and connecting your lead source is a few clicks from there. No card, no call."}
           </p>
         </div>
 
         <div className="mx-auto mt-14 grid divide-y divide-[rgba(var(--text-rgb),0.1)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <CheckoutCard />
+          {isSupportAgent ? <SupportAgentSignupCard /> : <CheckoutCard />}
           <TalkToHarperCard />
           <ReachOutCard />
         </div>
@@ -204,6 +210,88 @@ function CheckoutCard() {
             </a>
             <p className="mt-2 text-[11px] leading-relaxed text-[var(--text)] opacity-60">
               Sent to your email too, in case you want to finish on another device.
+            </p>
+          </>
+        )}
+      </form>
+    </OptionShell>
+  );
+}
+
+// The support agent's own signup. Before this, its buy button posted
+// straight to Stripe: the buyer never saw an account get created (so
+// "wait, do I have a login?" was a fair question at the moment of paying)
+// and Stripe's email field was unverified, so anyone could type someone
+// else's address. Account first, confirmation email second, Stripe third
+// -- and the account plus its 14-day free window are real even if checkout
+// is abandoned, so a cancelled payment never costs someone the agent.
+function SupportAgentSignupCard() {
+  const businessNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const [status, setStatus] = useState("idle"); // idle | submitting | error
+  const [message, setMessage] = useState("");
+  const [result, setResult] = useState(null); // { setupUrl, checkoutUrl }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("submitting");
+    setMessage("");
+    try {
+      const res = await fetch(`${AGENTS_BASE}/api/support-agent-signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          businessName: businessNameRef.current.value,
+          contactEmail: emailRef.current.value,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.message || "Something went wrong. Try again.");
+        return;
+      }
+      track("support_agent_signup");
+      trackLinkedInConversion("signup");
+      setStatus("idle");
+      setMessage(data.message || "Account created — check your email.");
+      if (!data.existingAccount) setResult({ setupUrl: data.setupUrl, checkoutUrl: data.checkoutUrl });
+      e.target.reset();
+    } catch {
+      setStatus("error");
+      setMessage("Something went wrong. Try again.");
+    }
+  }
+
+  return (
+    <OptionShell
+      title="Start free"
+      note="14 days free, then $200/mo. Cancel anytime."
+      accentNote
+    >
+      <form onSubmit={handleSubmit} className="text-left">
+        <div className="space-y-4">
+          <Input ref={businessNameRef} required placeholder="Business name" disabled={status === "submitting"} className={fieldClass} />
+          <Input ref={emailRef} type="email" required placeholder="Business email" disabled={status === "submitting"} className={fieldClass} />
+        </div>
+        <Button type="submit" disabled={status === "submitting"} className={primaryBtnClass + " mt-6"}>
+          {status === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create account"}
+        </Button>
+        {message && (
+          <p className={"mt-3 text-xs " + (status === "error" ? "text-[#FF4438]" : "text-emerald-400")}>{message}</p>
+        )}
+        {result?.checkoutUrl && (
+          <a href={result.checkoutUrl} onClick={() => track("support_agent_to_checkout")} className="mt-3 block">
+            <Button className={primaryBtnClass + " font-bold"}>Add billing — $0 today</Button>
+          </a>
+        )}
+        {result?.setupUrl && (
+          <>
+            <a href={result.setupUrl} onClick={() => track("support_agent_open_dashboard")} className="mt-3 block">
+              <Button className={secondaryBtnClass}>Confirm email &amp; open dashboard</Button>
+            </a>
+            <p className="mt-2 text-[11px] leading-relaxed text-[var(--text)] opacity-60">
+              Your agent is already on — billing can wait until you've seen it work.
             </p>
           </>
         )}

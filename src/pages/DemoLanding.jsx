@@ -772,22 +772,6 @@ const PLANS = [
 // directly above already says it, and the freed-up room goes to what
 // happens AFTER paying (one line to install), which nothing else here said.
 function SupportAddonBuy() {
-  const [state, setState] = useState("idle"); // idle | opening | error
-
-  async function buy() {
-    if (state === "opening") return;
-    setState("opening");
-    track("pricing_support_addon_buy");
-    try {
-      const res = await fetch(`${import.meta.env.VITE_AGENTS_BASE_URL || "https://studio.fieldsta.com"}/api/support-agent-checkout`, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error(data.message || "no url");
-      window.location.href = data.url;
-    } catch {
-      setState("error");
-    }
-  }
-
   return (
     <div className="flex flex-col items-start gap-2.5 sm:items-end">
       <div className="flex flex-wrap items-center gap-3">
@@ -795,20 +779,17 @@ function SupportAddonBuy() {
           <span className="font-bold">+$150/mo</span>
           <span className="opacity-70"> with any plan</span>
         </div>
-        <button
-          type="button"
-          onClick={buy}
-          disabled={state === "opening"}
-          className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:bg-[var(--accent-hover)] disabled:opacity-60"
+        <a
+          href="/get-started?product=support-agent"
+          onClick={() => track("pricing_support_addon_buy")}
+          className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:bg-[var(--accent-hover)]"
         >
-          {state === "opening" ? "Opening checkout…" : "$200/mo on its own — start 14 days free"}
-          {state !== "opening" && <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />}
-        </button>
+          $200/mo on its own — start 14 days free
+          <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
+        </a>
       </div>
       <div className="text-xs text-[var(--text)] opacity-50 sm:text-right">
-        {state === "error"
-          ? "Checkout hiccuped — try again, or ask Harper below."
-          : "$0 today, cancel anytime — then one line to install. Already a client? Turn it on from your dashboard."}
+        Create your account, then $0 today — cancel anytime. Already a client? Turn it on from your dashboard.
       </div>
       <button
         type="button"
