@@ -161,7 +161,10 @@ function CheckoutCard() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.message || "Something went wrong. Try again.");
+        setMessage(
+          data.message ||
+            "That didn't go through. Try once more, or email support@fieldsta.com and we'll set you up by hand."
+        );
         return;
       }
 
@@ -172,8 +175,17 @@ function CheckoutCard() {
       setMessage(data.message || "Your 14-day pilot is live.");
       e.target.reset();
     } catch {
+      // This branch means the request never reached the server at all —
+      // network down, or the CORS regression that once took this exact
+      // endpoint offline while every server-side signal stayed green. The
+      // person hitting it is trying to become a customer RIGHT NOW, and
+      // "try again" sends them back into the same broken call with no other
+      // option. Naming a human they can email costs nothing and is the
+      // difference between a lost signup and a manual one.
       setStatus("error");
-      setMessage("Something went wrong. Try again.");
+      setMessage(
+        "We couldn't reach our servers just now. Email support@fieldsta.com and we'll set your pilot up by hand — usually within the hour."
+      );
     }
   }
 
@@ -248,7 +260,10 @@ function SupportAgentSignupCard() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.message || "Something went wrong. Try again.");
+        setMessage(
+          data.message ||
+            "That didn't go through. Try once more, or email support@fieldsta.com and we'll set you up by hand."
+        );
         return;
       }
       track("support_agent_signup");
@@ -258,15 +273,19 @@ function SupportAgentSignupCard() {
       if (!data.existingAccount) setResult({ setupUrl: data.setupUrl, checkoutUrl: data.checkoutUrl });
       e.target.reset();
     } catch {
+      // Same reasoning as the pilot signup above: unreachable server, and
+      // the visitor was mid-purchase. Give them a person, not a retry.
       setStatus("error");
-      setMessage("Something went wrong. Try again.");
+      setMessage(
+        "We couldn't reach our servers just now. Email support@fieldsta.com and we'll get your support agent set up by hand — usually within the hour."
+      );
     }
   }
 
   return (
     <OptionShell
       title="Start free"
-      note="14 days free, then $200/mo. Cancel anytime."
+      note="14 days free, then $400/mo. Cancel anytime."
       accentNote
     >
       <form onSubmit={handleSubmit} className="text-left">

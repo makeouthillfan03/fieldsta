@@ -757,7 +757,7 @@ const PLANS = [
   },
 ];
 
-// The right-hand side of the add-on strip. "$200/mo on its own" is the buy
+// The right-hand side of the add-on strip. "$400/mo on its own" is the buy
 // button itself: one click posts to the agents API (no form — Stripe's own
 // checkout collects email and card), charges $0 today with a real 14-day
 // trial on the subscription, and the webhook provisions the account from
@@ -766,7 +766,7 @@ const PLANS = [
 // dashboard path instead (+$150), which the small line under it names.
 //
 // That second sentence of the caption is load-bearing, not filler: without
-// it an existing client buys the $200 standalone when they should be
+// it an existing client buys the $400 standalone when they should be
 // paying $150 as an add-on. It survives any rewrite of the first half.
 // The caption also deliberately doesn't repeat "14 days" -- the button
 // directly above already says it, and the freed-up room goes to what
@@ -784,7 +784,7 @@ function SupportAddonBuy() {
           onClick={() => track("pricing_support_addon_buy")}
           className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:bg-[var(--accent-hover)]"
         >
-          $200/mo on its own — start 14 days free
+          $400/mo on its own — start 14 days free
           <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
         </a>
       </div>

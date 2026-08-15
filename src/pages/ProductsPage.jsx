@@ -75,7 +75,7 @@ const PRODUCTS = [
     name: "24/7 Support Agent",
     tag: "For your existing customers",
     what: "A chat bubble on your own website that answers your customers any hour in your voice, and hands anything sensitive — refunds, complaints, commitments — to a person instead of guessing. One line to install.",
-    priceLine: "$200/mo on its own · +$150/mo with any plan",
+    priceLine: "$400/mo on its own · +$150/mo with any plan",
     independent: "Fully independent — works without the lead-response product.",
     cta: "buy-support",
   },
