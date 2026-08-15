@@ -202,6 +202,10 @@ for (const { vertical: v, product: p } of pairs) {
 <p>${esc(v.fitNotes)}</p>
 <div class="note"><strong>What it will not do.</strong> ${esc(v.limits)}</div>
 
+<h2>See it on your own site first</h2>
+<p>Before deciding anything: run the free check. It reads one public page of your site the way a customer would and tells you what they can actually see — how many ways they can reach you, and what happens if they land there at 9pm. No signup, and the result shows in full.</p>
+<div class="cta-row"><a class="cta" href="/grader">Check my site free</a></div>
+
 <h2>Questions</h2>
 ${v.faqs
   .map((f) => `<div class="faq"><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></div>`)

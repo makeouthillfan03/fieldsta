@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/grader", "destination": "https://studio.fieldsta.com/grader", "permanent": false }
+  ],
   "rewrites": [
     {
       "source": "/((?!ai-lead-response|ai-support-agent|sitemap\\.xml|robots\\.txt).*)",

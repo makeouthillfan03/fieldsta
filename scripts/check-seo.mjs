@@ -170,7 +170,11 @@ check("no page promises another product's features", () => {
 });
 
 // --- internal links must resolve, or the crawl budget is wasted on 404s
-const SPA_ROUTES = new Set(["/", "/try", "/products", "/help", "/get-started", "/terms", "/privacy", "/agreement"]);
+// "/grader" is not a file in dist/ and not a React route — it's a Vercel
+// redirect to studio.fieldsta.com/grader, where the app server renders the
+// tool. Listed here so the dead-link check treats it as resolvable; the
+// redirect itself is asserted separately below.
+const SPA_ROUTES = new Set(["/", "/try", "/products", "/help", "/get-started", "/terms", "/privacy", "/agreement", "/grader"]);
 check("every internal link resolves", () => {
   const bad = [];
   for (const p of pages) {
@@ -222,6 +226,21 @@ if (existsSync(path.join(DIST, "robots.txt"))) {
 // there. (vercel.json is strict JSON with no comment support, hence this
 // living here.)
 const vercelRaw = await readFile(path.join(ROOT, "vercel.json"), "utf-8");
+
+// Every generated page's primary call-to-action points at /grader, which
+// only resolves because of a redirect in vercel.json. Delete that redirect
+// and all 18 pages keep rendering perfectly while their main CTA 404s —
+// exactly the kind of break that shows up as "traffic but no conversions"
+// weeks later rather than as a failure.
+check("/grader redirect exists, since every page's CTA depends on it", () => {
+  const vercel = JSON.parse(vercelRaw);
+  const r = (vercel.redirects ?? []).find((x) => x.source === "/grader");
+  assert(r, "no /grader redirect in vercel.json — every page's main CTA would 404");
+  assert(
+    /studio\.fieldsta\.com\/grader/.test(r.destination ?? ""),
+    `/grader redirect points at "${r.destination}", not the app server that serves the tool`
+  );
+});
 check("vercel.json carves the generated prefixes out of the SPA rewrite", () => {
   const vercel = JSON.parse(vercelRaw);
   const src = vercel.rewrites?.[0]?.source ?? "";
