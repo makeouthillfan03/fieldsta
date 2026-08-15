@@ -85,6 +85,17 @@ for (const p of pages) {
   });
 }
 
+// SITE must be the host that actually serves a 200. The apex 308-redirects
+// to www, so pointing canonicals at it aims every page in the sitemap at a
+// redirect. Checked statically (no network call in a build) by requiring
+// the host the redirect resolves TO.
+check("SITE uses the canonical host, not the redirecting apex", () => {
+  assert(
+    SITE === "https://www.fieldsta.com",
+    `SITE is "${SITE}" — fieldsta.com 308s to www.fieldsta.com, so canonicals and sitemap entries must use www`
+  );
+});
+
 check("every title is distinct", () => {
   const titles = pages.map((p) => p.html.match(/<title>([^<]+)<\/title>/)?.[1]);
   const dupes = titles.filter((t, i) => titles.indexOf(t) !== i);

@@ -15,7 +15,14 @@
 // with. "Leads go cold" is fine. "78% of leads go cold in 5 minutes" is
 // not, and is exactly what a cold-call prospect would check.
 
-export const SITE = "https://fieldsta.com";
+// The www host, NOT the apex: fieldsta.com 308-redirects to
+// www.fieldsta.com, so apex canonicals and sitemap entries would every one
+// of them point at a redirect. Google resolves that, but it wastes crawl
+// budget and hands the indexer an ambiguous canonical signal on the pages
+// whose whole job is to be indexed cleanly. Verified against the live
+// response, not assumed — CLAUDE.md and the marketing copy both say
+// "fieldsta.com", which is what made this easy to get wrong.
+export const SITE = "https://www.fieldsta.com";
 
 export const PRODUCTS = {
   lead: {
