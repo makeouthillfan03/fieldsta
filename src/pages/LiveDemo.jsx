@@ -737,21 +737,47 @@ function SampleRun({ vertical, onRunOwn }) {
 }
 
 function SampleRunCta({ onRunOwn }) {
+  // Measured 2026-08-15: 29 prospects clicked through from the sequence to
+  // this page and NOT ONE started a run (demoStartedAt = 0 across all 29).
+  //
+  // The likeliest reason is right here. The page's headline promises an
+  // action -- "Paste a real lead" -- and then hands the visitor a finished,
+  // pre-answered run with a score and a drafted reply. The question the
+  // headline asks is already answered above the fold, so there is nothing
+  // left to do; the only prominent thing left to click is "Start free
+  // trial", which is the largest commitment on the page offered to someone
+  // who has not yet watched the product do anything on their own input.
+  // The one low-commitment action -- the thing we can actually measure, and
+  // the thing the headline literally instructs -- was a 13px link at 60%
+  // opacity underneath it.
+  //
+  // So the hierarchy is inverted: running it on your own lead becomes the
+  // primary button, the trial becomes the quiet secondary. Nothing is lost
+  // by demoting the trial CTA here -- it is still in the sticky top nav on
+  // every scroll position AND in the full "Start free -- no card" section
+  // below, so this page asks for the trial three times either way.
   return (
     <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-      <a href="/get-started" onClick={() => track("try_peek_cta")}>
-        <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-          Start free trial
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </a>
-      <button
+      {/* Label deliberately NOT "Run it on your own lead": that is the
+          composer's own submit button a little further down, and having two
+          identically-worded buttons on screen at once -- one that scrolls,
+          one that actually runs -- is its own confusion. This echoes the
+          headline's verb ("Paste a real lead") and the ↓ says where it
+          takes you. */}
+      <Button
         type="button"
         onClick={onRunOwn}
+        className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
+      >
+        Paste your own lead ↓
+      </Button>
+      <a
+        href="/get-started"
+        onClick={() => track("try_peek_cta")}
         className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
       >
-        Or run it live on your own lead ↓
-      </button>
+        Or skip ahead and start the free trial
+      </a>
     </div>
   );
 }
