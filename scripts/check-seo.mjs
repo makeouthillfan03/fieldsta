@@ -15,6 +15,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE, PRODUCTS, VERTICALS, pagePairs } from "../seo/verticals.mjs";
+import { COMPARISONS } from "../seo/comparisons.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -52,6 +53,17 @@ for (const p of Object.values(PRODUCTS)) {
     continue;
   }
   pages.push({ rel: p.base, hub: true, product: p, html: await readFile(file, "utf-8") });
+}
+for (const c of COMPARISONS) {
+  const product = PRODUCTS[c.forProduct];
+  const rel = `${product.base}/vs/${c.slug}`;
+  const file = path.join(DIST, rel, "index.html");
+  if (!existsSync(file)) {
+    failures++;
+    console.error(`  FAIL comparison ${rel} was not generated`);
+    continue;
+  }
+  pages.push({ rel, comparison: true, product, html: await readFile(file, "utf-8") });
 }
 
 // --- the bug that shipped invisibly: no theme tokens, white-on-white CTA
@@ -253,7 +265,7 @@ check("vercel.json carves the generated prefixes out of the SPA rewrite", () => 
 });
 
 if (failures === 0) {
-  console.log(`[seo] ✓ ${pages.length} pages validated (${pairs.length} vertical + ${Object.keys(PRODUCTS).length} hub).`);
+  console.log(`[seo] ✓ ${pages.length} pages validated (${pairs.length} vertical + ${Object.keys(PRODUCTS).length} hub + ${COMPARISONS.length} comparison).`);
 } else {
   console.error(`\n[seo] ${failures} CHECK(S) FAILED — not shipping a broken SEO surface.`);
   process.exit(1);

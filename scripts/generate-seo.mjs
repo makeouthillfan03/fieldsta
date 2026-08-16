@@ -22,6 +22,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SITE, PRODUCTS, VERTICALS, pagePairs, secondaryProduct } from "../seo/verticals.mjs";
+import { COMPARISONS } from "../seo/comparisons.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -153,6 +154,7 @@ for (const { vertical: v, product: p } of pairs) {
   // since nothing else on the site points at them yet.
   const secondary = secondaryProduct(v);
   const others = VERTICALS.filter((o) => o.slug !== v.slug && o.products[0] === p.key).slice(0, 6);
+  const comparisons = COMPARISONS.filter((c) => c.forProduct === p.key);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -224,6 +226,14 @@ ${
 <ul class="links"><li><a href="/${esc(secondary.base)}">${esc(secondary.name)}</a></li><li><a href="/products">Compare both</a></li></ul>`
     : ""
 }
+${
+  comparisons.length
+    ? `<h3>How ${esc(p.name)} compares</h3>
+<ul class="links">
+${comparisons.map((c) => `<li><a href="/${esc(p.base)}/vs/${esc(c.slug)}">vs ${esc(c.name)}</a></li>`).join("\n")}
+</ul>`
+    : ""
+}
 <h3>${esc(p.name)} for other businesses</h3>
 <ul class="links">
 ${others.map((o) => `<li><a href="/${esc(p.base)}/${esc(o.slug)}">${esc(o.name)}</a></li>`).join("\n")}
@@ -235,10 +245,106 @@ ${others.map((o) => `<li><a href="/${esc(p.base)}/${esc(o.slug)}">${esc(o.name)}
   track(canonical, "0.8");
 }
 
+// ------------------------------------------------------ comparison pages
+//
+// Nested under the product's own base ("/ai-lead-response/vs/<slug>") so
+// they fall inside the SAME vercel.json negative-lookahead prefix already
+// carved out for vertical pages -- no rewrite-config change needed, and
+// no way to forget one (the exact bug class CLAUDE.md already warns about
+// for this file). Compares against an APPROACH (doing nothing, hiring
+// someone, a generic chatbot), never a named competitor -- see
+// comparisons.mjs for why.
+
+for (const c of COMPARISONS) {
+  const p = PRODUCTS[c.forProduct];
+  const rel = `${p.base}/vs/${c.slug}`;
+  const canonical = `${SITE}/${rel}`;
+  const title = `Fieldsta vs ${c.name} — ${p.name}`;
+  const description = `How Fieldsta's ${p.name.toLowerCase()} compares to ${c.name}: what each is actually good at, where it falls short, and where Fieldsta fits. ${p.priceLine}.`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "FAQPage",
+        mainEntity: c.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Fieldsta", item: SITE },
+          { "@type": "ListItem", position: 2, name: p.name, item: `${SITE}/${p.base}` },
+          { "@type": "ListItem", position: 3, name: `vs ${c.name}`, item: canonical },
+        ],
+      },
+    ],
+  };
+
+  const otherComparisons = COMPARISONS.filter((o) => o.forProduct === c.forProduct && o.slug !== c.slug);
+
+  const body = `
+<p class="eyebrow">${esc(p.name)} · Comparison</p>
+<h1>Fieldsta vs ${esc(c.name)}</h1>
+<p class="lede">${esc(p.blurb)}</p>
+<div class="cta-row">
+  <a class="cta" href="/get-started">Get started</a>
+  <a class="cta-alt" href="${esc(p.demoHref)}">${esc(p.demoLabel)}</a>
+</div>
+<p class="price">${esc(p.priceLine)} · ${esc(p.assurance)}</p>
+
+<hr class="rule" />
+
+<h2>What ${esc(c.name)} actually is</h2>
+<p>${esc(c.whatItIs)}</p>
+
+<h2>Where it genuinely wins</h2>
+<p>${esc(c.whereItWins)}</p>
+
+<h2>Where it falls short</h2>
+<p>${esc(c.whereItFalls)}</p>
+
+<h2>Where Fieldsta fits</h2>
+<p>${esc(c.fieldstaFit)}</p>
+<div class="note"><strong>What it will not do.</strong> ${esc(c.limits)}</div>
+
+<h2>See it on your own site first</h2>
+<p>Before deciding anything: run the free check. It reads one public page of your site the way a customer would and tells you what they can actually see — how many ways they can reach you, and what happens if they land there at 9pm. No signup, and the result shows in full.</p>
+<div class="cta-row"><a class="cta" href="/grader">Check my site free</a></div>
+
+<h2>Questions</h2>
+${c.faqs.map((f) => `<div class="faq"><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></div>`).join("\n")}
+
+<div class="cta-row">
+  <a class="cta" href="/get-started">Get started</a>
+  <a class="cta-alt" href="/products">Compare products</a>
+</div>
+
+<hr class="rule" />
+${
+  otherComparisons.length
+    ? `<h3>More comparisons</h3>
+<ul class="links">
+${otherComparisons.map((o) => `<li><a href="/${esc(p.base)}/vs/${esc(o.slug)}">vs ${esc(o.name)}</a></li>`).join("\n")}
+<li><a href="/${esc(p.base)}">All industries</a></li>
+</ul>`
+    : `<h3>See it by industry</h3>
+<ul class="links"><li><a href="/${esc(p.base)}">All industries</a></li></ul>`
+}
+`;
+
+  await emit(rel, shell({ title, description, canonical, jsonLd, body }));
+  track(canonical, "0.6");
+}
+
 // ------------------------------------------------------- product hubs
 
 for (const p of Object.values(PRODUCTS)) {
   const list = VERTICALS.filter((v) => v.products[0] === p.key);
+  const hubComparisons = COMPARISONS.filter((c) => c.forProduct === p.key);
   const canonical = `${SITE}/${p.base}`;
   const body = `
 <p class="eyebrow">Fieldsta</p>
@@ -255,6 +361,14 @@ for (const p of Object.values(PRODUCTS)) {
 <ul class="links">
 ${list.map((v) => `<li><a href="/${esc(p.base)}/${esc(v.slug)}">${esc(v.name)}</a></li>`).join("\n")}
 </ul>
+${
+  hubComparisons.length
+    ? `<h3>How it compares</h3>
+<ul class="links">
+${hubComparisons.map((c) => `<li><a href="/${esc(p.base)}/vs/${esc(c.slug)}">vs ${esc(c.name)}</a></li>`).join("\n")}
+</ul>`
+    : ""
+}
 <h3>Other products</h3>
 <ul class="links">
 ${Object.values(PRODUCTS)
@@ -305,5 +419,5 @@ Sitemap: ${SITE}/sitemap.xml
 await writeFile(path.join(DIST, "robots.txt"), robots, "utf-8");
 
 console.log(
-  `[seo] ${pairs.length} vertical pages + ${Object.keys(PRODUCTS).length} hubs, ${urls.length} URLs in sitemap.xml, robots.txt written.`
+  `[seo] ${pairs.length} vertical pages + ${Object.keys(PRODUCTS).length} hubs + ${COMPARISONS.length} comparison pages, ${urls.length} URLs in sitemap.xml, robots.txt written.`
 );
