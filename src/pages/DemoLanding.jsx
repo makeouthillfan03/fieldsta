@@ -801,6 +801,13 @@ function SupportAddonBuy() {
       >
         Questions? Ask Harper →
       </button>
+      <a
+        href="/support-demo"
+        onClick={() => track("pricing_support_demo")}
+        className="text-[13px] text-[var(--text)] opacity-60 underline underline-offset-2 transition-opacity hover:opacity-100"
+      >
+        Talk to it live first →
+      </a>
     </div>
   );
 }

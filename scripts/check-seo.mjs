@@ -186,7 +186,7 @@ check("no page promises another product's features", () => {
 // redirect to studio.fieldsta.com/grader, where the app server renders the
 // tool. Listed here so the dead-link check treats it as resolvable; the
 // redirect itself is asserted separately below.
-const SPA_ROUTES = new Set(["/", "/try", "/products", "/help", "/get-started", "/terms", "/privacy", "/agreement", "/grader"]);
+const SPA_ROUTES = new Set(["/", "/try", "/products", "/help", "/get-started", "/terms", "/privacy", "/agreement", "/grader", "/support-demo"]);
 check("every internal link resolves", () => {
   const bad = [];
   for (const p of pages) {
@@ -251,6 +251,17 @@ check("/grader redirect exists, since every page's CTA depends on it", () => {
   assert(
     /studio\.fieldsta\.com\/grader/.test(r.destination ?? ""),
     `/grader redirect points at "${r.destination}", not the app server that serves the tool`
+  );
+});
+// Same dependency for the support pages: their demo CTA is /support-demo,
+// which only resolves via this redirect to the app server's live widget page.
+check("/support-demo redirect exists, since support pages' demo CTA depends on it", () => {
+  const vercel = JSON.parse(vercelRaw);
+  const r = (vercel.redirects ?? []).find((x) => x.source === "/support-demo");
+  assert(r, "no /support-demo redirect in vercel.json — support pages' demo CTA would 404");
+  assert(
+    /studio\.fieldsta\.com\/support-demo/.test(r.destination ?? ""),
+    `/support-demo redirect points at "${r.destination}", not the app server that serves the live demo`
   );
 });
 check("vercel.json carves the generated prefixes out of the SPA rewrite", () => {

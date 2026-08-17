@@ -48,8 +48,11 @@ export const PRODUCTS = {
     // lead product's assurance line and demo link on a support page is a
     // promise about a feature that doesn't exist here.
     assurance: "answers only from facts you write · escalates anything else · cancel anytime",
-    demoLabel: "Check your site free",
-    demoHref: "/grader",
+    // /support-demo (a vercel.json redirect to the app server, same
+    // mechanism as /grader) is the live widget itself — the product's own
+    // demo, not the lead product's grader, which is what sat here before.
+    demoLabel: "Talk to it live",
+    demoHref: "/support-demo",
   },
 };
 
