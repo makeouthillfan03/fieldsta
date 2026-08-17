@@ -148,7 +148,17 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 )}
-                {p.cta === "buy-support" && <BuySupportButton />}
+                {p.cta === "buy-support" && (
+                  <div>
+                    <BuySupportButton />
+                    <Link
+                      to="/support-agent"
+                      className="mt-3 inline-block text-[13px] opacity-60 transition-opacity hover:opacity-100"
+                    >
+                      Full product page →
+                    </Link>
+                  </div>
+                )}
                 {p.cta === "harper" && (
                   <button
                     type="button"

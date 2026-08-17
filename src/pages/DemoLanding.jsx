@@ -808,6 +808,13 @@ function SupportAddonBuy() {
       >
         Talk to it live first →
       </a>
+      <Link
+        to="/support-agent"
+        onClick={() => track("pricing_support_page")}
+        className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+      >
+        Full product page →
+      </Link>
     </div>
   );
 }

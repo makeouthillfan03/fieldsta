@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import DemoLanding from "@/pages/DemoLanding";
 import LiveDemo from "@/pages/LiveDemo";
 import ProductsPage from "@/pages/ProductsPage";
+import SupportAgentPage from "@/pages/SupportAgentPage";
 import HelpPage from "@/pages/HelpPage";
 import GetStarted from "@/pages/GetStarted";
 import Terms from "@/pages/Terms";
@@ -66,6 +67,7 @@ export default function App() {
           so the ?step= marker this used to set was invisible to it. */}
       <Route path="/try/*" element={<LiveDemo />} />
       <Route path="/products" element={<ProductsPage />} />
+      <Route path="/support-agent" element={<SupportAgentPage />} />
       <Route path="/help" element={<HelpPage />} />
       <Route path="/get-started" element={<GetStarted />} />
       <Route path="/terms" element={<Terms />} />
