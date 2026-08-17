@@ -39,7 +39,7 @@ export const PRODUCTS = {
   support: {
     key: "support",
     name: "AI support agent",
-    priceLine: "$400/month",
+    priceLine: "$200/month",
     base: "ai-support-agent",
     blurb:
       "A 24/7 chat agent on your own website that answers your customers from facts you give it, and hands off to a real person the moment it isn't sure.",

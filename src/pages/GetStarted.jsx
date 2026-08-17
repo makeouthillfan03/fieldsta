@@ -285,7 +285,7 @@ function SupportAgentSignupCard() {
   return (
     <OptionShell
       title="Start free"
-      note="14 days free, then $400/mo. Cancel anytime."
+      note="14 days free, then $200/mo. Cancel anytime."
       accentNote
     >
       <form onSubmit={handleSubmit} className="text-left">

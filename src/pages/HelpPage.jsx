@@ -47,7 +47,7 @@ const ARTICLES = [
     body: [
       ["Trials", "The core product is 14 days free with no card. The support agent has its own 14-day free window — turn it on from your dashboard, and if you add billing early you're still not charged until the window ends. If you do nothing, it pauses itself politely instead of charging you."],
       ["Managing billing", "Everything runs through Stripe. From Billing settings you can update cards, view invoices, and cancel — cancellation is as easy as signup, and a cancelled support-agent subscription turns the agent off without touching the rest of your account."],
-      ["Prices", "Lead Response starts at $500/mo. The 24/7 Support Agent is $400/mo on its own or +$150/mo with any plan. Current pricing for everything is always at fieldsta.com/products."],
+      ["Prices", "Lead Response starts at $500/mo. The 24/7 Support Agent is $200/mo on its own or +$150/mo with any plan. Current pricing for everything is always at fieldsta.com/products."],
     ],
   },
   {
