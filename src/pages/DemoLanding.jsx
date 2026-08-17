@@ -757,63 +757,29 @@ const PLANS = [
   },
 ];
 
-// The right-hand side of the add-on strip. "$200/mo on its own" is the buy
-// button itself: one click posts to the agents API (no form — Stripe's own
-// checkout collects email and card), charges $0 today with a real 14-day
-// trial on the subscription, and the webhook provisions the account from
-// the completed payment. Abandoning checkout leaves nothing behind, so the
-// click is genuinely commitment-free. Existing/plan customers take the
-// dashboard path instead (+$150), which the small line under it names.
-//
-// That second sentence of the caption is load-bearing, not filler: without
-// it an existing client buys the $400 standalone when they should be
-// paying $150 as an add-on. It survives any rewrite of the first half.
-// The caption also deliberately doesn't repeat "14 days" -- the button
-// directly above already says it, and the freed-up room goes to what
-// happens AFTER paying (one line to install), which nothing else here said.
+// The right-hand side of the add-on strip. This used to be a full point of
+// sale (buy button, Harper prompt, live-demo link, product-page link — four
+// competing actions), which meant the homepage was pitching two products at
+// once and the support strip was busier than the plans above it. Now that
+// /support-agent exists as the product's own page, this strip follows the
+// multi-product convention (one product owns the homepage; every other
+// product gets exactly one quiet link out): price context + a single door.
+// All selling — buy, live demo, FAQ — happens on the product page.
 function SupportAddonBuy() {
   return (
-    <div className="flex flex-col items-start gap-2.5 sm:items-end">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="text-sm text-[var(--text)]">
-          <span className="font-bold">+$150/mo</span>
-          <span className="opacity-70"> with any plan</span>
-        </div>
-        <a
-          href="/get-started?product=support-agent"
-          onClick={() => track("pricing_support_addon_buy")}
-          className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-bold text-white transition-opacity hover:bg-[var(--accent-hover)]"
-        >
-          $200/mo on its own — start 14 days free
-          <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
-        </a>
+    <div className="flex flex-col items-start gap-2 sm:items-end">
+      <div className="text-sm text-[var(--text)]">
+        <span className="font-bold">+$150/mo</span>
+        <span className="opacity-70"> with any plan · </span>
+        <span className="font-bold">$200/mo</span>
+        <span className="opacity-70"> on its own</span>
       </div>
-      <div className="text-xs text-[var(--text)] opacity-50 sm:text-right">
-        Create your account, then $0 today — cancel anytime. Already a client? Turn it on from your dashboard.
-      </div>
-      <button
-        type="button"
-        onClick={() => {
-          track("pricing_support_addon_cta");
-          window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
-        }}
-        className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
-      >
-        Questions? Ask Harper →
-      </button>
-      <a
-        href="/support-demo"
-        onClick={() => track("pricing_support_demo")}
-        className="text-[13px] text-[var(--text)] opacity-60 underline underline-offset-2 transition-opacity hover:opacity-100"
-      >
-        Talk to it live first →
-      </a>
       <Link
         to="/support-agent"
         onClick={() => track("pricing_support_page")}
-        className="text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+        className="text-sm font-semibold text-[var(--accent)] transition-opacity hover:opacity-80"
       >
-        Full product page →
+        Learn more →
       </Link>
     </div>
   );

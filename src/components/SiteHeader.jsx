@@ -58,6 +58,12 @@ export default function SiteHeader() {
   // "Try Demo" is the one nav action that can be already-satisfied -- showing
   // it on /try points at the page you're on.
   const onTryPage = useLocation().pathname === "/try";
+  // On the support agent's own page the header CTAs must belong to THAT
+  // product: a support prospect clicking "Start Free Trial" here and
+  // landing in the lead-response pilot signup is exactly the two-products-
+  // at-once confusion the dedicated page exists to remove. Everywhere else
+  // the header stays lead-first — one product owns the default journey.
+  const onSupportPage = useLocation().pathname === "/support-agent";
 
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
@@ -129,20 +135,28 @@ export default function SiteHeader() {
           >
             Log in
           </a>
-          <a href="/get-started">
+          <a href={onSupportPage ? "/get-started?product=support-agent" : "/get-started"}>
             <Button
               size="sm"
               className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
             >
-              Start Free Trial
+              {onSupportPage ? "Start 14 Days Free" : "Start Free Trial"}
             </Button>
           </a>
-          {!onTryPage && (
-            <Link to="/try" className="hidden sm:block">
+          {onSupportPage ? (
+            <a href="/support-demo" className="hidden sm:block">
               <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
-                Try Demo
+                Talk to It Live
               </Button>
-            </Link>
+            </a>
+          ) : (
+            !onTryPage && (
+              <Link to="/try" className="hidden sm:block">
+                <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
+                  Try Demo
+                </Button>
+              </Link>
+            )
           )}
         </div>
       </div>

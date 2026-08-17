@@ -37,25 +37,6 @@ function openChat(event) {
   window.dispatchEvent(new CustomEvent("fieldsta:open-chat"));
 }
 
-// Goes to the signup page rather than straight to Stripe: the buyer should
-// see their account get created — and confirm the email is theirs — before
-// a payment page asks for a card.
-function BuySupportButton() {
-  return (
-    <div>
-      <a href="/get-started?product=support-agent" onClick={() => track("products_support_buy")}>
-        <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
-          Start 14 days free
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      </a>
-      <div className="mt-2 text-xs opacity-50">
-        Create your account in about a minute — $0 today, then one line to install on your site.
-      </div>
-    </div>
-  );
-}
-
 const PRODUCTS = [
   {
     id: "lead-response",
@@ -149,14 +130,20 @@ export default function ProductsPage() {
                   </div>
                 )}
                 {p.cta === "buy-support" && (
-                  <div>
-                    <BuySupportButton />
-                    <Link
-                      to="/support-agent"
-                      className="mt-3 inline-block text-[13px] opacity-60 transition-opacity hover:opacity-100"
-                    >
-                      Full product page →
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link to="/support-agent" onClick={() => track("products_support_page")}>
+                      <Button className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]">
+                        Learn more
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
                     </Link>
+                    <a
+                      href="/support-demo"
+                      onClick={() => track("products_support_demo")}
+                      className="text-[13px] opacity-60 transition-opacity hover:opacity-100"
+                    >
+                      Talk to it live →
+                    </a>
                   </div>
                 )}
                 {p.cta === "harper" && (
