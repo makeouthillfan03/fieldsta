@@ -10,6 +10,7 @@ import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 import { trackLinkedInConversion } from "@/lib/linkedin.js";
+import { reportFunnelEvent } from "@/lib/attribution.js";
 
 // Landing spot for the pricing section's "Start free trial" CTA. The first
 // card used to open Harper pre-primed with an auto-message and let the
@@ -169,6 +170,10 @@ function CheckoutCard() {
       }
 
       track("get_started_start_trial");
+      // Ties an account creation back to the cold email that sourced it
+      // (no-op without a stashed cid) — the last funnel stage that was
+      // still invisible per-prospect.
+      reportFunnelEvent("checkout_started");
       trackLinkedInConversion("signup");
       setStatus("idle");
       setSetupUrl(data.setupUrl || "");
@@ -267,6 +272,7 @@ function SupportAgentSignupCard() {
         return;
       }
       track("support_agent_signup");
+      reportFunnelEvent("checkout_started");
       trackLinkedInConversion("signup");
       setStatus("idle");
       setMessage(data.message || "Account created — check your email.");
