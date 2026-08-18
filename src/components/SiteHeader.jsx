@@ -108,7 +108,11 @@ export default function SiteHeader() {
                 homepage, nav carries the rest of the family. Opens on
                 hover AND focus-within so it works from the keyboard. */}
             <div className="group relative">
-              <Link to="/products" className={NAV_LINK_CLASS}>
+              {/* `block` matters: the other nav links are direct flex items
+                  (blockified), but this one sits inside the dropdown wrapper
+                  and stayed `inline`, which gave it different box metrics and
+                  set it a couple of pixels lower than its siblings. */}
+              <Link to="/products" className={`block ${NAV_LINK_CLASS}`}>
                 Products
               </Link>
               <div

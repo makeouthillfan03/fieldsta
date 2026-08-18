@@ -147,7 +147,7 @@ function Hero() {
 
       <div className="container relative z-10 py-14">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h1 className="animate-fade-up font-editorial text-4xl font-medium leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
+          <h1 className="animate-fade-up font-editorial text-4xl font-medium leading-[1.18] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
             You already <span className="font-semibold text-[var(--accent)]">paid</span> for the lead.
             <br />
             The <span className="font-semibold text-[var(--accent)]">expensive part</span> <span className="whitespace-nowrap">is losing it</span>
