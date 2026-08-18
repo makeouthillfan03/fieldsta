@@ -94,9 +94,43 @@ export default function SiteHeader() {
             <FieldstaLogoMark withWordmark={false} />
           </a>
           <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
-            <Link to="/products" className={NAV_LINK_CLASS}>
-              Products
-            </Link>
+            {/* A product SWITCHER, not just a link. The homepage tells one
+                story (lead response) on purpose — two hero pitches
+                convert worse than one. But a visitor who arrives already
+                wanting the support agent then had to read the wrong pitch
+                and dig three clicks (Products -> scroll -> Learn more) to
+                find theirs. Same pattern Stripe/Twilio use: single-story
+                homepage, nav carries the rest of the family. Opens on
+                hover AND focus-within so it works from the keyboard. */}
+            <div className="group relative">
+              <Link to="/products" className={NAV_LINK_CLASS}>
+                Products
+              </Link>
+              <div
+                className="invisible absolute left-1/2 top-full z-50 w-64 -translate-x-1/2 pt-4 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              >
+                <div className="overflow-hidden rounded-lg border border-[rgba(var(--text-rgb),0.12)] bg-[var(--bg)] shadow-lg">
+                  <Link
+                    to="/try"
+                    className="block px-4 py-3 normal-case tracking-normal transition-colors hover:bg-[rgba(var(--text-rgb),0.05)]"
+                  >
+                    <div className="text-[13px] font-bold">AI Lead Response</div>
+                    <div className="mt-0.5 text-[11px] font-normal opacity-60">
+                      Answer new leads in under a minute
+                    </div>
+                  </Link>
+                  <Link
+                    to="/support-agent"
+                    className="block border-t border-[rgba(var(--text-rgb),0.08)] px-4 py-3 normal-case tracking-normal transition-colors hover:bg-[rgba(var(--text-rgb),0.05)]"
+                  >
+                    <div className="text-[13px] font-bold">24/7 Support Agent</div>
+                    <div className="mt-0.5 text-[11px] font-normal opacity-60">
+                      Answer existing customers, any hour
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <a href="/#how-it-works" className={NAV_LINK_CLASS}>
               How It Works
             </a>

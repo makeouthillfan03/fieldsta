@@ -48,6 +48,7 @@ export default function DemoLanding() {
     <div className="font-body bg-[var(--bg)] text-[var(--text)]">
       <SiteHeader />
       <Hero />
+      <TwoProducts />
       <TrustedBy />
       <DemoVideo />
       <LeadReviewDemo />
@@ -178,9 +179,88 @@ function Hero() {
           <p className="animate-fade-up [animation-delay:360ms] mt-4 text-[13px] text-[var(--text)] opacity-60">
             A real lead, already run through it — read the verdict in 90 seconds. No signup.
           </p>
+
+          {/* The other product's door, above the fold. The hero stays a
+              one-product story on purpose, but the support agent is the
+              larger-market motion — a visitor who came for it should not
+              have to read the wrong pitch and dig through /products to
+              find theirs. One quiet line, not a second hero. */}
+          <Link
+            to="/support-agent"
+            onClick={() => track("hero_support_door")}
+            className="animate-fade-up [animation-delay:440ms] mt-6 text-[13px] text-[var(--text)] opacity-60 transition-opacity hover:opacity-100"
+          >
+            Looking for the 24/7 customer support agent instead? →
+          </Link>
         </div>
       </div>
 
+    </section>
+  );
+}
+
+// The product family, stated once, early, as two doors. Exists because the
+// page previously marketed ONLY lead response while the support agent — the
+// larger-market, higher-volume motion — was invisible until the pricing
+// section's add-on strip. One product owns the hero; this section makes the
+// second product findable within one scroll, each door going to its own
+// complete path (/try and /support-agent) rather than competing CTAs.
+function TwoProducts() {
+  return (
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-16">
+      <div className="container">
+        <Reveal className="text-center">
+          <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
+            Two products, one job: nobody waits
+          </div>
+        </Reveal>
+        <div className="mx-auto mt-8 grid max-w-3xl gap-4 sm:grid-cols-2">
+          <Reveal>
+            <Link
+              to="/try"
+              onClick={() => track("two_products_lead")}
+              className="group block h-full border border-[rgba(var(--text-rgb),0.12)] p-6 transition-colors hover:border-[var(--accent)]"
+            >
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--accent)]">
+                For your new leads
+              </div>
+              <div className="font-editorial mt-2 text-xl font-medium">AI Lead Response</div>
+              <p className="mt-2 text-sm leading-relaxed opacity-70">
+                Replies to every inbound lead in under a minute, qualifies it against your
+                criteria, books the meeting. Human review on every booking.
+              </p>
+              <div className="mt-4 text-sm font-semibold">
+                $500/mo
+                <span className="ml-3 text-[13px] font-normal opacity-60 transition-opacity group-hover:opacity-100">
+                  See it run on a real lead →
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+          <Reveal delay={100}>
+            <Link
+              to="/support-agent"
+              onClick={() => track("two_products_support")}
+              className="group block h-full border border-[rgba(var(--text-rgb),0.12)] p-6 transition-colors hover:border-[var(--accent)]"
+            >
+              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--accent)]">
+                For your existing customers
+              </div>
+              <div className="font-editorial mt-2 text-xl font-medium">24/7 Support Agent</div>
+              <p className="mt-2 text-sm leading-relaxed opacity-70">
+                A chat bubble on your own website that answers your customers any hour, from
+                facts you wrote — and hands off to a person the moment it isn&apos;t sure.
+              </p>
+              <div className="mt-4 text-sm font-semibold">
+                $200/mo
+                <span className="ml-3 text-[13px] font-normal opacity-60 transition-opacity group-hover:opacity-100">
+                  Talk to it live →
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+        </div>
+      </div>
     </section>
   );
 }
