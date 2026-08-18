@@ -67,7 +67,12 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
-      <div className="container grid h-16 grid-cols-[1fr_auto_1fr] items-center">
+      {/* auto_1fr_auto (not 1fr_auto_1fr): the right group is wider than the
+          logo, so equal fr side columns hit min-content and shoved the nav
+          subtly left of center. Centering the middle cell between its
+          neighbors gives equal whitespace on both sides of the nav, which is
+          the symmetry the eye actually checks. */}
+      <div className="container grid h-16 grid-cols-[auto_1fr_auto] items-center">
         <div className="justify-self-start">
           {/* Desktop only -- on mobile the logo moves to the center slot
               below instead. */}

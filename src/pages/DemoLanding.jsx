@@ -150,7 +150,7 @@ function Hero() {
           <h1 className="animate-fade-up font-editorial text-4xl font-medium leading-[1.12] tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl">
             You already <span className="font-semibold text-[var(--accent)]">paid</span> for the lead.
             <br />
-            The <span className="font-semibold text-[var(--accent)]">expensive part</span> is losing it
+            The <span className="font-semibold text-[var(--accent)]">expensive part</span> <span className="whitespace-nowrap">is losing it</span>
             <br />
             before anyone replies.
           </h1>
