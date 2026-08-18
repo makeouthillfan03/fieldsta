@@ -103,6 +103,9 @@ export default function LiveDemo() {
   // -- the pitch is that a lead goes cold in minutes, so the elapsed time IS
   // the proof. Measured, not estimated: set from the real request duration.
   const [elapsedMs, setElapsedMs] = useState(null);
+  // Wall-clock anchor for the live stopwatch. Set the moment a real run
+  // starts; null while idle so the stopwatch only exists during a run.
+  const [runStartedAt, setRunStartedAt] = useState(null);
   // A captured run has no duration this visitor experienced, so the elapsed
   // line has to stay off for it -- showing "0 seconds" for a replay, next to
   // copy asking how long their process takes, would be the page's one
@@ -205,6 +208,7 @@ export default function LiveDemo() {
     if (!msg || status === "running") return;
     const usedSample = msg === active.sample;
     setStatus("running");
+    setRunStartedAt(Date.now());
     setError("");
     setResult(null);
 
@@ -472,6 +476,7 @@ export default function LiveDemo() {
 
           {status === "running" && (
             <div className="space-y-3">
+              <LiveStopwatch startedAt={runStartedAt} />
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-[rgba(var(--text-rgb),0.1)]">
                 <div
                   className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
@@ -569,6 +574,53 @@ const RUN_STEPS = [
   "Filling in what the message left out",
   "Drafting the reply",
 ];
+
+// The clock IS the product, so during the run it gets top billing: a live
+// wall-clock stopwatch in the same editorial serif as the headlines, big
+// enough to be the thing the eye rests on while the agent works. rAF-driven
+// off a real Date.now() anchor rather than the eased progress timer, because
+// this number is a truthful measurement and the bar is choreography — the
+// one the visitor quotes later must be the real one. Deciseconds tick fast
+// enough to FEEL like a stopwatch; a whole-second counter reads as a page
+// timer. Under prefers-reduced-motion the display still updates (it is
+// content, not decoration) but only once per second.
+function LiveStopwatch({ startedAt }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!startedAt) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      const iv = setInterval(() => setNow(Date.now()), 1000);
+      return () => clearInterval(iv);
+    }
+    let raf;
+    const tick = () => {
+      setNow(Date.now());
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [startedAt]);
+  if (!startedAt) return null;
+  const total = Math.max(0, now - startedAt);
+  const secs = Math.floor(total / 1000);
+  const decis = Math.floor((total % 1000) / 100);
+  return (
+    <div className="mb-5 flex items-baseline gap-3">
+      <span
+        className="font-editorial text-5xl font-medium tabular-nums leading-none text-[var(--text)] sm:text-6xl"
+        aria-label={`${secs} seconds elapsed`}
+      >
+        {secs}
+        <span className="text-3xl opacity-60 sm:text-4xl">.{decis}</span>
+        <span className="ml-1 text-2xl opacity-45 sm:text-3xl">s</span>
+      </span>
+      <span className="max-w-[11rem] text-[12px] leading-snug text-[var(--text)] opacity-55">
+        Your lead has been waiting this long. Somewhere, so has a real one.
+      </span>
+    </div>
+  );
+}
 
 function RunSteps({ progress }) {
   const activeStep = Math.min(RUN_STEPS.length - 1, Math.floor(progress / (100 / RUN_STEPS.length)));
@@ -939,12 +991,24 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
       )}
 
       {elapsedMs != null && (
-        <div className="space-y-2">
-          <p className="text-sm text-[var(--text)]">
-            <span className="font-medium">
-              {(elapsedMs / 1000).toFixed(0)} seconds
+        <div className="space-y-3">
+          {/* The frozen clock is the payoff of the live stopwatch above —
+              same serif, same scale, now a verdict instead of a countdown.
+              The contrast line stays qualitative ("hours") on purpose: the
+              site's standing rule is no invented statistics, and "most
+              businesses take hours" is the kind of claim a practitioner
+              nods at without asking for a citation. */}
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-editorial text-4xl font-medium tabular-nums leading-none text-[var(--accent)] sm:text-5xl">
+              {(elapsedMs / 1000).toFixed(1)}
+              <span className="text-2xl sm:text-3xl">s</span>
             </span>
-            <span className="opacity-70"> from message to drafted reply.</span>
+            <span className="text-sm text-[var(--text)] opacity-75">
+              from message to drafted reply — at 2pm or 2am, same clock.
+            </span>
+          </div>
+          <p className="text-[13px] text-[var(--text)] opacity-55">
+            Most inquiries wait hours for this. Yours just didn&apos;t.
           </p>
           <WaitMath elapsedMs={elapsedMs} />
         </div>
