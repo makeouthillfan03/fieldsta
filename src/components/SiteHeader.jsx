@@ -72,7 +72,7 @@ export default function SiteHeader() {
           subtly left of center. Centering the middle cell between its
           neighbors gives equal whitespace on both sides of the nav, which is
           the symmetry the eye actually checks. */}
-      <div className="container grid h-16 grid-cols-[auto_1fr_auto] items-center">
+      <div className="container relative grid h-16 grid-cols-[auto_1fr_auto] items-center">
         <div className="justify-self-start">
           {/* Desktop only -- on mobile the logo moves to the center slot
               below instead. */}
@@ -98,7 +98,12 @@ export default function SiteHeader() {
           <a href="/" className="flex items-center gap-2 md:hidden">
             <FieldstaLogoMark withWordmark={false} />
           </a>
-          <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
+          {/* Absolutely centered on the page, not between its neighbors: the
+              logo and the CTA group have different widths, so any flow-based
+              centering either favors one side or drifts with content changes.
+              Absolute centering keeps the nav on the page's true midline at
+              every viewport where it's visible. */}
+          <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
             {/* A product SWITCHER, not just a link. The homepage tells one
                 story (lead response) on purpose — two hero pitches
                 convert worse than one. But a visitor who arrives already
