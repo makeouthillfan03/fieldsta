@@ -348,6 +348,15 @@ export default function LiveDemo() {
             Paste a real <span className="font-semibold text-[var(--accent)]">lead</span>. Watch it{" "}
             <span className="font-semibold text-[var(--accent)]">stop going cold</span>.
           </h1>
+          {/* Direction line, added 2026-08-18. Two prospects in a row read
+              this page as cold outreach ("sounds like outbound") -- reasonable,
+              since the thing it shows is an email being composed. Nobody
+              confused by a page writes in to say so, so the two who did
+              stand for the silent ones. States the direction before the
+              demo can be misread. */}
+          <p className="mt-3 text-sm text-[var(--text)] opacity-70">
+            This is inbound, not outreach: lead gen fills the funnel — Fieldsta answers it.
+          </p>
         </div>
 
         {!result && status !== "running" && (
@@ -1074,7 +1083,7 @@ function Result({ result, round, appliedEdit, editedDraft, setEditedDraft, onRun
 
       <div className="space-y-3 border-t border-[rgba(var(--text-rgb),0.1)] pt-5">
         <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
-          Drafted reply — nothing sends until a human approves it
+          ↩ Reply back to the lead who inquired — nothing sends until a human approves it
         </div>
         {result.subject && (
           <div className="text-sm font-medium text-[var(--text)]">{result.subject}</div>

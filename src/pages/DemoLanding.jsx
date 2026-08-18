@@ -158,6 +158,12 @@ function Hero() {
           <p className="animate-fade-up [animation-delay:280ms] mt-8 text-lg font-semibold text-[var(--text)]">
             Your competitor only has to reply first.
           </p>
+          {/* The plainest sentence on the site, and a prospect wrote it, not
+              us: two agency readers took the hero for an outbound pitch. Says
+              which half of the funnel this is before anyone has to guess. */}
+          <p className="animate-fade-up [animation-delay:320ms] mt-3 text-sm text-[var(--text)] opacity-65">
+            Lead gen fills the funnel. Fieldsta answers it — in under 60 seconds, day or night.
+          </p>
 
           <Link
             to="/try"
