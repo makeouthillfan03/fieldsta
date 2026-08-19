@@ -8,8 +8,13 @@
   --bg-deep: #f0f0f1;
   --text: #0a0a0a;
   --text-rgb: 10, 10, 10;
-  --accent: #ef4444;
-  --accent-hover: #dc2626;
+  /* Vermilion, deepened from Tailwind's stock red-500 (2026-08-19).
+     #ef4444 is the most default red on the web — the one hue that made an
+     otherwise editorial identity read framework-issued. This is the same
+     temperature with ink in it; hover darkens (toward print) rather than
+     brightens (toward neon). */
+  --accent: #c2321f;
+  --accent-hover: #a52a18;
 }
 
 [data-theme="dark"] {
@@ -18,8 +23,28 @@
   --bg-deep: #0a0a0a;
   --text: #f5f5f5;
   --text-rgb: 245, 245, 245;
-  --accent: #ef4444;
-  --accent-hover: #ff5c5c;
+  /* Slightly lifted on dark so it doesn't sink into the ground. */
+  --accent: #e04a33;
+  --accent-hover: #f06046;
+}
+
+/* Text selection carries the brand — the kind of detail nobody consciously
+   notices and everyone registers. */
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Numbers line up like a ledger wherever they appear — counts and prices
+   are the product's soul, so they get typographic respect globally. */
+body {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keyboard focus is visible and branded, never the browser default blue. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 html, body, #root {

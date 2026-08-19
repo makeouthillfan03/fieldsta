@@ -123,7 +123,7 @@ export default function SiteHeader() {
               <div
                 className="invisible absolute left-1/2 top-full z-50 w-64 -translate-x-1/2 pt-4 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
               >
-                <div className="overflow-hidden rounded-lg border border-[rgba(var(--text-rgb),0.12)] bg-[var(--bg)] shadow-lg">
+                <div className="overflow-hidden rounded-none border border-[rgba(var(--text-rgb),0.14)] bg-[var(--bg)] shadow-[0_12px_40px_rgba(0,0,0,0.10)]">
                   <Link
                     to="/try"
                     className="block px-4 py-3 normal-case tracking-normal transition-colors hover:bg-[rgba(var(--text-rgb),0.05)]"

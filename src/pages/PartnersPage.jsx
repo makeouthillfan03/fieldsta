@@ -1,4 +1,5 @@
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 // The agency partner program — a close path that doesn't depend on cold
 // email deliverability or Harper: agencies already own the client rosters,
@@ -91,6 +92,7 @@ export default function PartnersPage() {
           </p>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import { track } from "@vercel/analytics/react";
@@ -113,7 +114,7 @@ export default function SupportAgentPage() {
             This is the live agent, not a recording — ask it what you&apos;d ask any business
             after hours.
           </p>
-          <div className="mt-5 overflow-hidden rounded-lg border border-[rgba(var(--text-rgb),0.12)]">
+          <div className="mt-5 overflow-hidden rounded-none border border-[rgba(var(--text-rgb),0.14)]">
             <iframe
               src="https://studio.fieldsta.com/support-demo"
               title="Live support agent demo"
@@ -248,6 +249,7 @@ export default function SupportAgentPage() {
           </div>
         </div>
       </div>
+      <SiteFooter />
       <SalesChatWidget />
     </div>
   );

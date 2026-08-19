@@ -9,6 +9,7 @@ import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import StreamedText from "@/components/StreamedText";
 import { getAttribution, reportFunnelEvent } from "@/lib/attribution.js";
 import { trackLinkedInConversion } from "@/lib/linkedin.js";
@@ -564,6 +565,7 @@ export default function LiveDemo() {
           </p>
         </div>
       </div>
+      <SiteFooter />
       <SalesChatWidget />
     </div>
   );

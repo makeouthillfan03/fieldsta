@@ -8,6 +8,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import Triangle from "@/components/Triangle";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 import { useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
@@ -1120,34 +1121,5 @@ function DemoForm() {
 }
 
 function Footer() {
-  return (
-    <footer className="border-t border-[rgba(var(--text-rgb),0.1)] py-12 text-center text-sm text-[var(--text)]">
-      <div className="container flex flex-col items-center gap-3">
-        <span className="text-xs font-bold uppercase tracking-[0.3em] text-[var(--text)]">
-          Fieldsta
-        </span>
-        <div className="flex items-center gap-4">
-          <a href="/try" className="hover:text-[var(--text)]">
-            Try Demo
-          </a>
-          <a href="/help" className="hover:text-[var(--text)]">
-            Help
-          </a>
-          <a href="/products" className="hover:text-[var(--text)]">
-            Products
-          </a>
-          <a href="/terms" className="hover:text-[var(--text)]">
-            Terms
-          </a>
-          <a href="/privacy" className="hover:text-[var(--text)]">
-            Privacy
-          </a>
-          <a href="mailto:support@fieldsta.com" className="hover:text-[var(--text)]">
-            support@fieldsta.com
-          </a>
-        </div>
-        <span>&copy; 2026 Fieldsta, LLC.</span>
-      </div>
-    </footer>
-  );
+  return <SiteFooter />;
 }
