@@ -67,12 +67,23 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--bg-rgb),0.9)] backdrop-blur">
-      {/* auto_1fr_auto (not 1fr_auto_1fr): the right group is wider than the
-          logo, so equal fr side columns hit min-content and shoved the nav
-          subtly left of center. Centering the middle cell between its
-          neighbors gives equal whitespace on both sides of the nav, which is
-          the symmetry the eye actually checks. */}
-      <div className="container relative grid h-16 grid-cols-[auto_1fr_auto] items-center">
+      {/* minmax(0,1fr) on both sides, not bare 1fr and not auto_1fr_auto.
+          A previous version used auto_1fr_auto with the nav flow-centered
+          INSIDE the middle track -- that stops the nav overlapping its
+          neighbours (the actual bug it fixed), but a middle track only
+          centers within whatever space the two auto side tracks didn't
+          claim, and the side tracks are different widths (logo vs. toggle +
+          2 buttons) -- so the nav sat visibly off the page's true midline,
+          which is what this fixes.
+          A bare 1fr on each side isn't enough either: an implicit `1fr`
+          track's minimum is its own min-content, not 0, so the wider
+          (right) side can still force itself larger than the left one even
+          though both say "1fr" -- explicit minmax(0,1fr) overrides that
+          minimum, which is what actually forces the two side tracks to be
+          equal. Equal side tracks + a content-sized middle track is the
+          only combination that is BOTH truly centered AND overlap-proof --
+          neither property implies the other. */}
+      <div className="container relative grid h-16 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
         <div className="justify-self-start">
           {/* Desktop only -- on mobile the logo moves to the center slot
               below instead. */}
@@ -115,7 +126,16 @@ export default function SiteHeader() {
               layout that is structurally incapable of overlapping. That is
               the right trade: nobody can perceive a 20px centering offset,
               and everybody can see two labels stacked on top of each other. */}
-          <nav className="hidden items-center gap-6 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] lg:flex xl:gap-8">
+          {/* xl, not lg: true centering (minmax(0,1fr) side columns, see the
+              grid comment above) means the nav sits exactly on the page
+              midline, which needs more room either side than the old
+              flow-centered-in-its-track version did. Measured: 1024px
+              (lg) put the nav 59px INTO the right-hand buttons once
+              actually centered; 1280px (xl) clears by 30px. The old lg
+              threshold was tuned for the previous centering approach and
+              didn't carry over automatically -- verify both centering AND
+              gap together after any future change here, not just one. */}
+          <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] xl:flex">
             {/* A product SWITCHER, not just a link. The homepage tells one
                 story (lead response) on purpose — two hero pitches
                 convert worse than one. But a visitor who arrives already
