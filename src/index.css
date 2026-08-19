@@ -2,17 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Accent rationale (2026-08-19): vermilion, deepened from Tailwind's stock
+   red-500 — the most default red on the web, the one hue that made an
+   otherwise editorial identity read framework-issued. Same temperature
+   with ink in it; hover darkens (toward print) rather than brightens
+   (toward neon). Kept OUTSIDE the :root block because the SEO generator
+   inlines that block verbatim into shipped pages. */
 :root {
   --bg: #ffffff;
   --bg-rgb: 255, 255, 255;
   --bg-deep: #f0f0f1;
   --text: #0a0a0a;
   --text-rgb: 10, 10, 10;
-  /* Vermilion, deepened from Tailwind's stock red-500 (2026-08-19).
-     #ef4444 is the most default red on the web — the one hue that made an
-     otherwise editorial identity read framework-issued. This is the same
-     temperature with ink in it; hover darkens (toward print) rather than
-     brightens (toward neon). */
   --accent: #c2321f;
   --accent-hover: #a52a18;
 }
