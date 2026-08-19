@@ -14,8 +14,8 @@
   --bg-deep: #f0f0f1;
   --text: #0a0a0a;
   --text-rgb: 10, 10, 10;
-  --accent: #c2321f;
-  --accent-hover: #a52a18;
+  --accent: #ef4444;
+  --accent-hover: #dc2626;
 }
 
 [data-theme="dark"] {
@@ -25,8 +25,8 @@
   --text: #f5f5f5;
   --text-rgb: 245, 245, 245;
   /* Slightly lifted on dark so it doesn't sink into the ground. */
-  --accent: #e04a33;
-  --accent-hover: #f06046;
+  --accent: #ef4444;
+  --accent-hover: #ff5c5c;
 }
 
 /* Text selection carries the brand — the kind of detail nobody consciously

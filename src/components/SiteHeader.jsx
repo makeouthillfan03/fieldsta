@@ -94,16 +94,28 @@ export default function SiteHeader() {
             </Button>
           </div>
         </div>
-        <div className="flex items-center justify-self-center">
+        <div className="flex min-w-0 items-center justify-center">
           <a href="/" className="flex items-center gap-2 md:hidden">
             <FieldstaLogoMark withWordmark={false} />
           </a>
-          {/* Absolutely centered on the page, not between its neighbors: the
-              logo and the CTA group have different widths, so any flow-based
-              centering either favors one side or drifts with content changes.
-              Absolute centering keeps the nav on the page's true midline at
-              every viewport where it's visible. */}
-          <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] md:flex">
+          {/* Centered in the grid's middle track, NOT absolutely centered on
+              the page. It used to be the latter (for the page's "true
+              midline"), but an absolutely-positioned nav is removed from flow
+              and therefore cannot be pushed by its neighbours — it just
+              overlaps them. The side groups here are asymmetric and grow with
+              their content, so past a certain width the nav printed straight
+              through the theme toggle: FAQ on top of the moon icon, which is
+              what this looked like in the wild. Measured, the collision began
+              around 1258px on every page and ~1330px on /support-agent, whose
+              CTA labels were longer — i.e. it was reachable on an ordinary
+              laptop, not some edge case.
+
+              Flow-centering inside the 1fr track trades a few pixels of
+              off-midline drift (the two side tracks differ in width) for a
+              layout that is structurally incapable of overlapping. That is
+              the right trade: nobody can perceive a 20px centering offset,
+              and everybody can see two labels stacked on top of each other. */}
+          <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] lg:flex">
             {/* A product SWITCHER, not just a link. The homepage tells one
                 story (lead response) on purpose — two hero pitches
                 convert worse than one. But a visitor who arrives already
@@ -183,18 +195,28 @@ export default function SiteHeader() {
           >
             Log in
           </a>
+          {/* Labels are deliberately IDENTICAL across pages; only the
+              destinations change per product. They used to differ ("Start
+              14 Days Free" / "Talk to It Live"), which made this right-hand
+              group measurably wider on /support-agent — and since the nav is
+              absolutely centered on the page midline rather than laid out
+              between its neighbours, a wider right group has nothing to push
+              against and simply overlapped it, printing FAQ on top of the
+              theme toggle. Same-width labels keep every page's header
+              identical, which is also just less jarring when navigating
+              between them. */}
           <a href={onSupportPage ? "/get-started?product=support-agent" : "/get-started"}>
             <Button
               size="sm"
               className="bg-[var(--accent)] font-bold text-white hover:bg-[var(--accent-hover)]"
             >
-              {onSupportPage ? "Start 14 Days Free" : "Start Free Trial"}
+              Start Free Trial
             </Button>
           </a>
           {onSupportPage ? (
             <a href="/support-demo" className="hidden sm:block">
               <Button size="sm" className="bg-[var(--text)] text-[var(--bg-deep)] hover:bg-white">
-                Talk to It Live
+                Try Demo
               </Button>
             </a>
           ) : (
