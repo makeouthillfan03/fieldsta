@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import SalesChatWidget from "@/components/SalesChatWidget";
+import InlineSupportChat, { SupportChatFootnote } from "@/components/InlineSupportChat";
 import Triangle from "@/components/Triangle";
 import { track } from "@vercel/analytics/react";
 
@@ -90,8 +91,14 @@ export default function SupportAgentPage() {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </a>
+          {/* Scrolls to the inline agent rather than navigating to
+              /support-demo. That page still exists and still earns its keep
+              for traffic that lands on it directly (the SEO pages' demo CTA
+              points there), but sending someone AWAY from this page to a
+              near-duplicate of it — to reach a demo this page now contains —
+              is a worse journey than moving them 400px down. */}
           <a
-            href="/support-demo"
+            href="#talk-to-it"
             onClick={() => track("support_page_demo")}
             className="text-[13px] opacity-60 transition-opacity hover:opacity-100"
           >
@@ -102,25 +109,27 @@ export default function SupportAgentPage() {
           $200/mo on its own · +$150/mo with any plan · $0 today, cancel anytime
         </div>
 
-        {/* Live demo, embedded. This page is where nearly all support-motion
+        {/* Live demo, inline. This page is where nearly all support-motion
             cold-email clicks land now (ctaUrl routes here), and the demo is
             the page's strongest argument — making it one more click away was
-            losing the least-motivated visitors. The studio serves
-            /support-demo with a frame-ancestors exemption scoped to this
-            site; everything inside the frame is the real live widget. */}
-        <div className="mt-14 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
+            losing the least-motivated visitors.
+            It used to be an <iframe> of studio's /support-demo. See
+            InlineSupportChat for why that shape was wrong: that URL is a
+            whole landing page, so it duplicated this page's own sections
+            inside a scroll box, and the real widget it carried put a second
+            chat bubble in the frame's corner — next to the sales bubble
+            already in the page's corner. Talking to the API directly is what
+            /try does for the lead product, and it makes the conversation
+            visible instead of one click inside a nested page. */}
+        <div id="talk-to-it" className="mt-14 scroll-mt-20 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
           <h2 className="font-editorial text-xl font-medium">Talk to it right now</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
             This is the live agent, not a recording — ask it what you&apos;d ask any business
             after hours.
           </p>
-          <div className="mt-5 overflow-hidden rounded-none border border-[rgba(var(--text-rgb),0.14)]">
-            <iframe
-              src="https://studio.fieldsta.com/support-demo"
-              title="Live support agent demo"
-              className="h-[560px] w-full"
-              loading="lazy"
-            />
+          <div className="mt-5">
+            <InlineSupportChat />
+            <SupportChatFootnote />
           </div>
         </div>
 
