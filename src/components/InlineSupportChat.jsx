@@ -60,6 +60,19 @@ export default function InlineSupportChat() {
   const [busy, setBusy] = useState(false);
   const [escalated, setEscalated] = useState(false);
   const [error, setError] = useState("");
+  // The escalation banner below has always said "with your customer's
+  // email captured so nobody is lost" -- true of the real embeddable
+  // widget (support-widget.ts), which has its own capture bar, but this
+  // component never actually asked for one. A real escalated visitor here
+  // was unreachable no matter what they typed in the chat itself: nothing
+  // parses a stray "email me at..." out of message text into
+  // session.visitorEmail, only POST /api/support-chat/contact does that,
+  // and nothing on this page ever called it. contactStatus tracks the
+  // capture form's own state; separate from `escalated` because someone
+  // can submit an email, then keep chatting, without the banner and form
+  // needing to fight over the same boolean.
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactStatus, setContactStatus] = useState("idle"); // idle | sending | sent | error
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   // Scrolling the transcript on the FIRST paint would yank the page to this
@@ -107,6 +120,23 @@ export default function InlineSupportChat() {
     }
   }
 
+  async function submitContact(e) {
+    e.preventDefault();
+    const email = contactEmail.trim();
+    if (!email || contactStatus === "sending") return;
+    setContactStatus("sending");
+    try {
+      const res = await fetch(`${AGENTS_BASE}/api/support-chat/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: "fieldsta", sessionId: getSessionId(), email }),
+      });
+      setContactStatus(res.ok ? "sent" : "error");
+    } catch {
+      setContactStatus("error");
+    }
+  }
+
   return (
     <div className="overflow-hidden border border-[rgba(var(--text-rgb),0.14)]">
       <div className="flex items-center gap-2 border-b border-[rgba(var(--text-rgb),0.1)] bg-[rgba(var(--text-rgb),0.03)] px-4 py-2.5">
@@ -143,9 +173,36 @@ export default function InlineSupportChat() {
         )}
         {escalated && (
           <div className="mt-1 border-l-2 border-[var(--accent)] bg-[rgba(var(--text-rgb),0.03)] px-3 py-2 text-[12.5px] leading-relaxed opacity-80">
-            That one got handed to a person rather than guessed at — which is
-            exactly what it does on your site, with your customer&apos;s email
-            captured so nobody is lost.
+            That one got handed to a person rather than guessed at — on your
+            site, that&apos;s the moment it asks your customer for an email so
+            nobody&apos;s lost. Since this is you talking to it, not them: want
+            us to actually follow up with you?
+            {contactStatus === "sent" ? (
+              <div className="mt-1.5 font-semibold opacity-90">
+                Got it — someone will reach out.
+              </div>
+            ) : (
+              <form onSubmit={submitContact} className="mt-2 flex items-center gap-2">
+                <input
+                  type="email"
+                  required
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="min-w-0 flex-1 border border-[rgba(var(--text-rgb),0.16)] bg-[var(--bg)] px-2.5 py-1.5 text-[12.5px] outline-none focus:border-[var(--accent)]"
+                />
+                <button
+                  type="submit"
+                  disabled={contactStatus === "sending" || !contactEmail.trim()}
+                  className="flex-none bg-[var(--text)] px-3 py-1.5 text-[12.5px] font-semibold text-[var(--bg)] transition-opacity hover:opacity-80 disabled:opacity-40"
+                >
+                  {contactStatus === "sending" ? "Sending…" : "Notify me"}
+                </button>
+              </form>
+            )}
+            {contactStatus === "error" && (
+              <div className="mt-1.5 text-[var(--accent)]">Couldn&apos;t save that — try again.</div>
+            )}
           </div>
         )}
         {error && <div className="mt-1 text-[12.5px] text-[var(--accent)]">{error}</div>}
