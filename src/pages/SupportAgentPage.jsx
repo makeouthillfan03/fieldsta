@@ -101,6 +101,43 @@ export default function SupportAgentPage() {
           $200/mo on its own · +$150/mo with any plan · $0 today, cancel anytime
         </div>
 
+        {/* Live demo, embedded. This page is where nearly all support-motion
+            cold-email clicks land now (ctaUrl routes here), and the demo is
+            the page's strongest argument — making it one more click away was
+            losing the least-motivated visitors. The studio serves
+            /support-demo with a frame-ancestors exemption scoped to this
+            site; everything inside the frame is the real live widget. */}
+        <div className="mt-14 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
+          <h2 className="font-editorial text-xl font-medium">Talk to it right now</h2>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
+            This is the live agent, not a recording — ask it what you&apos;d ask any business
+            after hours.
+          </p>
+          <div className="mt-5 overflow-hidden rounded-lg border border-[rgba(var(--text-rgb),0.12)]">
+            <iframe
+              src="https://studio.fieldsta.com/support-demo"
+              title="Live support agent demo"
+              className="h-[560px] w-full"
+              loading="lazy"
+            />
+          </div>
+        </div>
+
+        {/* The concierge offer — same promise the outbound emails make
+            (variant B's "reply and I'll set it up, free for a week"), stated
+            on the page so email and site tell one story. */}
+        <div className="mt-12 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
+          <h2 className="font-editorial text-xl font-medium">Or let us set it up for you</h2>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
+            Reply to any email from us with your website — or write to{" "}
+            <a href="mailto:support@fieldsta.com" className="underline underline-offset-2">
+              support@fieldsta.com
+            </a>{" "}
+            — and we&apos;ll install it on your site ourselves, free for a week. If it doesn&apos;t
+            catch anything worth keeping, we take it down and you owe nothing.
+          </p>
+        </div>
+
         {/* How it works */}
         <div className="mt-14 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
           <h2 className="font-editorial text-xl font-medium">How it gets onto your site</h2>
