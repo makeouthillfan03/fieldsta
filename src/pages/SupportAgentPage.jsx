@@ -123,6 +123,38 @@ export default function SupportAgentPage() {
           </div>
         </div>
 
+        {/* The monthly receipt — the answer to "this costs $X, makes me $Y".
+            Clearly labeled a sample with illustrative numbers; every real
+            receipt is counted from the customer's own conversations, and the
+            dollar line only ever uses THEIR average job value. */}
+        <div className="mt-12 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
+          <h2 className="font-editorial text-xl font-medium">Every month, you get the math</h2>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
+            A monthly receipt, counted from your agent&apos;s real conversations — so you always
+            know what it&apos;s doing against what it costs.
+          </p>
+          <div className="mt-5 max-w-md border border-[rgba(var(--text-rgb),0.12)] p-5 font-mono text-[13px] leading-relaxed">
+            <div className="text-[10px] uppercase tracking-[0.2em] opacity-50">
+              Sample month — illustrative numbers
+            </div>
+            <div className="mt-3 space-y-1 opacity-85">
+              <div>Conversations answered: 34</div>
+              <div>Customer messages handled: 121</div>
+              <div>Answered outside business hours: 12</div>
+              <div>Handed to you as warm leads: 5</div>
+            </div>
+            <div className="mt-3 border-t border-[rgba(var(--text-rgb),0.1)] pt-3 opacity-85">
+              Your average job: $450
+              <br />5 warm leads × $450 = up to $2,250 of potential work
+              <br />
+              Agent cost: $200
+            </div>
+            <div className="mt-3 text-[11px] opacity-50">
+              Your receipt uses your numbers — nothing estimated, nothing invented.
+            </div>
+          </div>
+        </div>
+
         {/* The concierge offer — same promise the outbound emails make
             (variant B's "reply and I'll set it up, free for a week"), stated
             on the page so email and site tell one story. */}
