@@ -15,6 +15,7 @@
   --text: #0a0a0a;
   --text-rgb: 10, 10, 10;
   --accent: #ef4444;
+  --accent-rgb: 239, 68, 68;
   --accent-hover: #dc2626;
 }
 
@@ -26,6 +27,7 @@
   --text-rgb: 245, 245, 245;
   /* Slightly lifted on dark so it doesn't sink into the ground. */
   --accent: #ef4444;
+  --accent-rgb: 239, 68, 68;
   --accent-hover: #ff5c5c;
 }
 
