@@ -115,7 +115,7 @@ export default function SiteHeader() {
               layout that is structurally incapable of overlapping. That is
               the right trade: nobody can perceive a 20px centering offset,
               and everybody can see two labels stacked on top of each other. */}
-          <nav className="hidden items-center gap-8 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] lg:flex">
+          <nav className="hidden items-center gap-6 text-xs font-bold uppercase tracking-[0.2em] text-[var(--text)] lg:flex xl:gap-8">
             {/* A product SWITCHER, not just a link. The homepage tells one
                 story (lead response) on purpose — two hero pitches
                 convert worse than one. But a visitor who arrives already
