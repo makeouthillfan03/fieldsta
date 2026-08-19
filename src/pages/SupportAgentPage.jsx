@@ -315,6 +315,17 @@ export default function SupportAgentPage() {
             This is the live agent, not a recording — ask it what you&apos;d ask any business
             after hours.
           </p>
+          {/* The confusion this exists to head off: someone talks to THIS
+              (the product itself, demonstrating what it'll say to your
+              customers) and assumes it's also who they'd talk to about
+              buying it -- it isn't, and it doesn't know how to sell
+              itself. Harper, the actual sales chat, is the bubble in the
+              corner of every page including this one. */}
+          <p className="mt-2 max-w-xl text-[13px] leading-relaxed opacity-50">
+            This is the product itself, not our sales team — it&apos;s demonstrating what it&apos;d
+            say to your customers, so it only knows Fieldsta&apos;s own facts. Questions about
+            pricing, plans, or getting set up go to Harper, the chat bubble in the corner.
+          </p>
           <div className="mt-5">
             <InlineSupportChat />
             <SupportChatFootnote />

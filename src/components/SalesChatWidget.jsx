@@ -242,8 +242,8 @@ export default function SalesChatWidget() {
         <div className="mb-3 flex h-[28rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-[#F5F5F5]/15 bg-[#0a0a0b] shadow-2xl">
           <div className="flex items-center justify-between border-b border-[#F5F5F5]/10 px-4 py-3">
             <div>
-              <div className="text-sm font-semibold text-[#F5F5F5]">Harper · Fieldsta AI</div>
-              <div className="text-[11px] text-[#6F6F75]">Usually replies in seconds</div>
+              <div className="text-sm font-semibold text-[#F5F5F5]">Harper · Fieldsta Sales</div>
+              <div className="text-[11px] text-[#6F6F75]">Pricing, plans & getting started</div>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -321,7 +321,7 @@ export default function SalesChatWidget() {
 
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close chat" : "Chat with Fieldsta"}
+        aria-label={open ? "Close chat" : "Chat with Harper, Fieldsta sales"}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F5F5F5] text-[#0a0a0a] shadow-2xl transition-transform hover:scale-105"
       >
         {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
