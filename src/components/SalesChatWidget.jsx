@@ -104,6 +104,15 @@ export default function SalesChatWidget() {
   const audioChunksRef = useRef([]);
   const audioPlayerRef = useRef(null);
   const autoSentRef = useRef(false);
+  // ?cid=<prospect.id> off a cold-email click-through link — read once on
+  // mount, sent with only the visitor's first message so the backend can
+  // greet them by company/offer instead of as a stranger. Not re-sent on
+  // later turns (the ref is cleared after the first send): the backend
+  // only uses it pre-greeting anyway, and dropping it after avoids paying
+  // the lookup on every subsequent message.
+  const cidRef = useRef(
+    typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("cid") : null
+  );
 
   useEffect(() => {
     sessionStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(1)));
@@ -143,7 +152,8 @@ export default function SalesChatWidget() {
     // straight into a live Harper conversation instead of landing on the
     // page cold — a query param survives a real navigation, unlike the
     // fieldsta:open-chat event above which only works for same-page clicks.
-    if (new URLSearchParams(window.location.search).get("chat") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("chat") === "1" || params.get("cid")) {
       sessionStorage.removeItem("fieldsta_chat_closed");
       setOpen(true);
     }
@@ -163,8 +173,13 @@ export default function SalesChatWidget() {
       const res = await fetchWithBusyRetry(`${AGENTS_BASE}/api/sales-chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: getSessionId(), message: text }),
+        body: JSON.stringify({
+          sessionId: getSessionId(),
+          message: text,
+          ...(cidRef.current ? { cid: cidRef.current } : {}),
+        }),
       });
+      cidRef.current = null;
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Something went wrong.");
       setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
