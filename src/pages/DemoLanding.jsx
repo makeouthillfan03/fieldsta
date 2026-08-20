@@ -797,10 +797,10 @@ const PRICING_INCLUDES = [
 
 // Real prices, matching what the backend actually enforces (see
 // DEFAULT_MONTHLY_LEAD_LIMIT_BY_PRICE) -- every tier gets every feature,
-// they scale by lead volume, not functionality. Only Starter has a real
-// self-serve checkout; Growth/Scale are real prices but require an actual
-// conversation first since usage-based cost varies enough at that volume
-// that it isn't a click-and-go purchase.
+// they scale by lead volume, not functionality. Starter and Growth are
+// self-serve (instant checkout); only Scale needs a founder conversation
+// first, since it is genuinely custom at that volume (operator call
+// 2026-08-19).
 //
 // `fit` is volume-sizing guidance only -- deliberately not a feature
 // claim (every tier is functionally identical) or a fabricated stat
@@ -827,9 +827,9 @@ const PLANS = [
     price: "$1,500",
     volume: "Up to ~500 qualified leads/mo",
     fit: "Fits an agency running lead flow across a handful of clients.",
-    cta: "Book a setup call",
-    action: "call",
-    note: "Usage-based at this volume — we size it with you first.",
+    cta: "Start free trial",
+    action: "signup",
+    note: "Self-serve — live in about two minutes. No card, no call.",
     highlight: true,
   },
   {
@@ -837,9 +837,9 @@ const PLANS = [
     price: "$3,000",
     volume: "Up to ~1,500 qualified leads/mo",
     fit: "Fits volume from paid campaigns already running at real scale.",
-    cta: "Book a setup call",
+    cta: "Talk to the founder",
     action: "call",
-    note: "Usage-based at this volume — we size it with you first.",
+    note: "Custom at this volume — a 15-minute call sets it up right.",
     highlight: false,
   },
 ];
