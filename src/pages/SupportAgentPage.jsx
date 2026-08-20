@@ -250,6 +250,18 @@ function FaqItem({ q, a, defaultOpen = false }) {
 }
 
 export default function SupportAgentPage() {
+  // Captures ?ref=<code> off a referral link (see /settings/support-widget
+  // on the dashboard, where an existing customer gets their own link) so
+  // GetStarted's support-agent signup form can forward it later. Stashed
+  // under its own key rather than the existing "fieldsta_ref" — that one
+  // already means something different (a company-id team invite read by
+  // CompanySetup.jsx), and reusing it here would silently break whichever
+  // flow read it second.
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) localStorage.setItem("fieldsta_referral_code", ref);
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-[var(--bg)] font-body text-[var(--text)]">
       <SiteHeader />

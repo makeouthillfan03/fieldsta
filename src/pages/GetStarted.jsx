@@ -254,12 +254,14 @@ function SupportAgentSignupCard() {
     setStatus("submitting");
     setMessage("");
     try {
+      const referralCode = localStorage.getItem("fieldsta_referral_code");
       const res = await fetch(`${AGENTS_BASE}/api/support-agent-signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           businessName: businessNameRef.current.value,
           contactEmail: emailRef.current.value,
+          ...(referralCode ? { referralCode } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -271,6 +273,7 @@ function SupportAgentSignupCard() {
         );
         return;
       }
+      if (referralCode) localStorage.removeItem("fieldsta_referral_code");
       track("support_agent_signup");
       reportFunnelEvent("checkout_started");
       trackLinkedInConversion("signup");
