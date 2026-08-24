@@ -272,20 +272,16 @@ function TwoProducts() {
   );
 }
 
-// WOWCABINET and ViralPicks are the FOUNDER'S OWN businesses -- which is
-// why the label below says "Built by the team behind", not "Working with"
-// or "Trusted by" (changed 2026-08-24). A label implying independent
-// customers chose the product, over companies the founder owns, is an
-// undisclosed material connection -- FTC endorsement-guide territory, and
-// worse, it's the single easiest thing for a skeptical prospect to
-// discover: one lookup flips the story from "has customers" to "faked
-// customers". The origin framing is not a downgrade: a young founder who
-// already runs two businesses and built this for his own inbound leads is
-// a STRONGER pitch than two anonymous logos -- and it's true. When the
-// design-partner program produces a real, independent, named customer,
-// THAT is when a "trusted by" treatment gets built, around one verifiable
-// quote. No fabricated logos, no "trusted by hundreds" inflation -- this
-// site's honesty policy applies to social proof same as every other claim.
+// WOWCABINET and ViralPicks are the founder's own businesses, using the
+// product for real. The label was briefly "Built by the team behind"
+// (2026-08-24, an origin-story framing) and reverted to "Working with" the
+// same day by operator decision. Noted for a future reader: "Working with"
+// over founder-owned companies is literally true (they do use it) but
+// reads as independent clients; the disclosure question was raised and the
+// call was made deliberately, not overlooked. When the design-partner
+// program produces the first independent named customer, revisit this
+// section around a real verifiable quote. No fabricated logos, no
+// "trusted by hundreds" inflation.
 const TRUSTED_LOGOS = [
   { name: "WOWCABINET", src: "/logos/wowcabinet.png", height: 22 },
   { name: "ViralPicks", src: "/logos/viralpicks.png", height: 34 },
@@ -296,7 +292,7 @@ function TrustedBy() {
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-14">
       <Reveal className="container flex flex-col items-center gap-8">
         <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-50">
-          Built by the team behind
+          Working with
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-6">
           {TRUSTED_LOGOS.map((logo) => (
