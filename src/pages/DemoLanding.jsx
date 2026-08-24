@@ -272,12 +272,20 @@ function TwoProducts() {
   );
 }
 
-// Real clients only -- WOWCABINET and ViralPicks (see clients.ts in the
-// agents repo). No fabricated logos, no "trusted by hundreds" inflation --
-// this site's honesty policy applies to social proof the same as every
-// other claim on it. Kept out of a card/border treatment on purpose, same
-// restraint as the rest of the page -- just the marks themselves, muted
-// until hovered.
+// WOWCABINET and ViralPicks are the FOUNDER'S OWN businesses -- which is
+// why the label below says "Built by the team behind", not "Working with"
+// or "Trusted by" (changed 2026-08-24). A label implying independent
+// customers chose the product, over companies the founder owns, is an
+// undisclosed material connection -- FTC endorsement-guide territory, and
+// worse, it's the single easiest thing for a skeptical prospect to
+// discover: one lookup flips the story from "has customers" to "faked
+// customers". The origin framing is not a downgrade: a young founder who
+// already runs two businesses and built this for his own inbound leads is
+// a STRONGER pitch than two anonymous logos -- and it's true. When the
+// design-partner program produces a real, independent, named customer,
+// THAT is when a "trusted by" treatment gets built, around one verifiable
+// quote. No fabricated logos, no "trusted by hundreds" inflation -- this
+// site's honesty policy applies to social proof same as every other claim.
 const TRUSTED_LOGOS = [
   { name: "WOWCABINET", src: "/logos/wowcabinet.png", height: 22 },
   { name: "ViralPicks", src: "/logos/viralpicks.png", height: 34 },
@@ -288,7 +296,7 @@ function TrustedBy() {
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-14">
       <Reveal className="container flex flex-col items-center gap-8">
         <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-50">
-          Working with
+          Built by the team behind
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-14 gap-y-6">
           {TRUSTED_LOGOS.map((logo) => (
