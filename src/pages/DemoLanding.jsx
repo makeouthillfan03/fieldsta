@@ -285,6 +285,12 @@ function TwoProducts() {
 const TRUSTED_LOGOS = [
   { name: "WOWCABINET", src: "/logos/wowcabinet.png", height: 22 },
   { name: "ViralPicks", src: "/logos/viralpicks.png", height: 34 },
+  // Skysquare LLC — a real pilot account (clientId "skysquare-llc", created
+  // 2026-08-25), verified live before this went up. Square/circular mark
+  // rather than a wordmark like the other two, so height alone reads
+  // slightly heavier at the same value as ViralPicks' wordmark height — 30
+  // instead of 34 keeps its visual weight matched to its neighbors.
+  { name: "Skysquare", src: "/logos/skysquare.png", height: 30 },
 ];
 
 function TrustedBy() {
