@@ -24,19 +24,19 @@ const STEPS = [
     n: "1",
     title: "Write your facts.",
     body:
-      "Hours, services, pricing, policies — plain text, in your own words. The agent answers only from what you wrote, and nothing else. If you'd rather not start from scratch, it can pull a first draft from your own website for you to edit.",
+      "Hours, services, pricing, policies. Plain text, in your own words. The agent answers only from what you wrote, and nothing else. If you'd rather not start from scratch, it can pull a first draft from your own website for you to edit.",
   },
   {
     n: "2",
     title: "Paste one script tag.",
     body:
-      "One line on your website — any platform that lets you add HTML. The chat bubble appears, matching your brand color if you want, and the setup page confirms when it's live on your site.",
+      "One line on your website, on any platform that lets you add HTML. The chat bubble appears, matching your brand color if you want, and the setup page confirms when it's live on your site.",
   },
   {
     n: "3",
     title: "It hands off the moment it isn't sure.",
     body:
-      "Anything outside your facts — refunds, complaints, legal, commitments — gets escalated to a real person, with the visitor's email captured so nobody is lost overnight.",
+      "Refunds, complaints, legal questions, commitments: anything outside your facts gets handed to a real person, with the visitor's email captured so nobody is lost overnight.",
   },
 ];
 
@@ -124,10 +124,10 @@ function useCountUp(target, active, durationMs = 900) {
 const FAQS = [
   {
     q: "What happens when it doesn't know the answer?",
-    a: "It says so and hands off. It never fills a gap with a guess — an answer it can't trace to your facts is an answer it doesn't give.",
+    a: "It says so and hands off. It never fills a gap with a guess: an answer it can't trace to your facts is an answer it doesn't give.",
   },
   {
-    q: "Can it promise my customers things — discounts, refunds, delivery dates?",
+    q: "Can it promise my customers things, like discounts or delivery dates?",
     a: "No. Anything that resembles a commitment is escalated to you. That's a design rule, not a setting.",
   },
   {
@@ -208,7 +208,7 @@ function Receipt() {
         </div>
       </div>
       <p className="mt-3 text-[11px] opacity-50">
-        Your receipt uses your numbers — nothing estimated, nothing invented.
+        Your receipt uses your numbers. Nothing is estimated or invented.
       </p>
     </div>
   );
@@ -324,8 +324,7 @@ export default function SupportAgentPage() {
         <div id="talk-to-it" className="mt-14 scroll-mt-20 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
           <h2 className="font-editorial text-xl font-medium">Talk to it right now</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
-            This is the live agent, not a recording — ask it what you&apos;d ask any business
-            after hours.
+            This is the live agent. Ask it what you&apos;d ask any business after hours.
           </p>
           {/* The confusion this exists to head off: someone talks to THIS
               (the product itself, demonstrating what it'll say to your
@@ -357,8 +356,7 @@ export default function SupportAgentPage() {
         <Reveal className="mt-14 border-t border-[rgba(var(--text-rgb),0.08)] pt-10">
           <h2 className="font-editorial text-xl font-medium">Every month, you get the math</h2>
           <p className="mt-2 max-w-xl text-sm leading-relaxed opacity-70">
-            A monthly receipt, counted from your agent&apos;s real conversations — so you always
-            know what it&apos;s doing against what it costs.
+            A monthly receipt, counted from your agent&apos;s real conversations. You always know what it did against what it costs.
           </p>
           <Receipt />
         </Reveal>
@@ -501,8 +499,7 @@ export default function SupportAgentPage() {
             Put it on your site today
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed opacity-75">
-            Self-serve start to finish — create the account, write your facts, paste the tag. If
-            you get stuck, a person answers.
+            Self-serve start to finish: create the account, write your facts, paste the tag. If you get stuck, a person answers.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <a href="/get-started?product=support-agent" onClick={() => track("support_page_buy_bottom")}>

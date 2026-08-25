@@ -163,7 +163,7 @@ function Hero() {
               us: two agency readers took the hero for an outbound pitch. Says
               which half of the funnel this is before anyone has to guess. */}
           <p className="animate-fade-up [animation-delay:320ms] mt-3 text-sm text-[var(--text)] opacity-65">
-            Lead gen fills the funnel. Fieldsta answers it — in under 60 seconds, day or night.
+            Lead gen fills the funnel. Fieldsta answers it in under a minute, any hour of the day.
           </p>
 
           <Link
@@ -184,7 +184,7 @@ function Hero() {
               Keeping the button label short and putting the promise here,
               under it, rather than bloating the button itself. */}
           <p className="animate-fade-up [animation-delay:360ms] mt-4 text-[13px] text-[var(--text)] opacity-60">
-            A real lead, already run through it — read the verdict in 90 seconds. No signup.
+            Here's a real lead we ran through it. Takes 90 seconds to read. No signup.
           </p>
 
           {/* The other product's door, above the fold. The hero stays a
@@ -327,7 +327,7 @@ function DemoVideo() {
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
       <div className="container flex flex-col items-center">
         <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[var(--text)]">
-          Watch it qualify a real lead — start to finish
+          Watch it qualify a real lead, start to finish
         </div>
         <div className="animate-fade-up [animation-delay:100ms] w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
           <video
@@ -444,7 +444,7 @@ const steps = [
   {
     n: "01",
     title: "A lead comes in",
-    desc: "Webhook, form, HubSpot, Meta Lead Ads — however it already reaches you.",
+    desc: "Webhook, form, HubSpot, or Meta Lead Ads. However leads already reach you.",
   },
   {
     n: "02",
@@ -454,7 +454,7 @@ const steps = [
   {
     n: "03",
     title: "The pilot account activates",
-    desc: "Live immediately — no deploy, no waiting on a developer.",
+    desc: "Live immediately. Nothing to deploy, no developer needed.",
   },
 ];
 
@@ -496,16 +496,16 @@ function HowItWorks() {
 // so these three stay distinct from each other and from that section.
 const features = [
   {
-    title: "Built and fed around your business, not a script",
-    desc: "You feed it your own qualifying criteria, your tone, and a hard list of anything it can never claim on your behalf. It's not a generic template with your logo on it — it's shaped by your rules and grows sharper from your own edits over time.",
+    title: "It runs on your rules",
+    desc: "You give it your qualifying criteria, your tone, and a hard list of things it must never claim on your behalf. When you edit a reply, the correction sticks. After a few weeks it answers the way you would.",
   },
   {
     title: "Works with what you already run",
-    desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook — plugs into your stack instead of replacing it.",
+    desc: "HubSpot, Meta Lead Ads, Slack, Google Calendar, or a plain webhook. It plugs into whatever you already use.",
   },
   {
-    title: "One system, not one templated reply",
-    desc: "Respond, qualify, and book straight onto your calendar — the whole handoff, not a bot that fires one message and stops.",
+    title: "It finishes the job",
+    desc: "It replies, qualifies, and puts the meeting on your calendar. Most tools stop after the first message. This one does the whole handoff.",
   },
 ];
 
@@ -516,7 +516,7 @@ function Features() {
         <Reveal className="text-center">
           <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
             <Triangle />
-            More than an email bot
+            What it actually does
           </div>
           <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
             It doesn&apos;t just send auto-replies —{" "}
@@ -620,7 +620,7 @@ function AlwaysImproving() {
           </div>
           <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
             The more you use it, the more{" "}
-            <span className="text-[var(--accent)]">it sounds like you</span> — not a generic bot.
+            <span className="text-[var(--accent)]">it sounds like you</span>.
           </p>
         </Reveal>
 
