@@ -291,6 +291,12 @@ const TRUSTED_LOGOS = [
   // slightly heavier at the same value as ViralPicks' wordmark height — 30
   // instead of 34 keeps its visual weight matched to its neighbors.
   { name: "Skysquare", src: "/logos/skysquare.png", height: 30 },
+  // Puppy's Home — a real pilot account (clientId "puppys-home", created
+  // 2026-08-25), verified live before this went up, same standard as every
+  // entry in this list. Source was a JPG with a solid white background
+  // (JPG can't carry alpha) — keyed to transparent before adding, or it
+  // would have shown a white box around the mark, worst in dark mode.
+  { name: "Puppy's Home", src: "/logos/puppyshome.png", height: 30 },
 ];
 
 function TrustedBy() {
