@@ -348,11 +348,7 @@ function LeadReviewDemo() {
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-24">
       <div className="container flex flex-col items-center">
         <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            Lead review
-          </div>
-          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
+          <h2 className="font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Know exactly why a lead is worth your time
           </h2>
         </Reveal>
@@ -458,32 +454,36 @@ const steps = [
   },
 ];
 
+// Deliberately NOT the centered eyebrow + h2 + 3-card stamp used elsewhere:
+// heading sits left as a column, steps run down the right as a numbered
+// list. Part of the de-template pass — a page where every section shares
+// one skeleton reads as generated regardless of what the words say.
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+    <section id="how-it-works" className="border-t border-[rgba(var(--text-rgb),0.1)] py-20">
       <div className="container">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            How it works
-          </div>
-          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
-            The Standard
-          </h2>
-        </Reveal>
-        <div className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-12 sm:grid-cols-3">
-          {steps.map((step, i) => (
-            <Reveal key={step.title} delay={i * 100}>
-              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6 text-center">
-                <div className="mx-auto flex justify-center">
-                  <Triangle />
+        <div className="mx-auto grid max-w-4xl gap-10 sm:grid-cols-[1fr_1.6fr] sm:gap-16">
+          <Reveal>
+            <h2 className="font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
+              The Standard
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-[var(--text)] opacity-70">
+              Three steps between a lead arriving and a qualified reply going out.
+            </p>
+          </Reveal>
+          <div>
+            {steps.map((step, i) => (
+              <Reveal key={step.title} delay={i * 80}>
+                <div className="flex gap-6 border-t border-[rgba(var(--text-rgb),0.12)] py-6 first:border-t-0 first:pt-0">
+                  <div className="font-editorial text-2xl text-[var(--accent)]">{step.n}</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text)]">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--text)] opacity-70">{step.desc}</p>
+                  </div>
                 </div>
-                <div className="mt-2 font-editorial text-3xl text-[var(--accent)]">{step.n}</div>
-                <h3 className="mt-3 text-lg font-semibold text-[var(--text)]">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{step.desc}</p>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -509,40 +509,33 @@ const features = [
   },
 ];
 
+// Same de-template rule as HowItWorks, mirrored: statement on the RIGHT,
+// features stacked on the LEFT, so the two adjacent sections don't share a
+// silhouette. The three features render as unequal stacked rows, not a
+// 3-card grid — three-of-everything-in-columns is the strongest template
+// tell on the page.
 function Features() {
   return (
-    <section id="features" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+    <section id="features" className="border-t border-[rgba(var(--text-rgb),0.1)] py-28">
       <div className="container">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            What it actually does
-          </div>
-          <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
-            It doesn&apos;t just send auto-replies —{" "}
-            <span className="text-[var(--accent)]">it&apos;s fed your own rules, plugs into what you already run, and handles the whole handoff end to end.</span>
-          </p>
-        </Reveal>
-
-        <div className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-3">
-          {features.map((f, i) => (
-            <Reveal key={f.title} delay={i * 100}>
-              <div
-                className={cn(
-                  "h-full pt-6 text-center",
-                  "border-t border-[rgba(var(--text-rgb),0.12)]"
-                )}
-              >
-                <div className="flex justify-center">
-                  <Triangle className="mb-3" />
+        <div className="mx-auto grid max-w-4xl gap-10 sm:grid-cols-[1.6fr_1fr] sm:gap-16">
+          <div className="order-2 sm:order-1">
+            {features.map((f, i) => (
+              <Reveal key={f.title} delay={i * 80}>
+                <div className="border-t border-[rgba(var(--text-rgb),0.12)] py-6 first:border-t-0 first:pt-0">
+                  <h3 className="text-base font-semibold text-[var(--text)]">{f.title}</h3>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--text)] opacity-70">{f.desc}</p>
                 </div>
-                <h3 className="text-base font-semibold text-[var(--text)]">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{f.desc}</p>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            ))}
+          </div>
+          <Reveal className="order-1 sm:order-2">
+            <p className="font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)]">
+              It doesn&apos;t just send auto-replies —{" "}
+              <span className="text-[var(--accent)]">it&apos;s fed your own rules, plugs into what you already run, and handles the whole handoff end to end.</span>
+            </p>
+          </Reveal>
         </div>
-
       </div>
     </section>
   );
@@ -609,40 +602,35 @@ function CorrectionMockup() {
   );
 }
 
+// Mockup left, argument right — the one section on the page where the
+// artifact leads and the headline supports. The three points stack under
+// the headline instead of spreading into another 3-column strip (see the
+// de-template comments on HowItWorks/Features).
 function AlwaysImproving() {
   return (
     <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            Always learning
-          </div>
-          <p className="mx-auto mt-5 max-w-3xl font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
-            The more you use it, the more{" "}
-            <span className="text-[var(--accent)]">it sounds like you</span>.
-          </p>
-        </Reveal>
-
-        <Reveal delay={100}>
-          <div className="mx-auto mt-14 w-full max-w-2xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
-            <CorrectionMockup />
-          </div>
-        </Reveal>
-
-        <Reveal delay={200}>
-          <ul className="mx-auto mt-14 grid max-w-4xl gap-x-8 gap-y-6 text-sm sm:grid-cols-3">
-            {ALWAYS_IMPROVING_POINTS.map((point) => (
-              <li
-                key={point.title}
-                className="flex items-start gap-3 border-t border-[rgba(var(--text-rgb),0.12)] pt-4"
-              >
-                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
-                <div className="font-semibold text-[var(--text)]">{point.title}</div>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+        <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
+          <Reveal>
+            <div className="w-full overflow-hidden rounded-xl border border-[rgba(var(--text-rgb),0.15)] shadow-xl">
+              <CorrectionMockup />
+            </div>
+          </Reveal>
+          <Reveal delay={100}>
+            <p className="font-editorial text-3xl font-medium leading-[1.2] tracking-tight text-[var(--text)] sm:text-4xl">
+              The more you use it, the more{" "}
+              <span className="text-[var(--accent)]">it sounds like you</span>.
+            </p>
+            <ul className="mt-8 space-y-4 text-sm">
+              {ALWAYS_IMPROVING_POINTS.map((point) => (
+                <li key={point.title} className="flex items-start gap-3">
+                  <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#34D399]" />
+                  <div className="font-semibold text-[var(--text)]">{point.title}</div>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
@@ -666,38 +654,32 @@ const SETUP_STEPS = [
   },
 ];
 
+// Compressed to a single compact band on purpose — setup genuinely IS
+// small, and a short section among tall ones is itself a rhythm break
+// (every section being the same height is part of the template look).
 function SetupFlow() {
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-14">
       <div className="container">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            Getting started
-          </div>
-          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
-            Set up in 5 minutes
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-[var(--text)] opacity-70">
-            Sign up free → connect your integrations → test it on a real lead → you&apos;re live
-          </p>
-        </Reveal>
-
-        <div className="mx-auto mt-14 grid max-w-4xl gap-x-10 gap-y-10 sm:grid-cols-3">
-          {SETUP_STEPS.map((item, i) => (
-            <Reveal key={item.title} delay={i * 100}>
-              <div className="border-t border-[rgba(var(--text-rgb),0.12)] pt-6 text-center">
-                <div className="flex justify-center">
-                  <Triangle className="mb-3" />
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--accent)]">
-                  Step {item.step}
-                </div>
-                <h3 className="mt-2 text-lg font-semibold text-[var(--text)]">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--text)] opacity-70">{item.desc}</p>
-              </div>
-            </Reveal>
-          ))}
+        <div className="mx-auto flex max-w-4xl flex-col gap-8 sm:flex-row sm:items-start sm:gap-14">
+          <Reveal className="sm:w-56 sm:flex-shrink-0">
+            <h2 className="font-editorial text-2xl font-medium leading-tight tracking-tight text-[var(--text)]">
+              Set up in 5 minutes
+            </h2>
+          </Reveal>
+          <Reveal delay={80} className="flex-1">
+            <ol className="space-y-4">
+              {SETUP_STEPS.map((item) => (
+                <li key={item.title} className="flex items-baseline gap-4">
+                  <span className="font-mono text-xs text-[var(--accent)]">{item.step}.</span>
+                  <span className="text-sm text-[var(--text)]">
+                    <span className="font-semibold">{item.title}</span>
+                    <span className="opacity-70"> — {item.desc}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -728,14 +710,10 @@ const WITH_FIELDSTA = [
 
 function WhySwitch() {
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+    <section className="border-t border-[rgba(var(--text-rgb),0.1)] py-20">
       <div className="container">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
-            <Triangle />
-            The difference
-          </div>
-          <h2 className="mt-4 font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
+        <Reveal>
+          <h2 className="mx-auto max-w-4xl font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
             Why businesses switch
           </h2>
         </Reveal>
