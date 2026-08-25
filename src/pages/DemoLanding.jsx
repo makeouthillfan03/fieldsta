@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ParticleSkyline from "@/components/ParticleSkyline";
-import { ScoreRing } from "@/components/ScoreRing";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import Triangle from "@/components/Triangle";
@@ -352,89 +351,27 @@ function LeadReviewDemo() {
             Know exactly why a lead is worth your time
           </h2>
         </Reveal>
-        <Reveal delay={100} className="mt-14 w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
-          <DashboardMockup />
+        <Reveal delay={100} className="relative mt-14 w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
+          {/* Actual product screenshot (studio.fieldsta.com, demo-account
+              data) — replaces the hand-built DashboardMockup per its own
+              "real product screenshot goes here eventually" note. The
+              second card's score-0 NOT A FIT is deliberately in frame:
+              software that visibly says no is the honesty claim made
+              elsewhere in this page's copy, shown instead of stated. */}
+          <img
+            src="/screens/lead-review.png"
+            alt="Fieldsta lead review — a qualified lead scored 83 with a drafted reply awaiting approval, and a score-0 lead marked not a fit"
+            className="block w-full bg-white"
+          />
+          <span className="absolute right-4 top-4 rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.1em] text-amber-600">
+            Demo data
+          </span>
         </Reveal>
       </div>
     </section>
   );
 }
 
-const EXAMPLE_CRITERIA = [
-  {
-    criterion: "Property is within the service area",
-    met: true,
-    evidence: "“About 20 minutes from Raleigh” — inside the 45-mile radius",
-  },
-  {
-    criterion: "Needs the service offered — storm/hail damage",
-    met: true,
-    evidence: "“Hailstorm last week, dented gutters and shingles in the yard”",
-  },
-  {
-    criterion: "Wants an actual visit, not just information",
-    met: true,
-    evidence: "“Can someone come take a look this week?” — a real ask, not browsing",
-  },
-  {
-    criterion: "Owns the property or can authorize the work",
-    met: false,
-    evidence: "Not stated — the one thing keeping this from a perfect score",
-  },
-];
-
-// Real product screenshot goes here eventually; this mockup uses the exact
-// data shape and copy voice the live dashboard (studio.fieldsta.com)
-// actually produces — see server.ts's renderCriteriaBreakdown and
-// computeLeadScore — not an invented UI. Labeled "Example" throughout
-// rather than shown as a captured lead, per the no-fabricated-claims rule
-// everywhere else on this site.
-function DashboardMockup() {
-  return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-left">
-      <div className="flex items-center gap-3 border-b border-[rgba(var(--text-rgb),0.1)] px-6 py-5 sm:px-10">
-        <span className="text-sm font-bold uppercase tracking-[0.3em] text-[var(--text)]">
-          Fieldsta
-        </span>
-        <span className="text-sm text-[var(--text)]">·</span>
-        <span className="text-sm uppercase tracking-[0.2em] text-[var(--text)]">Lead review</span>
-        <span className="ml-auto rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.1em] text-amber-400">
-          Example
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 p-8 sm:flex-row sm:gap-14 sm:p-10">
-        <div className="flex flex-shrink-0 flex-col items-center gap-4">
-          <ScoreRing score={88} size={150} stroke={10} />
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-amber-400">
-            Needs one more detail
-          </div>
-        </div>
-
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--text)] opacity-60">
-            Why this lead scored 88, not 100
-          </div>
-          <ul className="mt-4 space-y-3">
-            {EXAMPLE_CRITERIA.map((c) => (
-              <li key={c.criterion} className="flex items-center gap-3">
-                <span
-                  className={
-                    "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border text-sm font-bold " +
-                    (c.met ? "border-emerald-400/40 text-emerald-400" : "border-amber-400/40 text-amber-400")
-                  }
-                >
-                  {c.met ? "✓" : "?"}
-                </span>
-                <div className="text-base font-medium text-[var(--text)]">{c.criterion}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const steps = [
   {

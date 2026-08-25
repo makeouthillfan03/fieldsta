@@ -80,7 +80,7 @@ export default function SiteFooter() {
           <div className="font-mono text-[11px] uppercase tracking-[0.18em] opacity-45">
             Every number on this site: counted, never invented.
           </div>
-          <div className="font-mono text-[11px] opacity-45">© {new Date().getFullYear()} Fieldsta</div>
+          <div className="font-mono text-[11px] opacity-45">© {new Date().getFullYear()} Fieldsta Services LLC · New Jersey</div>
         </div>
       </div>
     </footer>
