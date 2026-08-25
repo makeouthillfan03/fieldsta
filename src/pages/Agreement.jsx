@@ -121,7 +121,7 @@ export default function Agreement() {
 
       <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
         <p>
-          This Agreement is between Fieldsta and the company identified below (&quot;Customer&quot;) for
+          This Agreement is between Fieldsta Services LLC (&quot;Fieldsta&quot;) and the company identified below (&quot;Customer&quot;) for
           Fieldsta&apos;s AI-assisted lead response service. By signing, Customer agrees to the full{" "}
           <Link to="/terms" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-2">
             Terms of Service

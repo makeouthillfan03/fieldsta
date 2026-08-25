@@ -23,7 +23,7 @@ export default function Privacy() {
       </div>
 
       <p>
-        This policy explains what Fieldsta (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) collects, why, and what rights
+        This policy explains what Fieldsta Services LLC (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) collects, why, and what rights
         you have. It applies both to visitors of this website and to individuals whose contact
         information a Fieldsta Customer submits to our service as part of their own lead-response
         workflow.

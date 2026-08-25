@@ -22,7 +22,7 @@ export default function Terms() {
       </div>
 
       <p>
-        Fieldsta (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) provides an AI-assisted service that drafts replies to
+        Fieldsta Services LLC (&quot;Fieldsta,&quot; &quot;we,&quot; &quot;us&quot;) provides an AI-assisted service that drafts replies to
         a business&apos;s inbound leads and, where enabled, drafts outbound prospecting messages, for
         review and approval by that business (&quot;Customer,&quot; &quot;you&quot;). By signing up for, configuring,
         or using Fieldsta, you agree to these Terms on behalf of yourself and the business you
