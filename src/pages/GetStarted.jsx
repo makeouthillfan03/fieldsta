@@ -319,7 +319,12 @@ function SupportAgentSignupCard() {
         )}
         {result?.checkoutUrl && (
           <a href={result.checkoutUrl} onClick={() => track("support_agent_to_checkout")} className="mt-3 block">
-            <Button className={primaryBtnClass + " font-bold"}>Add billing — $0 today</Button>
+            {/* Primary next step, not an optional extra: since 2026-08-26 the
+                widget won't serve a customer's own site visitors until
+                billing exists (card-required trial, $0 today via Stripe's
+                14-day trial). The dashboard link below still works without
+                it — trying the agent stays free; going live doesn't. */}
+            <Button className={primaryBtnClass + " font-bold"}>Start your 14-day trial — $0 today</Button>
           </a>
         )}
         {result?.setupUrl && (
