@@ -585,6 +585,211 @@ export const VERTICALS = [
       },
     ],
   },
+  // Added 2026-08-26. Chosen from unsubscribe-by-vertical on our own
+  // outbound: the trades tolerate this mail (roofing 4.4%, remodelers 2.8%,
+  // dental/landscaping ~0%) while professional-services offices generated
+  // 10-11% and were cut from discovery entirely. These six are the
+  // consumer-facing trades adjacent to the proven ones that had no page
+  // yet — same audience the data says is receptive, reached through the
+  // channel that costs nothing per visit.
+  {
+    slug: "garage-door-companies",
+    name: "Garage Door Companies",
+    noun: "garage door company",
+    products: ["support"],
+    intent: "24/7 AI support agent for garage door companies",
+    todayReality:
+      "A stuck door is a trapped car, and it happens at the two worst moments: leaving for work and arriving home at night. The customer isn't researching brands — they're finding whoever picks up while standing in the driveway.",
+    whoAnswersNow:
+      "A dispatcher during the day; after hours it's usually the owner's cell, forwarded, and answered if he happens to hear it over a job site or a family dinner.",
+    whatComesIn:
+      "Broken springs and cables that stop the door mid-track, openers that died without warning, storm-damaged panels, and new-install quotes from homeowners doing a renovation.",
+    stakes:
+      "A spring failure is an emergency for a few hours and a scheduled repair by tomorrow. Whoever answers inside that window gets an emergency-rate job; everyone else quotes a normal one, later, if at all.",
+    fitNotes:
+      "Fits the after-hours pattern almost exactly — the emergencies happen off-hours by nature, and the qualifying questions (door type, is the car trapped, is the spring visibly broken) are the same every time.",
+    limits:
+      "It won't talk anyone through a repair. Garage door springs are under enough tension to injure people, so anything resembling a DIY instruction is escalated to a person instead.",
+    faqs: [
+      {
+        q: "Can it tell whether it's actually an emergency?",
+        a: "It asks the questions you'd ask — is the car stuck inside, is the door off its track, is it a spring — and flags urgency accordingly. Whether that becomes a same-night truck is your dispatcher's call, not the agent's.",
+      },
+      {
+        q: "Will it quote a spring replacement?",
+        a: "Only if you write the price into its facts. Otherwise it says pricing depends on the door and takes the details so someone can quote it properly.",
+      },
+      {
+        q: "What about new-door sales versus repairs?",
+        a: "They're different conversations and it can treat them differently — a repair needs urgency triage, a new install needs measurements and a callback.",
+      },
+    ],
+  },
+  {
+    slug: "appliance-repair-companies",
+    name: "Appliance Repair Companies",
+    noun: "appliance repair company",
+    products: ["support"],
+    intent: "24/7 AI support agent for appliance repair companies",
+    todayReality:
+      "The message almost always names a brand, a model, and a symptom — and it arrives the evening the fridge started making the noise, not the next business morning when someone is at a desk to read it.",
+    whoAnswersNow:
+      "One office person handling phones, parts ordering, and scheduling at the same time, plus techs answering their own texts between calls when they remember.",
+    whatComesIn:
+      "Refrigerators not cooling with food at stake, washers leaking onto a floor, warranty-versus-out-of-pocket questions, and 'do you even service this brand' before anything else.",
+    stakes:
+      "A failing fridge has a deadline measured in hours of spoiling groceries. That customer will book the first company that confirms it services their brand — a question that costs nothing to answer and is exactly what goes unanswered overnight.",
+    fitNotes:
+      "The single highest-value thing an after-hours agent does here is answer 'do you service this brand and area' instantly, capture model and symptom, and stop the customer from continuing down the list.",
+    limits:
+      "No diagnosis and no repair instructions. Appliances mean gas lines, water lines and mains voltage, and a wrong automated guess is a real hazard rather than an inconvenience.",
+    faqs: [
+      {
+        q: "Can it tell someone whether their model is worth repairing?",
+        a: "No — that judgment depends on parts availability and what the tech sees. It gathers the model and symptom so whoever calls back already has what they need.",
+      },
+      {
+        q: "Can it handle warranty questions?",
+        a: "It can state your policy if you write it down. Anything about a manufacturer's warranty terms goes to a person, because those terms aren't yours to interpret.",
+      },
+      {
+        q: "Does it work for commercial kitchen equipment too?",
+        a: "Yes, and it's worth separate facts — restaurant equipment carries different urgency and different service terms than a home dishwasher.",
+      },
+    ],
+  },
+  {
+    slug: "painting-contractors",
+    name: "Painting Contractors",
+    noun: "painting contractor",
+    products: ["support"],
+    intent: "24/7 AI support agent for painting contractors",
+    todayReality:
+      "Painting inquiries are rarely urgent and almost always comparative. The homeowner is emailing three or four painters the same evening after deciding the living room can't wait another year, and the estimate they schedule first frames every quote that follows.",
+    whoAnswersNow:
+      "The owner, from a ladder or a truck, usually hours later — estimating is the same person as the crew lead in most shops this size.",
+    whatComesIn:
+      "Interior repaints with a room count, exterior jobs that hinge on weather and season, cabinet refinishing questions, and HOA or property-management work with specification requirements.",
+    stakes:
+      "Nobody loses this job to speed alone, but the first painter to book the walkthrough sets the reference price and gets to hear the real budget first. Later quotes get compared to that number rather than to the work.",
+    fitNotes:
+      "Good fit for capturing scope while interest is fresh — rooms, square footage, interior or exterior, timeline — so the estimate call starts from facts instead of starting over.",
+    limits:
+      "It won't quote square-foot pricing or promise a start date. Paint jobs price on prep, height and substrate, none of which survive being guessed at from a message.",
+    faqs: [
+      {
+        q: "Can it give a ballpark per room?",
+        a: "Only from ranges you write down yourself, and we'd generally advise against it — prep is most of the cost and it isn't visible in a chat message.",
+      },
+      {
+        q: "Will it schedule the estimate?",
+        a: "It collects availability and the property details and hands you a ready-to-book conversation. Confirming the slot stays with whoever owns the calendar.",
+      },
+      {
+        q: "Can it filter out jobs we don't take?",
+        a: "Yes — if you don't do commercial, or won't travel past a radius, or have a job minimum, it applies that consistently instead of you re-explaining it every week.",
+      },
+    ],
+  },
+  {
+    slug: "tree-service-companies",
+    name: "Tree Service Companies",
+    noun: "tree service company",
+    products: ["support"],
+    intent: "24/7 AI support agent for tree service companies",
+    todayReality:
+      "Volume arrives in bursts tied to weather. A storm passes at 11pm and a hundred homeowners photograph a limb on their roof within the hour — the inbox that was quiet all week is suddenly the whole month's revenue arriving at once.",
+    whoAnswersNow:
+      "Nobody, during the exact hours it matters. Crews are asleep or already cutting, and the owner is triaging by phone while operating equipment.",
+    whatComesIn:
+      "Emergency limb and whole-tree failures onto roofs, cars and power lines; insurance-claim removals; and non-urgent trimming or stump work that can wait weeks.",
+    stakes:
+      "Storm work is won in the first few hours and priced accordingly. The company that answers at midnight books the emergency queue; everyone else quotes trimming next week.",
+    fitNotes:
+      "This is the clearest after-hours case of any trade we've looked at — the demand spike happens overnight by definition, and separating 'tree on the house' from 'shrub needs shaping' is exactly the triage an agent can do while you sleep.",
+    limits:
+      "It never advises anyone to approach a fallen tree, and any mention of power lines gets an immediate hand-off with a note to contact the utility. That's a life-safety line, not a service question.",
+    faqs: [
+      {
+        q: "Can it prioritize storm calls over trimming requests?",
+        a: "Yes, and that's most of its value here. It sorts emergencies from routine work as they arrive, so the morning list is already triaged instead of being a hundred unread messages.",
+      },
+      {
+        q: "What if a tree is on a power line?",
+        a: "It stops, tells them to keep away and contact the utility, and escalates to you immediately. It will not schedule around a live line.",
+      },
+      {
+        q: "Can it handle insurance work?",
+        a: "It can capture claim details and adjuster contacts. What's covered isn't a question it should answer, so that goes to a person.",
+      },
+    ],
+  },
+  {
+    slug: "water-damage-restoration-companies",
+    name: "Water Damage Restoration Companies",
+    noun: "restoration company",
+    products: ["support"],
+    intent: "24/7 AI support agent for water damage restoration companies",
+    todayReality:
+      "Every call is a bad night. A pipe burst, a heater failed, a basement filled — and the customer is standing in water with a phone, working down a list until a human answers.",
+    whoAnswersNow:
+      "This is one trade that often does staff a 24/7 line, or pays an answering service to take a name and number. What's usually missing isn't the pickup — it's a first response that captures anything useful before the callback.",
+    whatComesIn:
+      "Burst pipes and failed water heaters, sewage backups, post-fire cleanup, and mold inspections that are usually somebody's insurance requirement.",
+    stakes:
+      "Mitigation is measured in hours — damage compounds while the water sits, and the insurer's clock is already running. Being reachable is table stakes here rather than an advantage, and the differentiator is how much is already known when the truck rolls.",
+    fitNotes:
+      "Fits, but the honest pitch differs from other trades: it isn't 'never miss a call', it's a cheaper and better-informed first response than a generic answering service that only takes a message.",
+    limits:
+      "No safety guidance about standing water, electricity or contamination, and no opinion on what insurance will cover. Both are hand-offs, immediately.",
+    faqs: [
+      {
+        q: "We already pay for an answering service. Why this?",
+        a: "An answering service takes a name and number. This captures what happened, how much water, which floor, whether it's clean or contaminated, and whether a claim is open — so the person calling back starts informed rather than starting over. If your service already does that, this is a smaller upgrade for you than for most.",
+      },
+      {
+        q: "Can it dispatch a crew?",
+        a: "No. It escalates immediately with everything it collected and notifies you; a human decides what rolls.",
+      },
+      {
+        q: "Will it tell someone whether insurance covers this?",
+        a: "Never. Coverage is between them and their adjuster, and a wrong automated answer there causes real harm.",
+      },
+    ],
+  },
+  {
+    slug: "pool-service-companies",
+    name: "Pool Service Companies",
+    noun: "pool service company",
+    products: ["support"],
+    intent: "24/7 AI support agent for pool service companies",
+    todayReality:
+      "Demand is seasonal and the season is short, so the same message arrives four hundred times between April and June: are you taking new weekly customers, and what does it cost. Miss that window and the customer is on a competitor's route for the whole summer.",
+    whoAnswersNow:
+      "Techs on a route with their phones in the truck, and an owner doing scheduling at night after the last stop.",
+    whatComesIn:
+      "Weekly maintenance signups clustered at season open, green-pool recovery after a neglected winter, equipment failures where the pump or heater quit, and one-off cleanings before a party.",
+    stakes:
+      "A weekly maintenance customer is a recurring contract worth far more than the single job it starts as, and route density decides your margin. Losing spring inquiries to a slow reply costs an entire season of revenue, not one visit.",
+    fitNotes:
+      "The strongest fit is the routine top of the funnel — answering 'do you service my area, are you taking customers, roughly what does weekly cost' instantly during the two months when everyone asks at once.",
+    limits:
+      "It doesn't give chemical dosing advice. Pool chemistry involves things that hurt people when they're wrong, and it's a licensed judgment in some states.",
+    faqs: [
+      {
+        q: "Can it tell someone how to fix a green pool?",
+        a: "No. It gathers what the water looks like and how long it's been sitting, and gets a tech involved — dosing instructions from a chat agent is not a thing we'll ship.",
+      },
+      {
+        q: "Can it say whether we cover an address?",
+        a: "Yes, if you give it your service area. That single answer resolves a large share of your season-open inbox with no one touching it.",
+      },
+      {
+        q: "Does it handle the off-season differently?",
+        a: "It answers whatever facts you've written, so if you pause service in winter it says so and captures the contact for spring rather than going silent.",
+      },
+    ],
+  },
 ];
 
 /** ONE page per vertical, on its primary product — not one per (vertical,
