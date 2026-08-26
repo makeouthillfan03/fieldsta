@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import SalesChatWidget from "@/components/SalesChatWidget";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import Triangle from "@/components/Triangle";
+import { trackEngagement } from "@/lib/funnel";
 import ParticleSkyline from "@/components/ParticleSkyline";
 import { ThemeToggle, useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
@@ -25,6 +26,9 @@ import { reportFunnelEvent } from "@/lib/attribution.js";
 // right tool for anyone who actually wants to ask something first.
 export default function GetStarted() {
   const dark = useIsDarkTheme();
+  // Reaching this page is the strongest pre-purchase intent signal there is;
+  // dwell here separates "bounced off the form" from "never got here".
+  useEffect(() => trackEngagement("get_started"), []);
   // ?product=support-agent swaps the first card for the support agent's own
   // signup. Same page, same three options, so the support buyer gets an
   // account-first flow without a second near-identical route to maintain.
@@ -162,6 +166,10 @@ function CheckoutCard() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
+        // The most diagnostic event on the site: someone WANTED the product,
+        // filled the form, and the server said no. Distinguishes "nobody
+        // tries" from "trying is broken".
+        track("signup_failed", { form: "lead_trial", status: res.status });
         setMessage(
           data.message ||
             "That didn't go through. Try once more, or email support@fieldsta.com and we'll set you up by hand."
@@ -201,6 +209,7 @@ function CheckoutCard() {
           <Input
             ref={businessNameRef}
             required
+            onFocus={() => track("form_started", { form: "lead_trial" })}
             placeholder="Business name"
             disabled={status === "submitting"}
             className={fieldClass}
@@ -299,7 +308,7 @@ function SupportAgentSignupCard() {
     >
       <form onSubmit={handleSubmit} className="text-left">
         <div className="space-y-4">
-          <Input ref={businessNameRef} required placeholder="Business name" disabled={status === "submitting"} className={fieldClass} />
+          <Input ref={businessNameRef} required onFocus={() => track("form_started", { form: "support_trial" })} placeholder="Business name" disabled={status === "submitting"} className={fieldClass} />
           <Input ref={emailRef} type="email" required placeholder="Business email" disabled={status === "submitting"} className={fieldClass} />
         </div>
         <Button type="submit" disabled={status === "submitting"} className={primaryBtnClass + " mt-6"}>

@@ -9,6 +9,7 @@ import SalesChatWidget from "@/components/SalesChatWidget";
 import InlineSupportChat, { SupportChatFootnote } from "@/components/InlineSupportChat";
 import Triangle from "@/components/Triangle";
 import { track } from "@vercel/analytics/react";
+import { trackEngagement, observeSection } from "@/lib/funnel";
 
 // The support agent's own product page. Until this existed the product's
 // entire marketing presence was one strip inside the lead product's pricing
@@ -250,6 +251,10 @@ function FaqItem({ q, a, defaultOpen = false }) {
 }
 
 export default function SupportAgentPage() {
+  // Attention instrumentation — see lib/funnel.js. This page is where cold
+  // clicks land, so it's the one that most needs to say where they leave.
+  useEffect(() => trackEngagement("support_agent"), []);
+
   // Captures ?ref=<code> off a referral link (see /settings/support-widget
   // on the dashboard, where an existing customer gets their own link) so
   // GetStarted's support-agent signup form can forward it later. Stashed

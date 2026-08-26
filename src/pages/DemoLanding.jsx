@@ -10,6 +10,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { useIsDarkTheme } from "@/components/ThemeToggle";
 import { track } from "@vercel/analytics/react";
+import { trackEngagement, observeSection } from "@/lib/funnel";
 import { cn } from "@/lib/utils";
 
 // Clean/engineered monochrome restyle of the cold-call landing page ahead of
@@ -28,6 +29,11 @@ export default function DemoLanding() {
     const el = document.getElementById(window.location.hash.slice(1));
     el?.scrollIntoView();
   }, []);
+
+  // Attention instrumentation (lib/funnel.js) — the existing track() calls
+  // all fire on clicks, i.e. only for visitors who already decided. This
+  // records what the other ~98% did before leaving.
+  useEffect(() => trackEngagement("home"), []);
 
   // collect_payment (sales-agent.ts) redirects here on a real completed
   // Stripe checkout -- the one genuine "paid" signal in the whole funnel,
@@ -322,8 +328,10 @@ function TrustedBy() {
 }
 
 function DemoVideo() {
+  const ref = useRef(null);
+  useEffect(() => observeSection(ref.current, "demo_video", "home"), []);
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
+    <section ref={ref} className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-20">
       <div className="container flex flex-col items-center">
         <div className="animate-fade-up mb-6 text-sm uppercase tracking-[0.18em] text-[var(--text)]">
           Watch it qualify a real lead, start to finish
@@ -334,6 +342,7 @@ function DemoVideo() {
             controls
             preload="metadata"
             playsInline
+            onPlay={() => track("video_play", { page: "home" })}
             className="block w-full bg-black"
           />
         </div>
@@ -343,8 +352,10 @@ function DemoVideo() {
 }
 
 function LeadReviewDemo() {
+  const ref = useRef(null);
+  useEffect(() => observeSection(ref.current, "proof_screenshot", "home"), []);
   return (
-    <section className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-24">
+    <section ref={ref} className="border-t border-[rgba(var(--text-rgb),0.1)] bg-[var(--bg)] py-24">
       <div className="container flex flex-col items-center">
         <Reveal className="text-center">
           <h2 className="font-editorial text-3xl font-medium leading-tight tracking-tight text-[var(--text)] sm:text-4xl">
@@ -804,8 +815,10 @@ function SupportAddonBuy() {
 }
 
 function Pricing() {
+  const ref = useRef(null);
+  useEffect(() => observeSection(ref.current, "pricing", "home"), []);
   return (
-    <section id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
+    <section ref={ref} id="pricing" className="border-t border-[rgba(var(--text-rgb),0.1)] py-24">
       <div className="container">
         <Reveal className="text-center">
           <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-[var(--text)] opacity-60">
