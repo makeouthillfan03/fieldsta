@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Send, Loader2, ArrowRight } from "lucide-react";
 import { track } from "@vercel/analytics/react";
+import { reportFunnelEvent } from "@/lib/attribution.js";
 
 // The support agent, embedded in the page as an actual conversation.
 //
@@ -79,6 +80,7 @@ export default function InlineSupportChat() {
   // section before the visitor has read the heading above it. Only follow
   // the conversation once they've actually started one.
   const hasSent = useRef(false);
+  const hasReportedDemo = useRef(false);
 
   useEffect(() => {
     if (!hasSent.current || !scrollRef.current) return;
@@ -94,6 +96,19 @@ export default function InlineSupportChat() {
     setBusy(true);
     setMessages((m) => [...m, { role: "user", content }]);
     track("support_demo_message");
+    // Per-prospect funnel event, not just an aggregate count. Talking to the
+    // live agent IS this product's demo — but demo_started was only ever
+    // emitted by LiveDemo.jsx (/try), which demos the LEAD product. So for
+    // every support-motion prospect the "demo started" column was
+    // structurally incapable of being anything but zero, and that zero was
+    // read as evidence the funnel was dead (measured 2026-08-26: 54 of 91
+    // recorded clickers are support-motion, i.e. the majority of the funnel
+    // was being judged by an instrument that wasn't connected to it).
+    // Fires once per session; recordFunnelEvent is first-write-wins anyway.
+    if (!hasReportedDemo.current) {
+      hasReportedDemo.current = true;
+      reportFunnelEvent("demo_started", { vertical: "support-agent" });
+    }
 
     try {
       const res = await fetch(`${AGENTS_BASE}/api/support-chat`, {
