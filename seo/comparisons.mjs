@@ -173,4 +173,75 @@ export const COMPARISONS = [
       },
     ],
   },
+  // Added 2026-08-26. These two target the vocabulary buyers ACTUALLY
+  // search — "answering service", "voicemail" — rather than the vocabulary
+  // we use for ourselves ("AI support agent"). A business shopping for
+  // after-hours coverage searches the category it already buys, and the
+  // incumbent category here is the phone answering service, not AI
+  // anything. Still an APPROACH rather than a named company, so the
+  // no-unverifiable-claims rule at the top of this file holds: everything
+  // below describes how answering services work in general, which is
+  // publicly documented and uncontroversial, not what any specific
+  // provider charges or promises.
+  //
+  // Grounded in a real reply, not a guess: Genesis Roofing declined the
+  // cold email on 2026-08-25 with "We have office personnel who answer the
+  // phone 24 hours a day, 7 days a week." That is the objection this page
+  // exists to answer honestly.
+  {
+    slug: "an-answering-service",
+    name: "a phone answering service",
+    forProduct: "support",
+    intent: "Fieldsta's support agent vs a phone answering service",
+    whatItIs:
+      "An outside company whose staff answer your phone under your business name, usually charging per minute or per call. They take a message, collect contact details, and pass it along — some also book appointments against a calendar you share with them.",
+    whereItWins:
+      "A real person answers, which matters enormously for a distressed caller. They handle a phone line, which a website widget structurally cannot, and a good service can be trained on scripts specific to your business. For businesses whose inbound is overwhelmingly phone-based, this is the right tool and it isn't close.",
+    whereItFalls:
+      "It answers the phone, and a growing share of after-hours enquiries never involve a phone call — someone fills in a contact form or messages the website at 10pm instead of dialling. Per-minute billing also means the cost scales with volume, and message-taking is not the same as answering: a caller who wanted to know whether you cover their area still waits until morning to find out.",
+    fieldstaFit:
+      "Fieldsta covers the channel an answering service doesn't: the website. It answers the question itself — service area, hours, what you do and don't handle — from facts you wrote, at a flat monthly price regardless of volume, and hands anything sensitive to you rather than guessing. Plenty of businesses sensibly run both: the service takes calls, this takes the messages that were never going to be calls.",
+    limits:
+      "It does not answer your phone, and it is not a person. For a caller in genuine distress, or any situation needing real judgement, a human answering service is the better answer and this hands off rather than pretending otherwise.",
+    faqs: [
+      {
+        q: "We already pay for an answering service — why add this?",
+        a: "If your after-hours enquiries all arrive by phone, you may not need it. The gap worth checking is your website: form fills and chat messages that arrive overnight aren't reaching the answering service at all, because they were never phone calls.",
+      },
+      {
+        q: "Is it cheaper than an answering service?",
+        a: "It's a flat monthly price rather than per-minute or per-call, so the comparison depends entirely on your volume. We're not going to claim a saving without knowing what you currently pay or how many calls you take.",
+      },
+      {
+        q: "Can it take a message like an answering service does?",
+        a: "It does more than take one — it answers what it can from your facts first, then captures the details and contact information for anything it shouldn't answer, and notifies you with the full conversation rather than a summary.",
+      },
+    ],
+  },
+  {
+    slug: "voicemail-and-a-callback",
+    name: "voicemail and a morning callback",
+    forProduct: "support",
+    intent: "Fieldsta's support agent vs voicemail and calling back in the morning",
+    whatItIs:
+      "The default at most small businesses: after hours the phone goes to voicemail and the website form drops into an inbox, and someone works through both when the office opens.",
+    whereItWins:
+      "It costs nothing, needs no setup, and for a business whose customers are content to wait until morning it is genuinely sufficient. Nobody has ever been confused by how voicemail works.",
+    whereItFalls:
+      "It assumes the customer waits. Someone with an urgent problem at 9pm usually contacts more than one business, and the one that responds first is generally the one that gets the work — so the cost isn't a slow reply, it's a job that quietly went somewhere else with no record it ever existed.",
+    fieldstaFit:
+      "The message still reaches you in the morning — it just gets answered when it arrives, so the customer has what they asked for (do you cover my area, do you handle this, what happens next) instead of silence. You wake up to a conversation already started rather than a list to work through.",
+    limits:
+      "It answers only from facts you've written, and it will not commit to an arrival time, quote a price you haven't set, or handle an emergency — those wait for you, explicitly, so the customer knows a person is coming rather than being left with a guess.",
+    faqs: [
+      {
+        q: "How would we even know we're losing jobs this way?",
+        a: "Mostly you wouldn't, which is the awkward part — a customer who went elsewhere doesn't tell you. The only honest way to find out is to let something answer for a couple of weeks and read what actually came in overnight.",
+      },
+      {
+        q: "Won't customers be annoyed it isn't a person?",
+        a: "It says plainly that it's an automated assistant and that a person will follow up. In our experience the thing people object to isn't automation, it's being stonewalled — an honest answer at 9pm beats silence until 8am.",
+      },
+    ],
+  },
 ];

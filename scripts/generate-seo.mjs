@@ -93,6 +93,30 @@ p{margin:0 0 1rem;opacity:.8}
 // search doesn't get flashed a white page.
 const THEME_SCRIPT = `(function(){try{if(localStorage.getItem("theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})();`;
 
+// These 30+ pages have been live and completely unmeasured — nobody knew
+// whether SEO delivers a visitor a week or none at all, which are opposite
+// problems with opposite fixes. They ship no JS bundle by design (React
+// would mount and wipe the static content), so they can't use lib/funnel.js
+// and get this instead: Vercel's script plus four events, inlined, ~40
+// lines, no dependency.
+//
+// Deliberately minimal — page view with its slug, scroll depth as a
+// bounce/read signal, dwell bucket, and CTA clicks. Enough to answer "does
+// organic traffic exist and does it engage", which is the actual open
+// question. No identifiers, no raw scroll positions, no PII.
+const ANALYTICS_SCRIPT = `(function(){
+var page=document.body.getAttribute("data-seo-page")||location.pathname;
+var fired={};
+function ev(n,d){if(fired[n])return;fired[n]=1;try{window.va?window.va("event",{name:n,data:d||{}}):(window.vaq=window.vaq||[]).push(["event",{name:n,data:d||{}}])}catch(e){}}
+var t0=Date.now();
+function src(){try{var r=document.referrer;if(!r)return"direct";var h=new URL(r).hostname.replace(/^www\\./,"");if(h===location.hostname)return"internal";if(/google|bing|duckduckgo|yahoo/.test(h))return"search";return"referral"}catch(e){return"unknown"}}
+ev("seo_view",{page:page,source:src()});
+function onScroll(){var d=document.documentElement,s=d.scrollHeight-window.innerHeight;if(s<=0)return;var p=Math.round(window.scrollY/s*100);if(p>=25)ev("seo_scroll_25",{page:page});if(p>=50)ev("seo_scroll_50",{page:page});if(p>=75)ev("seo_scroll_75",{page:page})}
+window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){var s=Math.round((Date.now()-t0)/1000);ev("seo_dwell",{page:page,bucket:s<5?"0-5s":s<15?"5-15s":s<45?"15-45s":s<120?"45-120s":"120s+"})}});
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a");if(!a)return;var h=a.getAttribute("href")||"";if(/get-started|support-demo|grader|\\/try/.test(h))ev("seo_cta_click",{page:page,href:h.slice(0,60)})});
+})();`;
+
 function shell({ title, description, canonical, jsonLd, body }) {
   return `<!doctype html>
 <html lang="en">
@@ -110,19 +134,20 @@ function shell({ title, description, canonical, jsonLd, body }) {
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <script>${THEME_SCRIPT}</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" />
 <style>${PAGE_CSS}</style>
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ""}
 </head>
-<body>
+<body data-seo-page="${esc(canonical.replace(SITE + "/", ""))}">
 <div class="wrap">
 ${body}
 <div class="foot">
   <a href="/">Fieldsta</a> · <a href="/products">Products</a> · <a href="/get-started">Get started</a> · <a href="/help">Help</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
 </div>
-</div>
+<script>${ANALYTICS_SCRIPT}</script>
 </body>
 </html>
 `;
