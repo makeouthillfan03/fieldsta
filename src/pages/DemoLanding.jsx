@@ -362,7 +362,8 @@ function LeadReviewDemo() {
             Know exactly why a lead is worth your time
           </h2>
         </Reveal>
-        <Reveal delay={100} className="relative mt-14 w-full max-w-3xl overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
+        <Reveal delay={100} className="mt-14 w-full max-w-3xl">
+          <div className="overflow-hidden rounded-2xl border border-[rgba(var(--text-rgb),0.15)] shadow-2xl">
           {/* Actual product screenshot (studio.fieldsta.com, demo-account
               data) — replaces the hand-built DashboardMockup per its own
               "real product screenshot goes here eventually" note. The
@@ -374,9 +375,19 @@ function LeadReviewDemo() {
             alt="Fieldsta lead review — a qualified lead scored 83 with a drafted reply awaiting approval, and a score-0 lead marked not a fit"
             className="block w-full bg-white"
           />
-          <span className="absolute right-4 top-4 rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.1em] text-amber-600">
-            Demo data
-          </span>
+          </div>
+          {/* Below the image, not overlaid on it. As an absolute-positioned
+              overlay this sat on the QUALIFIED / NEEDS REVIEW status labels
+              (top-right) and on the tail of Mark Young's quote
+              (bottom-right) — this screenshot has content in every corner,
+              so there is no safe spot, and covering the status labels hid
+              the exact UI the section exists to show off. A caption also
+              survives the screenshot being re-shot at a different crop. */}
+          <div className="mt-3 flex justify-end">
+            <span className="rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.1em] text-amber-600">
+              Demo data
+            </span>
+          </div>
         </Reveal>
       </div>
     </section>
