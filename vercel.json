@@ -1,7 +1,8 @@
 {
   "redirects": [
     { "source": "/grader", "destination": "https://studio.fieldsta.com/grader", "permanent": false },
-    { "source": "/support-demo", "destination": "https://studio.fieldsta.com/support-demo", "permanent": false }
+    { "source": "/support-demo", "destination": "https://studio.fieldsta.com/support-demo", "permanent": false },
+    { "source": "/demo/:slug", "destination": "https://studio.fieldsta.com/demo/:slug", "permanent": false }
   ],
   "rewrites": [
     {
