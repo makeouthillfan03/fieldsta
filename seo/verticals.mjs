@@ -790,6 +790,116 @@ export const VERTICALS = [
       },
     ],
   },
+  // Added 2026-08-28. Three verticals the OUTBOUND rotation actively
+  // targets (property management joined discovery 08-26, physical therapy
+  // has been an angle since 08-14) that had no SEO page — the paid channel
+  // and the free channel should at least agree on who the customer is.
+  // Med spas are the deliberate exception to that symmetry: CUT from
+  // outbound for a 10-11% unsubscribe rate, kept here, because the two
+  // channels measure different things. An unsubscribe says "stop emailing
+  // me"; a search for after-hours coverage says "I want this" — inbound
+  // intent is the one audience segment where the vertical's receptiveness
+  // is proven by arrival.
+  {
+    slug: "property-management-companies",
+    name: "Property Management Companies",
+    noun: "property management company",
+    products: ["support", "lead"],
+    intent: "24/7 tenant communication and AI lead response for property managers",
+    todayReality:
+      "Tenant messages don't respect office hours — a burst pipe, a lockout, or a no-heat call at 11pm is the defining case of this business. The after-hours line rings to an answering service reading from a card, or to a maintenance coordinator's personal phone.",
+    whoAnswersNow:
+      "An answering service billing per call, an on-call coordinator, or nobody until the office opens — while owners judge the company by exactly these moments.",
+    whatComesIn:
+      "Maintenance requests and emergencies, rent and lease questions, showing requests from prospective tenants, application status checks, and owner inquiries about vacancies.",
+    stakes:
+      "A mishandled emergency is property damage and an angry owner in the same night. A missed showing request is a longer vacancy — and vacancies, not fees, are what lose management contracts.",
+    fitNotes:
+      "Support agent first: tenant triage is the volume. It answers the routine (office hours, rent portal, application status) from facts you approve and escalates real emergencies to your on-call person with the full conversation. Lead response covers prospective-tenant and new-owner inquiries.",
+    limits:
+      "It doesn't dispatch vendors, promise repair windows, or make judgment calls on what counts as an emergency beyond the rules you write. Escalation goes to your person, immediately.",
+    faqs: [
+      {
+        q: "Can it handle a 2am emergency?",
+        a: "It recognizes one — by rules you set, like no heat or active leak — and hands it to your on-call contact with the full transcript. What it never does is improvise repair advice at 2am.",
+      },
+      {
+        q: "Does it replace our answering service?",
+        a: "For message-taking and routine questions, yes, and it answers instantly instead of putting tenants on hold. For dispatch, your existing on-call process stays exactly as it is.",
+      },
+      {
+        q: "Can tenants pay rent through it?",
+        a: "No — it points them to your existing portal. Payment stays in the system of record.",
+      },
+    ],
+  },
+  {
+    slug: "physical-therapy-clinics",
+    name: "Physical Therapy Clinics",
+    noun: "physical therapy clinic",
+    products: ["support", "lead"],
+    intent: "24/7 patient communication and AI intake response for physical therapy clinics",
+    todayReality:
+      "New-patient inquiries arrive when the pain does — evenings and weekends, right after the injury or the referral. The front desk is treating-hours only, and clinicians are with patients, so the inquiry waits.",
+    whoAnswersNow:
+      "Front-desk staff between check-ins, or voicemail. Many clinics answer new-patient messages in a batch the next morning.",
+    whatComesIn:
+      "New-patient and referral inquiries, insurance and coverage questions, scheduling and reschedule requests, direct-access questions, and hours or location basics.",
+    stakes:
+      "A person in pain books with whoever answers. PT also competes with doing nothing — every hour of silence is another chance they decide to just rest it, and a referral that goes unanswered reflects on the referring physician too.",
+    fitNotes:
+      "Support agent fields the routine — hours, locations, what to bring, whether a referral is required — from facts you approve. Lead response gets new-patient inquiries a same-minute reply and moves them toward an evaluation slot.",
+    limits:
+      "No clinical advice of any kind, no diagnosis, no exercise recommendations, and no promises about what insurance will cover — coverage questions collect the details and go to your billing person.",
+    faqs: [
+      {
+        q: "Will it give medical advice?",
+        a: "No, categorically. Anything clinical — symptoms, exercises, whether something is serious — goes to a person. It answers the administrative layer only.",
+      },
+      {
+        q: "Can it verify insurance?",
+        a: "It collects the patient's plan details and hands them to your billing staff. It never tells a patient they're covered.",
+      },
+      {
+        q: "Is this compliant with patient privacy?",
+        a: "It answers from facts you write about the clinic — hours, services, locations. It doesn't access patient records at all.",
+      },
+    ],
+  },
+  {
+    slug: "med-spas",
+    name: "Med Spas & Aesthetic Clinics",
+    noun: "med spa",
+    products: ["support", "lead"],
+    intent: "24/7 inquiry response and AI consultation booking for med spas",
+    todayReality:
+      "Aesthetic decisions are researched at night. Someone spends an evening reading about a treatment, works up the nerve to ask, sends the message at 10pm — and the front desk answers tomorrow, by which point three competitors' Instagram inboxes have the same question.",
+    whoAnswersNow:
+      "Front-desk coordinators during clinic hours, or the owner answering DMs from home.",
+    whatComesIn:
+      "Treatment questions, consultation requests, pricing inquiries, appointment changes, and pre/post-treatment logistics like what to expect at a first visit.",
+    stakes:
+      "These are high-ticket, discretionary purchases where the deciding factor is often simply who responded while the motivation was live. A next-day reply competes with a same-minute one and loses.",
+    fitNotes:
+      "Lead response books the consultation while interest is warm. The support agent answers the researchable layer — services offered, what a first visit looks like, hours — from facts you approve, and hands anything clinical or price-specific to your coordinator.",
+    limits:
+      "No medical claims, no treatment recommendations, no candidacy assessments, and no quoted prices unless you've written them as fixed facts. Anything resembling clinical judgment escalates.",
+    faqs: [
+      {
+        q: "Can it recommend a treatment?",
+        a: "No. It can describe what you offer, but matching a treatment to a person is your practitioner's call, and it says so.",
+      },
+      {
+        q: "Can it quote prices?",
+        a: "Only prices you've written down as fixed. Anything consultation-dependent, it books the consultation instead of guessing.",
+      },
+      {
+        q: "Can it book consultations?",
+        a: "It collects what a booking needs and gets it onto your calendar flow, with a person confirming — same as the rest of the product, nothing goes out unreviewed.",
+      },
+    ],
+  },
+
 ];
 
 /** ONE page per vertical, on its primary product — not one per (vertical,
